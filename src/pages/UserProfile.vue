@@ -18,17 +18,45 @@ export default {
 			buttonMsg: "选择虚拟形象",
 			selfImageChoice: [
 				{
-					name: "那维莱特",
-					path: "/那维莱特/那维莱特.pmx",
+					name: "万叶",
+					path: "/万叶/万叶.pmx",
 				},
 				{
 					name: "云堇",
 					path: "/云堇/云堇.pmx",
 				},
 				{
-					name: "万叶",
-					path: "/万叶/万叶.pmx",
-				}
+					name: "五郎",
+					path: "/五郎/五郎.pmx",
+				},
+				{
+					name: "千织",
+					path: "/千织/千织.pmx",
+				},
+				{
+					name: "多莉",
+					path: "/多莉/多莉.pmx",
+				},
+				{
+					name: "烟绯",
+					path: "/烟绯/烟绯.pmx",
+				},
+				{
+					name: "芭芭拉",
+					path: "/芭芭拉/芭芭拉.pmx",
+				},
+				{
+					name: "荒泷一斗",
+					path: "/荒泷一斗/荒泷一斗.pmx",
+				},
+				{
+					name: "行秋",
+					path: "/行秋/行秋.pmx",
+				},
+				{
+					name: "那维莱特",
+					path: "/那维莱特/那维莱特.pmx",
+				},
 			],
 			form: {
 				username: "",
