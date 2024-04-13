@@ -2,6 +2,7 @@
 import { ElMessage, ElForm, ElFormItem, ElInput, ElButton } from 'element-plus';
 import * as CHECK from "@/utils/check";
 import {deepCopy} from "@/utils/copy";
+import {loadAndShowWithoutControl} from "@/three/self-image-loader";
 
 export default {
 	name: "LoginPage",
@@ -28,11 +29,12 @@ export default {
 				email: "",
 				selfImage: "",
 			},
-			avatarPreview: "",
 		};
 	},
 	mounted() {
 		this.getUserInfo();
+		// TODO 测试使用
+		this.toggleRightPanel();
 	},
 	methods: {
 		handleSubmit () {
@@ -76,7 +78,7 @@ export default {
 				username: "admin",
 				password: "123456",
 				email: "23@qq.com",
-				avatar: null,
+				selfImage: "/云堇/云堇.pmx"
 			};
 			this.formOld = deepCopy(userData);
 			this.form = deepCopy(userData);
@@ -84,17 +86,29 @@ export default {
 			// 	username: userData.username,
 			// 	password: userData.password,
 			// 	email: userData.email,
-			// 	avatar: userData.avatar,
+			// 	selfImage: "/云堇/云堇.pmx"
 			// };
 		},
 		toggleRightPanel() {
-			this.showRightPanel = !this.showRightPanel;
-			if (this.showRightPanel) {
+			if (!this.showRightPanel) {
 				this.buttonMsg = "隐藏虚拟信息选择";
+				this.showModels();
+				this.showRightPanel = !this.showRightPanel;
 			} else {
 				this.buttonMsg = "选择虚拟形象";
 			}
 		},
+		showModels(){
+			const canvas = document.querySelector("#image1");
+			loadAndShowWithoutControl(canvas, '/云堇/云堇.pmx',
+				canvas.width + 210, canvas.height + 1200);
+			const canvas2 = document.querySelector("#image2");
+			loadAndShowWithoutControl(canvas2, '/万叶/万叶.pmx',
+				canvas2.width + 210, canvas2.height + 1200);
+			const canvas3 = document.querySelector("#image3");
+			loadAndShowWithoutControl(canvas3, '/那维莱特/那维莱特.pmx'
+				, canvas3.width + 210, canvas3.height + 1200);
+		}
 	},
 };
 
@@ -138,8 +152,18 @@ export default {
 				</el-form>
 			</div>
 		</div>
-		<div class="right" v-if="showRightPanel">
-			<canvas id="self-image" width="100%" height="100%"></canvas>
+		<div class="right" v-show="showRightPanel">
+			<div class="image-container">
+				<div class="canvas-container">
+					<canvas class="image-canvas" id="image1"/>
+				</div>
+				<div class="canvas-container">
+					<canvas class="image-canvas" id="image2"/>
+				</div>
+				<div class="canvas-container">
+					<canvas class="image-canvas" id="image3"/>
+				</div>
+			</div>
 		</div>
 	</div>
 </template>
@@ -158,7 +182,7 @@ export default {
 }
 
 .left {
-	min-width: 40%;
+	min-width: 30%;
 	height: 100%;
 	display: flex;
 	flex-direction: row;
@@ -166,9 +190,29 @@ export default {
 	align-items: center;
 }
 .right {
-	min-width: 60%;
+	min-width: 70%;
 	height: 100%;
-	background-color: var(--primary-color-2);
+	background-color:  var(--background-color);
+	overflow: hidden;
+}
+
+.image-container {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+.canvas-container {
+	width: 33%;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+.image-canvas {
+	width: 100%;
+	height: 100%;
 }
 .user-profile {
 	max-width: 500px;
