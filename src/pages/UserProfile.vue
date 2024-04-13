@@ -239,7 +239,7 @@ export default {
 	align-items: center;
 }
 
-/* 选择虚拟形象的 button*/
+/* 用于提交的 button*/
 .btn-container {
 	width: 300px;
 	height: 40px;
