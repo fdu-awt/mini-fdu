@@ -1,11 +1,11 @@
 <script>
 export default {
-	name: "AboutPage"
+	name: "UserPersonalInfoPage"
 };
 </script>
 
 <template>
-	<div>About 页面，可能没有</div>
+	<div>用户个人信息</div>
 </template>
 
 <style scoped>

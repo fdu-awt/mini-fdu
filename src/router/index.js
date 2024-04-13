@@ -3,6 +3,7 @@ import HomePage from "@/pages/HomePage.vue";
 import AboutPage from "@/pages/AboutPage.vue";
 import LogInPage from "@/pages/LogInPage.vue";
 import SignUpPage from "@/pages/SignUpPage.vue";
+import UserPersonalInfoPage from "@/pages/UserPersonalInfoPage.vue";
 // import store from "../store";
 
 // 定义路由
@@ -12,6 +13,7 @@ const routes = [
 	{ path: '/about', component: AboutPage },
 	{ path: '/login', component: LogInPage },
 	{ path: '/signup', component: SignUpPage },
+	{ path: '/info', component: UserPersonalInfoPage },
 ];
 
 // 创建路由实例并传递 `routes` 配置
