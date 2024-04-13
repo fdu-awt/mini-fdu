@@ -2,6 +2,7 @@
 import { ElMessage } from 'element-plus';
 import * as CHECK from '../utils/check';
 import {logIn} from '@/api/user';
+import store from "@/store";
 
 export default {
 	name: "LoginPage",
@@ -34,9 +35,14 @@ export default {
 							message: "登陆成功",
 							type: "success",
 						});
+						// 登陆成功后，记录store
+						const user = {
+							username: username,
+							token: res.data.object,
+						};
+						store.mutations.login(store, user);
 						// 跳转到首页
 						this.$router.push("/");
-						// TODO 登陆成功后，记录store
 					} else {
 						ElMessage({
 							showClose: true,

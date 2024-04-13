@@ -1,6 +1,11 @@
 import request from "@/api/index";
 
-// 登陆
+/**
+ * 登陆<br/>
+ * 返回的 res.data.object 为 token
+ * @param {string} username
+ * @param {string} password
+ * */
 export function logIn(username, password){
 	const data = {
 		username: username,
