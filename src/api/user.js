@@ -44,6 +44,16 @@ export function getUserInfo() {
 }
 
 // 修改个人信息
-export function modifyUserInfo() {
-
+export function modifyUserInfo(username, password, email, selfImage) {
+	const data = {
+		username: username,
+		password: password,
+		email: email,
+		selfImage: selfImage,
+	};
+	return request({
+		url: '/user-service/modify-user-info',
+		method: 'post',
+		data: data,
+	});
 }
