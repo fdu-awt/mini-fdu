@@ -57,7 +57,7 @@ service.interceptors.response.use(
 		}
 	},
 	error => {
-		console.log("err: " + error);
+		console.error("err: " + error);
 		let { message } = error;
 		if (message.includes("Network Error")) {
 			message = "后端连接异常";
