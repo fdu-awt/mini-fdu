@@ -1,6 +1,7 @@
 <script>
 import * as CHECK from '../utils/check';
 import {ElMessage} from "element-plus";
+import {signUp} from '@/api/user';
 
 export default {
 	name: "LoginPage",
@@ -33,11 +34,23 @@ export default {
 					type: "warning",
 				});
 			} else {
-				// TODO 注册成功后跳转到登陆页面
-				// TODO 添加提交注册请求的逻辑
-				ElMessage({
-					message: "注册成功",
-					type: "success",
+				signUp(username, password, email).then((res) => {
+					if (res.data.code === 200) {
+						ElMessage({
+							showClose: true,
+							message: "注册成功",
+							type: "success",
+						});
+						// 跳转到登陆页面
+						this.$router.push("/login");
+					} else {
+						ElMessage({
+							message: res.data.msg,
+							type: "error",
+						});
+					}
+				}).catch(e => {
+					console.error(e);
 				});
 			}
 		},

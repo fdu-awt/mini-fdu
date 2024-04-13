@@ -30,15 +30,22 @@ export default {
 					if (res.data.code === 200) {
 						// 登陆成功
 						ElMessage({
+							showClose: true,
 							message: "登陆成功",
 							type: "success",
 						});
 						// 跳转到首页
 						this.$router.push("/");
 						// TODO 登陆成功后，记录store
+					} else {
+						ElMessage({
+							showClose: true,
+							message: res.data.msg,
+							type: "error",
+						});
 					}
 				}).catch(e => {
-					console.log(e);
+					console.error(e);
 				});
 			}
 		},
