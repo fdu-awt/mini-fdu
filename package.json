@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "core-js": "^3.8.3",
+    "element-plus": "^2.7.0",
     "three": "^0.163.0",
     "vue": "^3.2.13",
     "vue-router": "^4.3.0"
@@ -35,7 +36,10 @@
       "parser": "@babel/eslint-parser"
     },
     "rules": {
-      "semi": ["error", "always"]
+      "semi": [
+        "error",
+        "always"
+      ]
     }
   },
   "browserslist": [

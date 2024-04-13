@@ -1,5 +1,19 @@
 # mini-fdu
 
+## 技术栈
+
+- vue-router
+- vue-store
+- three.js
+```shell
+npm install three --save
+```
+
+- element-plus (Message, MessageBox, Notification)
+```shell
+npm install element-plus --save
+```
+
 ## Project setup
 ```
 npm install
