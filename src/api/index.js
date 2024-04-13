@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ElLoading, ElMessage, ElMessageBox, ElNotification } from 'element-plus';
+import { ElMessage, ElMessageBox, ElNotification } from 'element-plus';
 import router from "@/router";
 
 const service = axios.create({
@@ -76,4 +76,4 @@ service.interceptors.response.use(
 	}
 );
 
-export { service };
+export default service;
