@@ -1,8 +1,8 @@
 <script>
-import { ElMessage, ElForm, ElFormItem, ElInput, ElButton } from 'element-plus';
+import { ElMessage, ElForm, ElFormItem, ElInput, ElSelect,ElOption} from 'element-plus';
 import * as CHECK from "@/utils/check";
 import {deepCopy} from "@/utils/copy";
-import {loadAndShowWithoutControl} from "@/three/self-image-loader";
+import {initializeScene, loadWithModel} from "@/three/self-image-loader";
 
 export default {
 	name: "LoginPage",
@@ -10,13 +10,26 @@ export default {
 		ElForm,
 		ElFormItem,
 		ElInput,
-		ElButton,
+		ElSelect,
+		ElOption
 	},
 	data() {
 		return {
-			// 初始时不显示右侧区域
-			showRightPanel: false,
 			buttonMsg: "选择虚拟形象",
+			selfImageChoice: [
+				{
+					name: "那维莱特",
+					path: "/那维莱特/那维莱特.pmx",
+				},
+				{
+					name: "云堇",
+					path: "/云堇/云堇.pmx",
+				},
+				{
+					name: "万叶",
+					path: "/万叶/万叶.pmx",
+				}
+			],
 			form: {
 				username: "",
 				password: "",
@@ -33,8 +46,6 @@ export default {
 	},
 	mounted() {
 		this.getUserInfo();
-		// TODO 测试使用
-		this.toggleRightPanel();
 	},
 	methods: {
 		handleSubmit () {
@@ -78,7 +89,7 @@ export default {
 				username: "admin",
 				password: "123456",
 				email: "23@qq.com",
-				selfImage: "/云堇/云堇.pmx"
+				selfImage: "/那维莱特/那维莱特.pmx"
 			};
 			this.formOld = deepCopy(userData);
 			this.form = deepCopy(userData);
@@ -88,26 +99,18 @@ export default {
 			// 	email: userData.email,
 			// 	selfImage: "/云堇/云堇.pmx"
 			// };
+			this.showModel();
 		},
-		toggleRightPanel() {
-			if (!this.showRightPanel) {
-				this.buttonMsg = "隐藏虚拟信息选择";
-				this.showModels();
-				this.showRightPanel = !this.showRightPanel;
-			} else {
-				this.buttonMsg = "选择虚拟形象";
+		showModel(){
+			const path = this.form.selfImage;
+			if (path !== "") {
+				const canvas_container = document.querySelector("#canvas-container");
+				const canvas = document.querySelector("#image");
+				const width = canvas_container.clientWidth;
+				const height = canvas_container.clientHeight;
+				initializeScene(canvas, width, height);
+				loadWithModel(path, width, height);
 			}
-		},
-		showModels(){
-			const canvas = document.querySelector("#image1");
-			loadAndShowWithoutControl(canvas, '/云堇/云堇.pmx',
-				canvas.width + 210, canvas.height + 1200);
-			const canvas2 = document.querySelector("#image2");
-			loadAndShowWithoutControl(canvas2, '/万叶/万叶.pmx',
-				canvas2.width + 210, canvas2.height + 1200);
-			const canvas3 = document.querySelector("#image3");
-			loadAndShowWithoutControl(canvas3, '/那维莱特/那维莱特.pmx'
-				, canvas3.width + 210, canvas3.height + 1200);
 		}
 	},
 };
@@ -130,9 +133,23 @@ export default {
 						<el-input v-model="form.email" placeholder="请输入邮箱"/>
 					</el-form-item>
 					<el-form-item label="虚拟形象">
+						<el-select
+								v-model="form.selfImage"
+								@change="showModel"
+								filterable
+								placeholder="请选择虚拟形象">
+							<el-option
+									v-for="item in selfImageChoice"
+									:key="item.path"
+									:label="item.name"
+									:value="item.path">
+							</el-option>
+						</el-select>
+					</el-form-item>
+					<el-form-item>
 						<div class="btn-container">
-							<div class="btn-content" @click="toggleRightPanel">
-								<span class="btn-title">{{buttonMsg}}</span>
+							<div class="btn-content" @click="handleSubmit">
+								<span class="btn-title">提交</span>
 								<span class="icon-arrow">
 								<svg width="66px" height="43px" viewBox="0 0 66 43" xmlns="http://www.w3.org/2000/svg">
 									<g id="arrow" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
@@ -145,24 +162,12 @@ export default {
 							</div>
 						</div>
 					</el-form-item>
-					<el-form-item>
-						<el-button type="primary" @click="handleSubmit">提交</el-button>
-						<el-button @click="handleReset">重置</el-button>
-					</el-form-item>
 				</el-form>
 			</div>
 		</div>
-		<div class="right" v-show="showRightPanel">
-			<div class="image-container">
-				<div class="canvas-container">
-					<canvas class="image-canvas" id="image1"/>
-				</div>
-				<div class="canvas-container">
-					<canvas class="image-canvas" id="image2"/>
-				</div>
-				<div class="canvas-container">
-					<canvas class="image-canvas" id="image3"/>
-				</div>
+		<div class="right">
+			<div id="canvas-container">
+				<canvas id="image"/>
 			</div>
 		</div>
 	</div>
@@ -180,7 +185,6 @@ export default {
 	overflow: hidden;
 	width: 100%;
 }
-
 .left {
 	min-width: 30%;
 	height: 100%;
@@ -189,39 +193,24 @@ export default {
 	justify-content: center;
 	align-items: center;
 }
-.right {
-	min-width: 70%;
-	height: 100%;
-	background-color:  var(--background-color);
-	overflow: hidden;
-}
-
-.image-container {
-	width: 100%;
-	height: 100%;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-}
-.canvas-container {
-	width: 33%;
-	height: 100%;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-}
-.image-canvas {
-	width: 100%;
-	height: 100%;
-}
 .user-profile {
 	max-width: 500px;
 	margin: auto;
 }
-.form-label {
-	font-family: 'Poppins', sans-serif;
-	font-size: 20px;
+.right {
+	min-width: 70%;
+	height: 100%;
+	background-color: #eee;
 }
+
+#canvas-container {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
 /* 选择虚拟形象的 button*/
 .btn-container {
 	width: 300px;
