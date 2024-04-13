@@ -3,6 +3,7 @@ import { ElMessage, ElForm, ElFormItem, ElInput, ElSelect,ElOption} from 'elemen
 import * as CHECK from "@/utils/check";
 import {deepCopy} from "@/utils/copy";
 import {initializeScene, loadWithModel} from "@/three/self-image-loader";
+import { getUserInfo, modifyUserInfo } from "@/api/user";
 
 export default {
 	name: "LoginPage",
@@ -80,6 +81,7 @@ export default {
 			const username_check = CHECK.checkUsername(this.form.username);
 			if (!username_check.pass) {
 				ElMessage({
+					showClose: true,
 					message: username_check.msg,
 					type: "error",
 				});
@@ -88,6 +90,7 @@ export default {
 			const password_check = CHECK.checkPassword(this.form.password);
 			if (!password_check.pass) {
 				ElMessage({
+					showClose: true,
 					message: password_check.msg,
 					type: "error",
 				});
@@ -96,38 +99,50 @@ export default {
 			const email_check = CHECK.checkEmail(this.form.email);
 			if (!email_check.pass) {
 				ElMessage({
+					showClose: true,
 					message: email_check.msg,
 					type: "error",
 				});
 				return;
 			}
-			// TODO 调用 API 更新用户信息
-			console.log(this.form);
-			ElMessage({
-				message: "更新成功",
-				type: "success",
+			modifyUserInfo(this.form.username,this.form.password,this.form.email,this.form.selfImage).then((res) => {
+				if (res.data.code === 200) {
+					this.formOld = deepCopy(this.form);
+					ElMessage({
+						showClose: true,
+						message: res.data.msg,
+						type: "success",
+					});
+				} else {
+					ElMessage({
+						showClose: true,
+						message: res.data.msg,
+						type: "error",
+					});
+				}
+			}).catch((err) => {
+				console.error(err);
 			});
 		},
 		handleReset () {
 			this.form = deepCopy(this.formOld);
 		},
 		getUserInfo () {
-			// TODO 调用 API 获取用户信息
-			const userData = {
-				username: "admin",
-				password: "123456",
-				email: "23@qq.com",
-				selfImage: "/那维莱特/那维莱特.pmx"
-			};
-			this.formOld = deepCopy(userData);
-			this.form = deepCopy(userData);
-			// this.formOld = {
-			// 	username: userData.username,
-			// 	password: userData.password,
-			// 	email: userData.email,
-			// 	selfImage: "/云堇/云堇.pmx"
-			// };
-			this.showModel();
+			getUserInfo().then((res) => {
+				if (res.data.code === 200) {
+					this.form = res.data;
+					this.formOld = deepCopy(res.data);
+					this.showModel();
+				} else {
+					ElMessage({
+						showClose: true,
+						message: res.data.msg,
+						type: "error",
+					});
+				}
+			}).catch((err) => {
+				console.error(err);
+			});
 		},
 		showModel(){
 			const path = this.form.selfImage;
