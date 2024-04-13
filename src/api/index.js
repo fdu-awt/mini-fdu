@@ -67,10 +67,9 @@ service.interceptors.response.use(
 			message = "请求异常：" +
 				message.substr(message.length - 3);
 		}
-		ElMessage({
-			showClose: true,
-			message: message,
-			type: "error",
+		ElNotification({
+			title: message,
+			type: 'error',
 		});
 		return Promise.reject(error);
 	}
