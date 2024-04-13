@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory  } from "vue-router";
 import HomePage from "@/pages/HomePage.vue";
 import AboutPage from "@/pages/AboutPage.vue";
+import LogInPage from "@/pages/LogInPage.vue";
+import SignUpPage from "@/pages/SignUpPage.vue";
 // import store from "../store";
 
 // 定义路由
@@ -8,6 +10,8 @@ const routes = [
     { path: '/', component: HomePage },
     { path: '/home', component: HomePage },
     { path: '/about', component: AboutPage },
+    { path: '/login', component: LogInPage },
+    { path: '/signup', component: SignUpPage },
 ];
 
 // 创建路由实例并传递 `routes` 配置
