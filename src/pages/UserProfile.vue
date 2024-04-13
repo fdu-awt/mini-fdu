@@ -1,6 +1,6 @@
 <script>
 export default {
-	name: "UserPersonalInfoPage"
+	name: "UserProfile"
 };
 </script>
 
