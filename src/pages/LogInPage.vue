@@ -120,7 +120,7 @@ export default {
 
 .inputField:focus {
 	outline: none;
-	border-bottom: 2px solid rgb(199, 114, 255);
+	border-bottom: 2px solid var(--primary-color-2);
 }
 
 .inputField::placeholder {
@@ -132,8 +132,8 @@ export default {
 #button {
 	position: relative;
 	width: 100%;
-	border: 2px solid #8000ff;
-	background-color: #8000ff;
+	border: 2px solid var(--primary-color);
+	background-color: var(--primary-color-2);
 	height: 40px;
 	color: white;
 	font-size: .8em;
