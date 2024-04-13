@@ -8,6 +8,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "axios": "^1.6.8",
     "core-js": "^3.8.3",
     "element-plus": "^2.7.0",
     "three": "^0.163.0",
@@ -40,7 +41,10 @@
         "error",
         "always"
       ],
-      "indent": ["error", "tab"]
+      "indent": [
+        "error",
+        "tab"
+      ]
     }
   },
   "browserslist": [

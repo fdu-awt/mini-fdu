@@ -14,6 +14,11 @@ npm install three --save
 npm install element-plus --save
 ```
 
+- axios
+```shell
+npm install axios --save
+```
+
 ## Project setup
 ```
 npm install
