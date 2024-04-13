@@ -13,6 +13,9 @@ export default {
 	},
 	data() {
 		return {
+			// 初始时不显示右侧区域
+			showRightPanel: false,
+			buttonMsg: "选择虚拟形象",
 			form: {
 				username: "",
 				password: "",
@@ -84,6 +87,14 @@ export default {
 			// 	avatar: userData.avatar,
 			// };
 		},
+		toggleRightPanel() {
+			this.showRightPanel = !this.showRightPanel;
+			if (this.showRightPanel) {
+				this.buttonMsg = "隐藏虚拟信息选择";
+			} else {
+				this.buttonMsg = "选择虚拟形象";
+			}
+		},
 	},
 };
 
@@ -94,20 +105,20 @@ export default {
 		<!--	左右分屏展示：左边个人信息，右边虚拟形象	-->
 		<div class="left">
 			<div class="user-profile">
-				<el-form :model="form" label-width="120px">
+				<el-form :model="form" label-width="auto" size="large" label-position="left" >
 					<el-form-item label="用户名">
-						<el-input v-model="form.username" placeholder="请输入用户名"></el-input>
+						<el-input v-model="form.username" placeholder="请输入用户名" autocomplete="off"/>
 					</el-form-item>
 					<el-form-item label="密码">
-						<el-input v-model="form.password" type="password" placeholder="请输入密码"></el-input>
+						<el-input v-model="form.password" type="password" placeholder="请输入密码" autocomplete="off"/>
 					</el-form-item>
 					<el-form-item label="邮箱">
-						<el-input v-model="form.email" placeholder="请输入邮箱"></el-input>
+						<el-input v-model="form.email" placeholder="请输入邮箱"/>
 					</el-form-item>
 					<el-form-item label="虚拟形象">
 						<div class="btn-container">
-							<div class="btn-content" @click="handleSubmit">
-								<span class="btn-title">选择虚拟形象</span>
+							<div class="btn-content" @click="toggleRightPanel">
+								<span class="btn-title">{{buttonMsg}}</span>
 								<span class="icon-arrow">
 								<svg width="66px" height="43px" viewBox="0 0 66 43" xmlns="http://www.w3.org/2000/svg">
 									<g id="arrow" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
@@ -127,7 +138,7 @@ export default {
 				</el-form>
 			</div>
 		</div>
-		<div class="right">
+		<div class="right" v-if="showRightPanel">
 			<canvas id="self-image" width="100%" height="100%"></canvas>
 		</div>
 	</div>
@@ -136,15 +147,18 @@ export default {
 <style scoped>
 #container {
 	height: 100vh;
-	width: 100vw;
-	background-color: #f5f5f5;
+	background-color: var(--background-color);
 	display: flex;
 	flex-direction: row;
 	justify-content: center;
 	align-items: center;
+	transition: width 0.5s ease-in-out;
+	overflow: hidden;
+	width: 100%;
 }
+
 .left {
-	width: 40%;
+	min-width: 40%;
 	height: 100%;
 	display: flex;
 	flex-direction: row;
@@ -152,7 +166,7 @@ export default {
 	align-items: center;
 }
 .right {
-	width: 60%;
+	min-width: 60%;
 	height: 100%;
 	background-color: var(--primary-color-2);
 }
@@ -160,8 +174,14 @@ export default {
 	max-width: 500px;
 	margin: auto;
 }
+.form-label {
+	font-family: 'Poppins', sans-serif;
+	font-size: 20px;
+}
 /* 选择虚拟形象的 button*/
 .btn-container {
+	width: 300px;
+	height: 40px;
 	display: flex;
 	justify-content: center;
 	--color-text: #ffffff;
@@ -177,7 +197,7 @@ export default {
 	text-decoration: none;
 	font-family: 'Poppins', sans-serif;
 	font-weight: 600;
-	font-size: 30px;
+	font-size: 20px;
 	color: var(--color-text);
 	background: var(--color-background);
 	transition: 1s;
