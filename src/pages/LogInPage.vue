@@ -1,6 +1,7 @@
 <script>
 import { ElMessage } from 'element-plus';
 import * as CHECK from '../utils/check';
+import {logIn} from '@/api/user';
 
 export default {
 	name: "LoginPage",
@@ -25,12 +26,22 @@ export default {
 					type: "warning",
 				});
 			} else {
-				// TODO 添加提交登录请求的逻辑
-				// TODO 登陆成功后，记录store，跳转到首页
-				ElMessage({
-					message: "登陆成功",
-					type: "success",
-				});
+				logIn(username, password)
+					.then((res) => {
+						if (res.data.code === 200) {
+							// 登陆成功
+							ElMessage({
+								message: "登陆成功",
+								type: "success",
+							});
+							// 跳转到首页
+							this.$router.push("/");
+							// TODO 登陆成功后，记录store
+						}
+					})
+					.catch((e) => {
+						console.log(e);
+					});
 			}
 		},
 	},
