@@ -6,6 +6,7 @@ import SignUpPage from "@/pages/SignUpPage.vue";
 import UserProfile from "@/pages/UserProfile.vue";
 import NotFoundPage from "@/pages/NotFoundPage.vue";
 import store from "../store";
+import { ElNotification } from 'element-plus';
 
 // 定义路由
 const routes = [
@@ -31,6 +32,11 @@ router.beforeEach((to, from, next) => {
 		if (store.state.user.username && store.state.user.token) {
 			next();
 		} else {
+			ElNotification({
+				title: "未登陆",
+				message: "请先登陆以访问这个页面。",
+				type: "warning",
+			});
 			next({
 				path: 'login',
 				query: { redirect: to.fullPath }
