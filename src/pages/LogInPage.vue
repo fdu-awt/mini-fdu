@@ -26,22 +26,20 @@ export default {
 					type: "warning",
 				});
 			} else {
-				logIn(username, password)
-					.then((res) => {
-						if (res.data.code === 200) {
-							// 登陆成功
-							ElMessage({
-								message: "登陆成功",
-								type: "success",
-							});
-							// 跳转到首页
-							this.$router.push("/");
-							// TODO 登陆成功后，记录store
-						}
-					})
-					.catch((e) => {
-						console.log(e);
-					});
+				logIn(username, password).then((res) => {
+					if (res.data.code === 200) {
+						// 登陆成功
+						ElMessage({
+							message: "登陆成功",
+							type: "success",
+						});
+						// 跳转到首页
+						this.$router.push("/");
+						// TODO 登陆成功后，记录store
+					}
+				}).catch(e => {
+					console.log(e);
+				});
 			}
 		},
 	},
