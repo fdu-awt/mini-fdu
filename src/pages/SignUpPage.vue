@@ -6,16 +6,24 @@ export default {
 	name: "LoginPage",
 	methods: {
 		handleSubmit() {
-			// 读取用户名和密码
+			// 读取用户名、密码、邮箱
 			const username = document.getElementById("username").value;
 			const password = document.getElementById("password").value;
+			const email = document.getElementById("email").value;
 			// 校验用户名和密码
 			const user_check = CHECK.checkUsername(username);
 			const pas_check = CHECK.checkPassword(password);
+			const email_check = CHECK.checkEmail(email);
 			if (user_check.pass === false) {
 				ElMessage({
 					showClose: true,
 					message: user_check.msg,
+					type: "warning",
+				});
+			} else if (email_check.pass === false) {
+				ElMessage({
+					showClose: true,
+					message: email_check.msg,
 					type: "warning",
 				});
 			} else if (pas_check.pass === false) {
@@ -47,6 +55,12 @@ export default {
 						<path d="M13.106 7.222c0-2.967-2.249-5.032-5.482-5.032-3.35 0-5.646 2.318-5.646 5.702 0 3.493 2.235 5.708 5.762 5.708.862 0 1.689-.123 2.304-.335v-.862c-.43.199-1.354.328-2.29.328-2.926 0-4.813-1.88-4.813-4.798 0-2.844 1.921-4.881 4.594-4.881 2.735 0 4.608 1.688 4.608 4.156 0 1.682-.554 2.769-1.416 2.769-.492 0-.772-.28-.772-.76V5.206H8.923v.834h-.11c-.266-.595-.881-.964-1.6-.964-1.4 0-2.378 1.162-2.378 2.823 0 1.737.957 2.906 2.379 2.906.8 0 1.415-.39 1.709-1.087h.11c.081.67.703 1.148 1.503 1.148 1.572 0 2.57-1.415 2.57-3.643zm-7.177.704c0-1.197.54-1.907 1.456-1.907.93 0 1.524.738 1.524 1.907S8.308 9.84 7.371 9.84c-.895 0-1.442-.725-1.442-1.914z"></path>
 					</svg>
 					<input placeholder="用户名" id="username" class="inputField" type="text">
+				</div>
+				<div class="inputContainer">
+					<svg class="inputIcon" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" height="16" width="16">
+						<path d="M938.30656 160H85.76256A86.4 86.4 0 0 0 0.00256 246.976v530.112c0 48 38.4 86.912 85.696 86.912H938.24256c47.424 0 85.696-38.848 85.696-86.912V247.04c0-48-38.272-86.976-85.696-86.976z m-20.48 62.272L577.79456 528c-29.632 26.816-51.648 40.128-65.792 40.128-14.144 0-36.16-13.312-65.792-40.128L106.17856 222.272H917.76256zM63.74656 757.76V278.72l265.536 236.16-265.6 242.88z m44.608 43.968l266.56-240 43.712 38.848c25.344 22.464 56.64 34.048 93.376 34.048 36.928 0 68.032-11.52 93.44-34.048l43.712-38.848 266.56 240H108.35456z m851.968-43.968l-265.6-242.816 265.6-236.16v478.976z" fill="#000000" p-id="1553"></path>
+					</svg>
+					<input placeholder="邮箱" id="email" class="inputField" type="email">
 				</div>
 				<div class="inputContainer">
 					<svg viewBox="0 0 16 16" fill="#2e2e2e" height="16" width="16" xmlns="http://www.w3.org/2000/svg" class="inputIcon">
