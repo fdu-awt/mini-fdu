@@ -3,7 +3,7 @@ import { ElMessage, ElMessageBox, ElNotification } from 'element-plus';
 import router from "@/router";
 
 const service = axios.create({
-	baseURL: process.env.BASE_URL,
+	baseURL: process.env.VUE_APP_BASE_URL,
 	timeout: 20000, // 超时设置为20秒
 	headers: {
 		'Content-Type': 'application/json;charset=utf-8',
