@@ -2,7 +2,11 @@ import request from "@/api/index";
 
 /**
  * 登陆<br/>
- * 返回的 res.data.object 为 token
+ * 返回的 res.data.object 为 {
+ *   username:
+ *   token:
+ *   tokenExpireTime:
+ * }
  * @param {string} username
  * @param {string} password
  * */

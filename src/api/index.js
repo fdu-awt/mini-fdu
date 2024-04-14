@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { ElMessage, ElMessageBox, ElNotification } from 'element-plus';
 import router from "@/router";
-import { getToken } from "@/utils/auth";
+import { getToken } from "@/store/storage";
 
 const service = axios.create({
 	baseURL: process.env.VUE_APP_BASE_URL,

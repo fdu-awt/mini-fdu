@@ -1,21 +1,27 @@
 import { reactive } from 'vue';
-import { getUser, loginSuccess, logOut } from '@/utils/auth';
+import * as STORAGE from '@/store/storage';
 
 const store = reactive({
 	state: {
-		user: getUser(),
+		user: STORAGE.getUser(),
+		selfImage: STORAGE.getSelfImage(),
 	},
 	mutations: {
 		login (state, user) {
 			state.user = user;
-			loginSuccess(user.username, user.token);
+			STORAGE.loginSuccess(user);
 		},
 		logout (state) {
 			state.user = {
 				username: '',
 				token: '',
+				tokenExpireTime: '',
 			};
-			logOut();
+			STORAGE.logOut();
+		},
+		setSelfImage (state, selfImage) {
+			state.selfImage = selfImage;
+			STORAGE.setSelfImage(selfImage);
 		},
 	}
 });

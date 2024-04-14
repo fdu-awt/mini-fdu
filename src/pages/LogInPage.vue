@@ -38,7 +38,8 @@ export default {
 						// 登陆成功后，记录store
 						const user = {
 							username: username,
-							token: res.data.object,
+							token: res.data.object.token,
+							tokenExpireTime: res.data.object.tokenExpireTime,
 						};
 						store.mutations.login(store, user);
 						// 跳转到首页
