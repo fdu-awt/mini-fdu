@@ -130,8 +130,8 @@ export default {
 		getUserInfo () {
 			getUserInfo().then((res) => {
 				if (res.data.code === 200) {
-					this.form = res.data;
-					this.formOld = deepCopy(res.data);
+					this.form = deepCopy(res.data.object);
+					this.formOld = deepCopy(res.data.object);
 					this.showModel();
 				} else {
 					ElMessage({
