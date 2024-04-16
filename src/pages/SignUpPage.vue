@@ -34,8 +34,8 @@ export default {
 					type: "warning",
 				});
 			} else {
-				signUp(username, password, email).then((res) => {
-					if (res.data.code === 200) {
+				signUp(username, password, email).then((data) => {
+					if (data.code === 200) {
 						ElMessage({
 							showClose: true,
 							message: "注册成功",
@@ -45,7 +45,7 @@ export default {
 						this.$router.push("/login");
 					} else {
 						ElMessage({
-							message: res.data.msg,
+							message: data.msg,
 							type: "error",
 						});
 					}

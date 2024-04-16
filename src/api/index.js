@@ -83,7 +83,7 @@ service.interceptors.response.use(
 			// code = 200 时
 			if (res.data.uxApi) {
 				if (res.data.success) {
-					return res.data.result;
+					return res.data;
 				} else {
 					ElNotification({
 						title: msg,

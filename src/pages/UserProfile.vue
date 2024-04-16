@@ -105,18 +105,18 @@ export default {
 				});
 				return;
 			}
-			modifyUserInfo(this.form.username,this.form.password,this.form.email,this.form.selfImage).then((res) => {
-				if (res.data.code === 200) {
+			modifyUserInfo(this.form.username,this.form.password,this.form.email,this.form.selfImage).then((data) => {
+				if (data.code === 200) {
 					this.formOld = deepCopy(this.form);
 					ElMessage({
 						showClose: true,
-						message: res.data.msg,
+						message: data.msg,
 						type: "success",
 					});
 				} else {
 					ElMessage({
 						showClose: true,
-						message: res.data.msg,
+						message: data.msg,
 						type: "error",
 					});
 				}
@@ -128,15 +128,15 @@ export default {
 			this.form = deepCopy(this.formOld);
 		},
 		getUserInfo () {
-			getUserInfo().then((res) => {
-				if (res.data.code === 200) {
-					this.form = deepCopy(res.data.object);
-					this.formOld = deepCopy(res.data.object);
+			getUserInfo().then((data) => {
+				if (data.code === 200) {
+					this.form = deepCopy(data.object);
+					this.formOld = deepCopy(data.object);
 					this.showModel();
 				} else {
 					ElMessage({
 						showClose: true,
-						message: res.data.msg,
+						message: data.msg,
 						type: "error",
 					});
 				}

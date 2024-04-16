@@ -27,8 +27,8 @@ export default {
 					type: "warning",
 				});
 			} else {
-				logIn(username, password).then((res) => {
-					if (res.data.code === 200) {
+				logIn(username, password).then((data) => {
+					if (data.code === 200) {
 						// 登陆成功
 						ElMessage({
 							showClose: true,
@@ -38,8 +38,8 @@ export default {
 						// 登陆成功后，记录store
 						const user = {
 							username: username,
-							token: res.data.object.token,
-							tokenExpireTime: res.data.object.tokenExpireTime,
+							token: data.object.token,
+							tokenExpireTime: data.object.tokenExpireTime,
 						};
 						store.mutations.login(store, user);
 						// 跳转到首页
@@ -47,7 +47,7 @@ export default {
 					} else {
 						ElMessage({
 							showClose: true,
-							message: res.data.msg,
+							message: data.msg,
 							type: "error",
 						});
 					}
