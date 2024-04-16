@@ -55,7 +55,7 @@ service.interceptors.request.use(
 service.interceptors.response.use(
 	res => {
 		// 未设置状态码则默认 服务器内部错误
-		const code = res.data.code || 400;
+		const code = res.data.code || 500;
 		// 获取错误信息
 		const msg = res.data.msg;
 		if (code === 401) {
