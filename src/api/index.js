@@ -18,8 +18,7 @@ service.interceptors.request.use(
 		const isToken = (config.headers || {}).isToken === false;
 		const token = getToken();
 		if (token && !isToken) {
-			// TODO 让每个请求携带自定义token 请根据实际情况自行修改
-			config.headers["Authorization"] = "Bearer " + token;
+			config.headers["token"] = token;
 		}
 		// get请求映射params参数
 		if (config.method === "get" && config.params) {
@@ -64,6 +63,7 @@ service.interceptors.response.use(
 				confirmButtonText: '前往登录',
 				type: 'warning'
 			}).then(() => router.push('/login'));
+			return Promise.reject(new Error(msg));
 		} else if (code === 500) {
 			// 服务器内部错误
 			ElMessage({
