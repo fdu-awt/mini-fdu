@@ -36,10 +36,10 @@ function checkPassword(password) {
 			msg: '密码长度至少为5'
 		};
 	}
-	if (password.length > 10) {
+	if (password.length > 15) {
 		return {
 			pass: false,
-			msg: '密码长度不能超过10'
+			msg: '密码长度不能超过15'
 		};
 	}
 	return {
