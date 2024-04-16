@@ -29,7 +29,8 @@ const router = createRouter({
 // 路由守卫
 router.beforeEach((to, from, next) => {
 	if (to.meta.requireAuth) {
-		if (store.state.user.username && store.state.user.token) {
+		if (store.state.user.username !== null && store.state.user.username !== ''
+			&& store.state.user.token !== null && store.state.user.token !== '') {
 			next();
 		} else {
 			ElNotification({
