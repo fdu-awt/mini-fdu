@@ -1,10 +1,21 @@
 <script>
-import { ElMessage, ElForm, ElFormItem, ElInput, ElSelect,ElOption} from 'element-plus';
+import {
+	ElMessage,
+	ElForm,
+	ElFormItem,
+	ElInput,
+	ElSelect,
+	ElOption,
+	ElButton,
+	ElDialog,
+	ElNotification
+} from 'element-plus';
 import * as CHECK from "@/utils/check";
 import {deepCopy} from "@/utils/copy";
 import {initializeScene, loadWithModel} from "@/three/self-image-loader";
-import { getUserInfo, modifyUserInfo } from "@/api/user";
+import {getUserInfo, modifyPassword, modifyUserInfo} from "@/api/user";
 import SELF_IMAGE from "@/utils/self-image";
+import STORAGE from "@/store";
 
 export default {
 	name: "LoginPage",
@@ -13,7 +24,9 @@ export default {
 		ElFormItem,
 		ElInput,
 		ElSelect,
-		ElOption
+		ElOption,
+		ElButton,
+		ElDialog
 	},
 	data() {
 		return {
@@ -29,6 +42,26 @@ export default {
 				email: "",
 				selfImage: "",
 			},
+			passwordModifyDialogVisible: false,
+			passwordForm: {
+				oldPassword: "",
+				newPassword: "",
+				confirmPassword: "",
+			},
+			rules: {
+				oldPassword: [
+					{ required: true, message: '请输入旧密码', trigger: 'blur' }
+				],
+				newPassword: [
+					{ required: true, message: '请输入新密码', trigger: 'blur' },
+					{ min: 5, message: '密码长度至少为5个字符', trigger: 'blur' },
+					{ max: 15, message: '密码长度不能超过15个字符', trigger: 'blur' },
+				],
+				confirmPassword: [
+					{ required: true, message: '请再次输入新密码', trigger: 'blur' },
+					{ validator: this.matchPassword, trigger: 'blur' }
+				]
+			}
 		};
 	},
 	mounted() {
@@ -128,7 +161,49 @@ export default {
 				initializeScene(canvas, width, height);
 				loadWithModel(path, width, height);
 			}
-		}
+		},
+		showPasswordModifyDialogForm() {
+			this.passwordModifyDialogVisible = true;
+		},
+		matchPassword(rule, value, callback) {
+			if (value === '') {
+				callback(new Error('请确认新密码'));
+			} else if (value !== this.passwordForm.newPassword) {
+				callback(new Error('两次输入的密码不一致'));
+			} else {
+				callback();
+			}
+		},
+		modifyPassword () {
+			this.$refs.passwordForm.validate((valid) => {
+				if (valid) {
+					modifyPassword(this.passwordForm.oldPassword, this.passwordForm.newPassword).then((data) => {
+						if (data.code === 200) {
+							this.passwordModifyDialogVisible = false;
+							ElNotification({
+								title: "密码修改成功，请重新登陆",
+								type: "success",
+							});
+							// 需要重新登陆
+							this.logOut();
+						}
+					}).catch((err) => {
+						console.error(err);
+					});
+				} else {
+					ElMessage({
+						showClose: true,
+						message: "请检查输入",
+						type: "error",
+					});
+					return false;
+				}
+			});
+		},
+		logOut() {
+			STORAGE.logOut();
+			this.$router.push('/login');
+		},
 	},
 };
 
@@ -178,8 +253,8 @@ export default {
 					</el-form-item>
 					<el-form-item>
 						<div class="action-btn-container">
-							<button class="simple-btn" type="button">修改密码</button>
-							<button class="simple-btn" type="button">登出</button>
+							<button class="simple-btn" type="button" @click="showPasswordModifyDialogForm">修改密码</button>
+							<button class="simple-btn" type="button" @click="logOut">登出</button>
 						</div>
 					</el-form-item>
 				</el-form>
@@ -191,6 +266,25 @@ export default {
 			</div>
 		</div>
 	</div>
+	<el-dialog v-model="passwordModifyDialogVisible" title="修改密码" width="500">
+		<el-form :model="passwordForm" :rules="rules" ref="passwordForm">
+			<el-form-item label="旧密码" prop="oldPassword">
+				<el-input v-model="passwordForm.oldPassword" type="password" placeholder="请输入旧密码"/>
+			</el-form-item>
+			<el-form-item label="新密码" prop="newPassword">
+				<el-input v-model="passwordForm.newPassword" type="password" placeholder="请输入新密码"/>
+			</el-form-item>
+			<el-form-item label="确认密码" prop="confirmPassword">
+				<el-input v-model="passwordForm.confirmPassword" type="password" placeholder="请再次输入新密码"/>
+			</el-form-item>
+		</el-form>
+		<template #footer>
+			<div class="dialog-footer">
+				<el-button @click="passwordModifyDialogVisible = false">取 消</el-button>
+				<el-button type="primary" @click="modifyPassword">确 定</el-button>
+			</div>
+		</template>
+	</el-dialog>
 </template>
 
 <style scoped>
