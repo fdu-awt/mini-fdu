@@ -1,8 +1,7 @@
 import axios from 'axios';
 import { ElMessage, ElMessageBox, ElNotification } from 'element-plus';
 import router from "@/router";
-import { getToken } from "@/store";
-import store from "@/store";
+import STORAGE from "@/store";
 
 const service = axios.create({
 	baseURL: process.env.VUE_APP_BASE_URL,
@@ -17,7 +16,7 @@ service.interceptors.request.use(
 	config => {
 		// 是否需要设置 token
 		const isToken = (config.headers || {}).isToken === false;
-		const token = getToken();
+		const token = STORAGE.getToken();
 		if (token && !isToken) {
 			config.headers["Authorization"] = "Bearer " + token;
 		}
@@ -64,7 +63,7 @@ service.interceptors.response.use(
 				confirmButtonText: '前往登录',
 				type: 'warning'
 			}).then(() => {
-				store.mutations.logout(store);
+				STORAGE.logOut();
 				router.push('/login').then();
 			});
 			return Promise.reject(new Error(msg));

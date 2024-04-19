@@ -1,4 +1,3 @@
-import { reactive } from 'vue';
 // 实现一：使用localStorage
 // 令牌将在浏览器会话之间持久保存，直到明确地清除它。
 // 这意味着用户刷新页面或关闭浏览器时，令牌仍然存在。
@@ -45,32 +44,4 @@ const STORAGE = {
 // 	sessionStorage.setItem('token', token);
 // }
 
-const store = reactive({
-	state: {
-		user: STORAGE.getUser(),
-		selfImage: STORAGE.getSelfImage(),
-	},
-	mutations: {
-		login (state, user) {
-			state.user = user;
-			STORAGE.loginSuccess(user);
-		},
-		logout (state) {
-			state.user = {
-				username: '',
-				token: '',
-				tokenExpireTime: '',
-			};
-			STORAGE.logOut();
-		},
-		setSelfImage (state, selfImage) {
-			state.selfImage = selfImage;
-			STORAGE.setSelfImage(selfImage);
-		},
-	}
-});
-
-const getToken = STORAGE.getToken;
-
-export default store;
-export {getToken};
+export default STORAGE;

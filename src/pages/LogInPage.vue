@@ -41,7 +41,7 @@ export default {
 							token: data.object.token,
 							tokenExpireTime: data.object.tokenExpireTime,
 						};
-						store.mutations.login(store, user);
+						store.loginSuccess(user);
 						const redirect = this.$route.query.redirect;
 						if (redirect) {
 							// 如果 url 中有 redirect 参数，则跳转到 redirect 指定的页面

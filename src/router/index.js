@@ -5,7 +5,7 @@ import LogInPage from "@/pages/LogInPage.vue";
 import SignUpPage from "@/pages/SignUpPage.vue";
 import UserProfile from "@/pages/UserProfile.vue";
 import NotFoundPage from "@/pages/NotFoundPage.vue";
-import store from "../store";
+import STORAGE from "../store";
 import { ElNotification } from 'element-plus';
 
 // 定义路由
@@ -29,7 +29,8 @@ const router = createRouter({
 // 路由守卫
 router.beforeEach((to, from, next) => {
 	if (to.meta.requireAuth) {
-		if (store.state.user.username && store.state.user.token) {
+		const user = STORAGE.getUser();
+		if (user && user.username && user.token) {
 			next();
 		} else {
 			ElNotification({
