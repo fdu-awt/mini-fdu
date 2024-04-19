@@ -82,7 +82,7 @@ service.interceptors.response.use(
 				title: msg,
 				type: 'error',
 			});
-			return Promise.reject("error");
+			return Promise.reject(new Error(msg));
 		} else {
 			// code = 200 时
 			if (res.data.uxApi) {
