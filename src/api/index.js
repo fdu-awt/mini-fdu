@@ -11,14 +11,22 @@ const service = axios.create({
 	},
 });
 
+const EXPIRED_MESSAGE = "登录状态已过期";
+
 // request拦截器
 service.interceptors.request.use(
 	config => {
 		// 是否需要设置 token
-		const isToken = (config.headers || {}).isToken === false;
 		const token = STORAGE.getToken();
+		const isToken = (config.headers || {}).isToken === false;
 		if (token && !isToken) {
-			config.headers["Authorization"] = "Bearer " + token;
+			// 判断token是否过期
+			const isTokenExpired = STORAGE.isTokenExpired();
+			if (isTokenExpired) {
+				return Promise.reject(new Error(EXPIRED_MESSAGE));
+			} else {
+				config.headers["Authorization"] = "Bearer " + token;
+			}
 		}
 		// get请求映射params参数
 		if (config.method === "get" && config.params) {
@@ -114,10 +122,23 @@ service.interceptors.response.use(
 			message = "请求异常：" +
 				message.substr(message.length - 3);
 		}
-		ElNotification({
-			title: message,
-			type: 'error',
-		});
+		if (message === EXPIRED_MESSAGE) {
+			ElMessageBox.alert('您的登录状态已过期，请重新登录。', '登录状态过期', {
+				confirmButtonText: '前往登录',
+				type: 'warning'
+			}).then(() => {
+				STORAGE.logOut();
+				router.push({
+					path: '/login',
+					query: { redirect: router.currentRoute.value.fullPath }
+				}).then();
+			});
+		} else {
+			ElNotification({
+				title: message,
+				type: 'error',
+			});
+		}
 		return Promise.reject(error);
 	}
 );

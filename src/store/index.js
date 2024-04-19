@@ -18,6 +18,18 @@ const STORAGE = {
 	getToken() {
 		return STORAGE.getUser().token;
 	},
+	getTokenExpireTime() {
+		return STORAGE.getUser().tokenExpireTime;
+	},
+	isTokenExpired() {
+		const tokenExpireTime = STORAGE.getTokenExpireTime();
+		if (!tokenExpireTime) {
+			return true;
+		}
+		const expireTime = new Date(tokenExpireTime);
+		const timeNow = new Date();
+		return timeNow.getTime() > expireTime.getTime();
+	},
 	loginSuccess(user) {
 		window.localStorage.setItem(USER_KEY, JSON.stringify(user));
 	},
