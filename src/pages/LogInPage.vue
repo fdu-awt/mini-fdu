@@ -42,14 +42,14 @@ export default {
 							tokenExpireTime: data.object.tokenExpireTime,
 						};
 						store.mutations.login(store, user);
-						// 跳转到首页
-						this.$router.push("/");
-					} else {
-						ElMessage({
-							showClose: true,
-							message: data.msg,
-							type: "error",
-						});
+						const redirect = this.$route.query.redirect;
+						if (redirect) {
+							// 如果 url 中有 redirect 参数，则跳转到 redirect 指定的页面
+							this.$router.push(redirect);
+						} else {
+							// 否则跳转到首页
+							this.$router.push("/");
+						}
 					}
 				}).catch(e => {
 					console.error(e);
