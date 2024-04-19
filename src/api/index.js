@@ -2,6 +2,7 @@ import axios from 'axios';
 import { ElMessage, ElMessageBox, ElNotification } from 'element-plus';
 import router from "@/router";
 import { getToken } from "@/store";
+import store from "@/store";
 
 const service = axios.create({
 	baseURL: process.env.VUE_APP_BASE_URL,
@@ -62,7 +63,10 @@ service.interceptors.response.use(
 			ElMessageBox.alert('您需要登录以访问这个页面。', '未授权访问', {
 				confirmButtonText: '前往登录',
 				type: 'warning'
-			}).then(() => router.push('/login'));
+			}).then(() => {
+				store.mutations.logout(store);
+				router.push('/login').then();
+			});
 			return Promise.reject(new Error(msg));
 		} else if (code === 500) {
 			// 服务器内部错误
