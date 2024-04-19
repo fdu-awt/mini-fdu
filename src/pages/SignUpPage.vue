@@ -2,6 +2,7 @@
 import * as CHECK from '../utils/check';
 import {ElMessage} from "element-plus";
 import {signUp} from '@/api/user';
+import SELF_IMAGE from "@/utils/self-image";
 
 export default {
 	name: "LoginPage",
@@ -11,6 +12,7 @@ export default {
 			const username = document.getElementById("username").value;
 			const password = document.getElementById("password").value;
 			const email = document.getElementById("email").value;
+			const selfImage = SELF_IMAGE.defaultModel.name;
 			// 校验用户名和密码
 			const user_check = CHECK.checkUsername(username);
 			const pas_check = CHECK.checkPassword(password);
@@ -34,7 +36,7 @@ export default {
 					type: "warning",
 				});
 			} else {
-				signUp(username, password, email).then((data) => {
+				signUp(username, password, email, selfImage).then((data) => {
 					if (data.code === 200) {
 						ElMessage({
 							showClose: true,

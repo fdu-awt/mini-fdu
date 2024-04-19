@@ -23,11 +23,12 @@ export function logIn(username, password){
 }
 
 // 注册
-export function signUp(username, password, email) {
+export function signUp(username, password, email, selfImage) {
 	const data = {
 		username: username,
 		password: password,
 		email: email,
+		selfImage: selfImage,
 	};
 	return request({
 		url: '/user-service/sign-up',
