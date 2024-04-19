@@ -161,8 +161,8 @@ export default {
 						</el-select>
 					</el-form-item>
 					<el-form-item>
-						<div class="btn-container">
-							<div class="btn-content" @click="handleSubmit">
+						<div class="submit-btn-container">
+							<div class="submit-btn-content" @click="handleSubmit">
 								<span class="btn-title">提交</span>
 								<span class="icon-arrow">
 								<svg width="66px" height="43px" viewBox="0 0 66 43" xmlns="http://www.w3.org/2000/svg">
@@ -174,6 +174,12 @@ export default {
 								</svg>
 							</span>
 							</div>
+						</div>
+					</el-form-item>
+					<el-form-item>
+						<div class="action-btn-container">
+							<button class="simple-btn" type="button">修改密码</button>
+							<button class="simple-btn" type="button">登出</button>
 						</div>
 					</el-form-item>
 				</el-form>
@@ -225,8 +231,42 @@ export default {
 	align-items: center;
 }
 
+/* 用于修改密码的 button 和 登出的 button */
+.action-btn-container {
+	margin-top: 20px;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	--color-text: #f3f7fe;
+	--color-background: var(--primary-color);
+	--color-shadow: 0 0 0 5px #3b83f65f;
+}
+.simple-btn {
+	margin-left: 20px;
+	margin-right: 20px;
+	background-color:  var(--color-background);
+	color: var(--color-text);
+	border: none;
+	border-radius: 8px;
+	width: 100px;
+	height: 45px;
+	transition: .3s;
+	font-family: 'Poppins', sans-serif;
+	font-weight: 550;
+	font-size: 18px;
+}
+
+.simple-btn:hover {
+	background-color:  var(--primary-color);
+	box-shadow: var(--color-shadow);
+	color: var(--color-text);
+}
+
 /* 用于提交的 button*/
-.btn-container {
+.submit-btn-container {
 	width: 300px;
 	height: 40px;
 	display: flex;
@@ -237,7 +277,7 @@ export default {
 	--color-shadow: #00000080;
 }
 
-.btn-content {
+.submit-btn-content {
 	display: flex;
 	align-items: center;
 	padding: 5px 30px;
@@ -252,7 +292,7 @@ export default {
 	box-shadow: 0 0 0.2em 0 var(--color-background);
 }
 
-.btn-content:hover, .btn-content:focus {
+.submit-btn-content:hover, .submit-btn-content:focus {
 	transition: 0.5s;
 	-webkit-animation: btn-content 1s;
 	animation: btn-content 1s;
@@ -261,13 +301,13 @@ export default {
 	box-shadow: 0 0 0.4em 0 var(--color-background);
 }
 
-.btn-content .icon-arrow {
+.submit-btn-content .icon-arrow {
 	transition: 0.5s;
 	margin-right: 0;
 	transform: scale(0.6);
 }
 
-.btn-content:hover .icon-arrow {
+.submit-btn-content:hover .icon-arrow {
 	transition: 0.5s;
 	margin-right: 25px;
 }
@@ -290,16 +330,16 @@ export default {
 	transform: translateX(-30%);
 }
 
-.btn-content:hover #arrow-icon-three {
+.submit-btn-content:hover #arrow-icon-three {
 	animation: color_anim 1s infinite 0.2s;
 }
 
-.btn-content:hover #arrow-icon-one {
+.submit-btn-content:hover #arrow-icon-one {
 	transform: translateX(0%);
 	animation: color_anim 1s infinite 0.6s;
 }
 
-.btn-content:hover #arrow-icon-two {
+.submit-btn-content:hover #arrow-icon-two {
 	transform: translateX(0%);
 	animation: color_anim 1s infinite 0.4s;
 }
