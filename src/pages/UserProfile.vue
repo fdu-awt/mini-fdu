@@ -61,15 +61,6 @@ export default {
 				});
 				return;
 			}
-			const password_check = CHECK.checkPassword(this.form.password);
-			if (!password_check.pass) {
-				ElMessage({
-					showClose: true,
-					message: password_check.msg,
-					type: "error",
-				});
-				return;
-			}
 			const email_check = CHECK.checkEmail(this.form.email);
 			if (!email_check.pass) {
 				ElMessage({
@@ -79,7 +70,23 @@ export default {
 				});
 				return;
 			}
-			modifyUserInfo(this.form.username,this.form.email,this.form.selfImage).then((data) => {
+			if (!SELF_IMAGE.validName(this.form.selfImage)) {
+				ElMessage({
+					showClose: true,
+					message: "请选择正确的虚拟形象",
+					type: "error",
+				});
+				return;
+			}
+			if (this.form.username === this.formOld.username && this.form.email === this.formOld.email && this.form.selfImage === this.formOld.selfImage) {
+				ElMessage({
+					showClose: true,
+					message: "没有修改任何信息",
+					type: "warning",
+				});
+				return;
+			}
+			modifyUserInfo(this.form.username, this.form.email, this.form.selfImage).then((data) => {
 				if (data.code === 200) {
 					this.formOld = deepCopy(this.form);
 					ElMessage({

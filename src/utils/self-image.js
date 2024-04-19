@@ -27,6 +27,9 @@ const SELF_IMAGE = {
 		}
 		return this.modelMap[name] || this.defaultModel.path;
 	},
+	validName(name) {
+		return !!this.modelMap[name];
+	}
 };
 
 export default SELF_IMAGE;
