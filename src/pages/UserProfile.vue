@@ -61,13 +61,11 @@ export default {
 			],
 			form: {
 				username: "",
-				password: "",
 				email: "",
 				selfImage: "",
 			},
 			formOld: {
 				username: "",
-				password: "",
 				email: "",
 				selfImage: "",
 			},
@@ -105,19 +103,13 @@ export default {
 				});
 				return;
 			}
-			modifyUserInfo(this.form.username,this.form.password,this.form.email,this.form.selfImage).then((data) => {
+			modifyUserInfo(this.form.username,this.form.email,this.form.selfImage).then((data) => {
 				if (data.code === 200) {
 					this.formOld = deepCopy(this.form);
 					ElMessage({
 						showClose: true,
 						message: data.msg,
 						type: "success",
-					});
-				} else {
-					ElMessage({
-						showClose: true,
-						message: data.msg,
-						type: "error",
 					});
 				}
 			}).catch((err) => {
@@ -133,12 +125,6 @@ export default {
 					this.form = deepCopy(data.object);
 					this.formOld = deepCopy(data.object);
 					this.showModel();
-				} else {
-					ElMessage({
-						showClose: true,
-						message: data.msg,
-						type: "error",
-					});
 				}
 			}).catch((err) => {
 				console.error(err);
@@ -168,9 +154,6 @@ export default {
 				<el-form :model="form" label-width="auto" size="large" label-position="left" >
 					<el-form-item label="用户名">
 						<el-input v-model="form.username" placeholder="请输入用户名" autocomplete="off"/>
-					</el-form-item>
-					<el-form-item label="密码">
-						<el-input v-model="form.password" type="password" placeholder="请输入密码" autocomplete="off"/>
 					</el-form-item>
 					<el-form-item label="邮箱">
 						<el-input v-model="form.email" placeholder="请输入邮箱"/>

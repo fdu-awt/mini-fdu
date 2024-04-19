@@ -45,6 +45,13 @@ export function logOut() {
 }
 
 // 获取用户详细信息
+/**
+ * object: {
+ *   username: String
+ *   email: String
+ *   selfImage: String
+ * }
+ * */
 export function getUserInfo() {
 	return request({
 		url: '/user-service/get-user-info',
@@ -52,16 +59,28 @@ export function getUserInfo() {
 	});
 }
 
-// 修改个人信息
-export function modifyUserInfo(username, password, email, selfImage) {
+// 修改个人信息（不包括密码）
+export function modifyUserInfo(username, email, selfImage) {
 	const data = {
 		username: username,
-		password: password,
 		email: email,
 		selfImage: selfImage,
 	};
 	return request({
 		url: '/user-service/modify-user-info',
+		method: 'post',
+		data: data,
+	});
+}
+
+// 修改密码
+export function modifyPassword(oldPassword, newPassword) {
+	const data = {
+		oldPassword: oldPassword,
+		newPassword: newPassword,
+	};
+	return request({
+		url: '/user-service/modify-user-password',
 		method: 'post',
 		data: data,
 	});
