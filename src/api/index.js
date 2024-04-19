@@ -18,7 +18,7 @@ service.interceptors.request.use(
 		const isToken = (config.headers || {}).isToken === false;
 		const token = getToken();
 		if (token && !isToken) {
-			config.headers["token"] = token;
+			config.headers["Authorization"] = "Bearer " + token;
 		}
 		// get请求映射params参数
 		if (config.method === "get" && config.params) {
