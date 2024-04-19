@@ -100,6 +100,11 @@ export default {
 				if (data.code === 200) {
 					this.form = deepCopy(data.object);
 					this.formOld = deepCopy(data.object);
+					if (!data.object.selfImage) {
+						console.warn("没有个人形象信息！");
+						this.form.selfImage = SELF_IMAGE.defaultModel.name;
+						this.formOld.selfImage = SELF_IMAGE.defaultModel.name;
+					}
 					this.showModel();
 				}
 			}).catch((err) => {
