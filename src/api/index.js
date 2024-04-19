@@ -64,7 +64,10 @@ service.interceptors.response.use(
 				type: 'warning'
 			}).then(() => {
 				STORAGE.logOut();
-				router.push('/login').then();
+				router.push({
+					path: '/login',
+					query: { redirect: router.currentRoute.value.fullPath }
+				}).then();
 			});
 			return Promise.reject(new Error(msg));
 		} else if (code === 500) {
