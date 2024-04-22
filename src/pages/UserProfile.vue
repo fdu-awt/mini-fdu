@@ -42,6 +42,7 @@ export default {
 				email: "",
 				selfImage: "",
 			},
+			shouldInitializeModel: true,
 			passwordModifyDialogVisible: false,
 			passwordForm: {
 				oldPassword: "",
@@ -158,7 +159,10 @@ export default {
 				const canvas = document.querySelector("#image");
 				const width = canvas_container.clientWidth;
 				const height = canvas_container.clientHeight;
-				initializeScene(canvas, width, height);
+				if (this.shouldInitializeModel) {
+					this.shouldInitializeModel = false;
+					initializeScene(canvas, width, height);
+				}
 				loadWithModel(path, width, height);
 			}
 		},

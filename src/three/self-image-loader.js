@@ -85,7 +85,12 @@ export function loadWithModel(modelPath, renderer_width, renderer_height) {
 		const object = scene.children[0];
 		if (object.isMesh) {
 			object.geometry.dispose();
-			object.material.dispose();
+			// 检查material是否为数组
+			if (Array.isArray(object.material)) {
+				object.material.forEach(material => material.dispose());
+			} else {
+				object.material.dispose();
+			}
 		}
 		scene.remove(object);
 	}
