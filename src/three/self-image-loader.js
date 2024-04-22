@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import {MMDLoader} from "three/examples/jsm/loaders/MMDLoader.js";
-import {OrbitControls} from "three/addons/controls/OrbitControls";
+import {OrbitControls} from "three/addons";
 
 // 全局变量用于持久引用
 let scene, renderer, camera, controls;
