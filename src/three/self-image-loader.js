@@ -1,26 +1,11 @@
 import * as THREE from 'three';
 import {MMDLoader} from "three/examples/jsm/loaders/MMDLoader.js";
 import {OrbitControls} from "three/addons";
+import {resizeRendererToDisplaySize, clearModels} from "@/three/common";
 
 // 全局变量用于持久引用
 let scene, renderer, camera, controls;
 let hemLight, dirLight;
-
-// 调整渲染器大小以适应屏幕
-function resizeRendererToDisplaySize(renderer) {
-	const canvas = renderer.domElement;
-	const width = window.innerWidth;
-	const height = window.innerHeight;
-	const canvasPixelWidth = canvas.width / window.devicePixelRatio;
-	const canvasPixelHeight = canvas.height / window.devicePixelRatio;
-
-	const needResize =
-		canvasPixelWidth !== width || canvasPixelHeight !== height;
-	if (needResize) {
-		renderer.setSize(width, height, false);
-	}
-	return needResize;
-}
 
 /**
  * @description 初始化Three.js
@@ -80,21 +65,7 @@ export function initializeScene(canvas, renderer_width, renderer_height) {
  * @param renderer_height
  * */
 export function loadWithModel(modelPath, renderer_width, renderer_height) {
-	// 清理场景中旧的模型
-	while (scene.children.length > 0) {
-		const object = scene.children[0];
-		if (object.isMesh) {
-			object.geometry.dispose();
-			// 检查material是否为数组
-			if (Array.isArray(object.material)) {
-				object.material.forEach(material => material.dispose());
-			} else {
-				object.material.dispose();
-			}
-		}
-		scene.remove(object);
-	}
-
+	clearModels(scene);
 	renderer.setSize(renderer_width, renderer_height);
 
 	// 加载新模型
