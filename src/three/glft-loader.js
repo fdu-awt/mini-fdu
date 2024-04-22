@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import {GLTFLoader} from "three/addons";
 import {OrbitControls} from "three/addons";
 import {clearModels, resizeRendererToDisplaySize} from "@/three/common";
-
+import SELF_IMAGE from "@/utils/self-image";
 // 全局变量用于持久引用
 let scene, renderer, camera, controls;
 let hemLight, dirLight;
@@ -68,13 +68,10 @@ export function loadWithModel(modelPath, renderer_width, renderer_height) {
 	clearModels(scene);
 	renderer.setSize(renderer_width, renderer_height);
 	// 加载新模型
-	modelPath = "/那维莱特/那维莱特.glb";
-	const textureFiles = [
-		"/那维莱特/tex/颜.png",
-		"/那维莱特/tex/spa_h.png",
-		"/那维莱特/tex/体.png",
-		"/那维莱特/tex/髮.png",
-	];
+	const imageName = "那维莱特";
+	const glbConfig = 	SELF_IMAGE.getGlbConfigByName(imageName);
+	modelPath = glbConfig.modelPath;
+	const textureFiles = glbConfig.textureFiles;
 	// 加载纹理
 	const textures = textureFiles.map((file) => {
 		const texture = new THREE.TextureLoader().load(file);

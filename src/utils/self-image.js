@@ -12,6 +12,26 @@ const SELF_IMAGE = {
 		"那维莱特": "/那维莱特/那维莱特.pmx",
 		"花时来信_神里绫华": "/花时来信_神里绫华/神里绫华.pmx",
 	},
+	glbConfigMap: {
+		"那维莱特": {
+			modelPath: "/那维莱特/那维莱特.glb",
+			textureFiles: [
+				"/那维莱特/tex/颜.png",
+				"/那维莱特/tex/spa_h.png",
+				"/那维莱特/tex/体.png",
+				"/那维莱特/tex/髮.png",
+			],
+		},
+		"多莉": {
+			modelPath: "/多莉/多莉.glb",
+			textureFiles: [
+				"/多莉/tex/颜.png",
+				"/多莉/tex/spa_h.png",
+				"/多莉/tex/体.png",
+				"/多莉/tex/髮.png",
+			],
+		},
+	},
 	// 默认模型
 	defaultModel: {
 		name: "万叶",
@@ -30,6 +50,9 @@ const SELF_IMAGE = {
 	},
 	validName(name) {
 		return !!this.modelMap[name];
+	},
+	getGlbConfigByName(name) {
+		return this.glbConfigMap[name];
 	}
 };
 
