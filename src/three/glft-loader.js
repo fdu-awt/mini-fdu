@@ -68,9 +68,10 @@ export function loadWithModel(modelPath, renderer_width, renderer_height) {
 	clearModels(scene);
 	renderer.setSize(renderer_width, renderer_height);
 	// 加载新模型
-	const imageName = "那维莱特";
+	const imageName = "多莉";
 	const glbConfig = 	SELF_IMAGE.getGlbConfigByName(imageName);
 	modelPath = glbConfig.modelPath;
+	const shouldAddTexture = glbConfig.shouldAddTexture;
 	const textureFiles = glbConfig.textureFiles;
 	// 加载纹理
 	const textures = textureFiles.map((file) => {
@@ -95,7 +96,7 @@ export function loadWithModel(modelPath, renderer_width, renderer_height) {
 			model.traverse((o) => {
 				// 加载纹理
 				console.log(index);
-				if (o.type === "Mesh") {
+				if (shouldAddTexture(o.type)) {
 					console.log(o);
 					console.log(o.name + "加载纹理");
 					o.material = materials[index];

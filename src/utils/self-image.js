@@ -21,6 +21,9 @@ const SELF_IMAGE = {
 				"/那维莱特/tex/体.png",
 				"/那维莱特/tex/髮.png",
 			],
+			shouldAddTexture: (type) => {
+				return type === "Mesh";
+			},
 		},
 		"多莉": {
 			modelPath: "/多莉/多莉.glb",
@@ -29,7 +32,12 @@ const SELF_IMAGE = {
 				"/多莉/tex/spa_h.png",
 				"/多莉/tex/体.png",
 				"/多莉/tex/髮.png",
+				"/多莉/tex/肌.png",
+				"/多莉/hair.bmp",
 			],
+			shouldAddTexture: (type) => {
+				return type === "SkinnedMesh";
+			},
 		},
 	},
 	// 默认模型
