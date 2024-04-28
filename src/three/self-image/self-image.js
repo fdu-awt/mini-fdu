@@ -1,4 +1,4 @@
-const SELF_IMAGE = {
+const PMX_IMAGE = {
 	modelMap: {
 		"万叶": "/万叶/万叶.pmx",
 		"云堇": "/云堇/云堇.pmx",
@@ -84,4 +84,4 @@ const SELF_IMAGE = {
 	}
 };
 
-export default SELF_IMAGE;
+export default PMX_IMAGE;

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import {MMDLoader} from "three/examples/jsm/loaders/MMDLoader.js";
 import {OrbitControls} from "three/addons";
 import {resizeRendererToDisplaySize, clearModels} from "@/three/common";
-import SELF_IMAGE from "@/three/self-image/self-image";
+import PMX_IMAGE from "@/three/self-image/self-image";
 
 // 全局变量用于持久引用
 let scene, renderer, camera, controls;
@@ -71,7 +71,7 @@ export function loadWithModel(modelName, renderer_width, renderer_height) {
 
 	// 加载新模型
 	const loader = new MMDLoader();
-	const modelPath = SELF_IMAGE.getPathByName(modelName);
+	const modelPath = PMX_IMAGE.getPathByName(modelName);
 	loader.load(
 		modelPath,
 		function (mesh) {

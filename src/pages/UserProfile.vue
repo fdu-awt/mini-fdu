@@ -14,7 +14,7 @@ import * as CHECK from "@/utils/check";
 import {deepCopy} from "@/utils/copy";
 import {initializeScene, loadWithModel} from "@/three/self-image/self-image-loader";
 import {getUserInfo, modifyPassword, modifyUserInfo} from "@/api/user";
-import SELF_IMAGE from "@/three/self-image/self-image";
+import PMX_IMAGE from "@/three/self-image/self-image";
 import STORAGE from "@/store";
 
 export default {
@@ -73,7 +73,7 @@ export default {
 			if (this.choices.length > 0) {
 				return this.choices;
 			} else  {
-				const modelMap = SELF_IMAGE.modelMap;
+				const modelMap = PMX_IMAGE.modelMap;
 				const choices = [];
 				for (const key in modelMap) {
 					choices.push({
@@ -104,7 +104,7 @@ export default {
 				});
 				return;
 			}
-			if (!SELF_IMAGE.validName(this.form.selfImage)) {
+			if (!PMX_IMAGE.validName(this.form.selfImage)) {
 				ElMessage({
 					showClose: true,
 					message: "请选择正确的虚拟形象",
@@ -143,8 +143,8 @@ export default {
 					this.formOld = deepCopy(data.object);
 					if (!data.object.selfImage) {
 						console.warn("没有个人形象信息！");
-						this.form.selfImage = SELF_IMAGE.defaultModel.name;
-						this.formOld.selfImage = SELF_IMAGE.defaultModel.name;
+						this.form.selfImage = PMX_IMAGE.defaultModel.name;
+						this.formOld.selfImage = PMX_IMAGE.defaultModel.name;
 					}
 					this.showModel();
 				}
@@ -153,7 +153,7 @@ export default {
 			});
 		},
 		showModel(){
-			const path = SELF_IMAGE.getPathByName(this.form.selfImage);
+			const path = PMX_IMAGE.getPathByName(this.form.selfImage);
 			if (path !== "") {
 				const canvas_container = document.querySelector("#canvas-container");
 				const canvas = document.querySelector("#image");
