@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import {MMDLoader} from "three/examples/jsm/loaders/MMDLoader.js";
 import {OrbitControls} from "three/addons";
 import {resizeRendererToDisplaySize, clearModels} from "@/three/common";
-import PMX_IMAGE from "@/three/self-image/self-image";
+import {PMX_IMAGE} from "@/three/self-image/self-image";
 
 // 全局变量用于持久引用
 let scene, renderer, camera, controls;

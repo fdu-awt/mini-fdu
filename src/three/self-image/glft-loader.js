@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import {GLTFLoader} from "three/addons";
 import {OrbitControls} from "three/addons";
 import {clearModels, resizeRendererToDisplaySize} from "@/three/common";
-import PMX_IMAGE from "@/three/self-image/self-image";
+import {GLTF_IMAGE} from "@/three/self-image/self-image";
 // 全局变量用于持久引用
 let scene, renderer, camera, controls;
 let hemLight, dirLight;
@@ -68,7 +68,7 @@ export function loadWithModel(modelName, renderer_width, renderer_height) {
 	clearModels(scene);
 	renderer.setSize(renderer_width, renderer_height);
 	// 加载新模型
-	const glbConfig = PMX_IMAGE.getGlbConfigByName(modelName);
+	const glbConfig = GLTF_IMAGE.getGlbConfigByName(modelName);
 	const modelPath = glbConfig.modelPath;
 	const shouldAddTexture = glbConfig.shouldAddTexture;
 	const textureFiles = glbConfig.textureFiles;
@@ -90,7 +90,7 @@ export function loadWithModel(modelName, renderer_width, renderer_height) {
 			const model = gltf.scene.children[0];
 			const animations = gltf.animations;
 			const idleAnimation = animations.find((animation) => {
-				return animation.name === glbConfig.animations.idle;
+				return animation.name === glbConfig.animations.running;
 			}) || null; // 如果没有找到动画，则返回null
 			// 创建动画混合器和动作
 			mixer = new THREE.AnimationMixer(model);

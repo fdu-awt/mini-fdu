@@ -12,9 +12,9 @@ import {
 } from 'element-plus';
 import * as CHECK from "@/utils/check";
 import {deepCopy} from "@/utils/copy";
-import {initializeScene, loadWithModel} from "@/three/self-image/self-image-loader";
+import {initializeScene, loadWithModel} from "@/three/self-image/pmx-loader";
 import {getUserInfo, modifyPassword, modifyUserInfo} from "@/api/user";
-import PMX_IMAGE from "@/three/self-image/self-image";
+import SELF_IMAGE from "@/three/self-image/self-image";
 import STORAGE from "@/store";
 
 export default {
@@ -73,16 +73,8 @@ export default {
 			if (this.choices.length > 0) {
 				return this.choices;
 			} else  {
-				const modelMap = PMX_IMAGE.modelMap;
-				const choices = [];
-				for (const key in modelMap) {
-					choices.push({
-						name: key,
-						path: modelMap[key],
-					});
-				}
-				this.choices = choices;
-				return choices;
+				this.choices = SELF_IMAGE.models;
+				return this.choices;
 			}
 		},
 		handleSubmit () {
@@ -104,7 +96,7 @@ export default {
 				});
 				return;
 			}
-			if (!PMX_IMAGE.validName(this.form.selfImage)) {
+			if (!SELF_IMAGE.validName(this.form.selfImage)) {
 				ElMessage({
 					showClose: true,
 					message: "请选择正确的虚拟形象",
@@ -143,8 +135,8 @@ export default {
 					this.formOld = deepCopy(data.object);
 					if (!data.object.selfImage) {
 						console.warn("没有个人形象信息！");
-						this.form.selfImage = PMX_IMAGE.defaultModel.name;
-						this.formOld.selfImage = PMX_IMAGE.defaultModel.name;
+						this.form.selfImage = SELF_IMAGE.defaultModelName;
+						this.formOld.selfImage = SELF_IMAGE.defaultModelName;
 					}
 					this.showModel();
 				}
@@ -153,18 +145,15 @@ export default {
 			});
 		},
 		showModel(){
-			const path = PMX_IMAGE.getPathByName(this.form.selfImage);
-			if (path !== "") {
-				const canvas_container = document.querySelector("#canvas-container");
-				const canvas = document.querySelector("#image");
-				const width = canvas_container.clientWidth;
-				const height = canvas_container.clientHeight;
-				if (this.shouldInitializeModel) {
-					this.shouldInitializeModel = false;
-					initializeScene(canvas, width, height);
-				}
-				loadWithModel(this.form.selfImage, width, height);
+			const canvas_container = document.querySelector("#canvas-container");
+			const canvas = document.querySelector("#image");
+			const width = canvas_container.clientWidth;
+			const height = canvas_container.clientHeight;
+			if (this.shouldInitializeModel) {
+				this.shouldInitializeModel = false;
+				initializeScene(canvas, width, height);
 			}
+			loadWithModel(this.form.selfImage, width, height);
 		},
 		showPasswordModifyDialogForm() {
 			this.passwordModifyDialogVisible = true;
@@ -233,9 +222,9 @@ export default {
 								placeholder="请选择虚拟形象">
 							<el-option
 									v-for="item in selfImageChoices()"
-									:key="item.path"
-									:label="item.name"
-									:value="item.name">
+									:key="item"
+									:label="item"
+									:value="item">
 							</el-option>
 						</el-select>
 					</el-form-item>

@@ -2,7 +2,7 @@
 import * as CHECK from '../utils/check';
 import {ElMessage} from "element-plus";
 import {signUp} from '@/api/user';
-import PMX_IMAGE from "@/three/self-image/self-image";
+import SELF_IMAGE from "@/three/self-image/self-image";
 
 export default {
 	name: "LoginPage",
@@ -12,7 +12,7 @@ export default {
 			const username = document.getElementById("username").value;
 			const password = document.getElementById("password").value;
 			const email = document.getElementById("email").value;
-			const selfImage = PMX_IMAGE.defaultModel.name;
+			const selfImage = SELF_IMAGE.defaultModelName;
 			// 校验用户名和密码
 			const user_check = CHECK.checkUsername(username);
 			const pas_check = CHECK.checkPassword(password);

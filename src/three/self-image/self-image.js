@@ -1,3 +1,17 @@
+const SELF_IMAGE = {
+	defaultModelName: "荒泷一斗",
+	models: [
+		'云堇',
+		'多莉',
+		'荒泷一斗',
+		'那维莱特',
+		'芭芭拉',
+	],
+	validName(name) {
+		return !!this.modelMap[name];
+	},
+};
+
 const PMX_IMAGE = {
 	modelMap: {
 		"万叶": "/万叶/万叶.pmx",
@@ -13,7 +27,19 @@ const PMX_IMAGE = {
 		"那维莱特": "/那维莱特/那维莱特.pmx",
 		"花时来信_神里绫华": "/花时来信_神里绫华/神里绫华.pmx",
 	},
-	glbConfigMap: {
+	/**
+	 * 通过 name 获取 path
+	 * @param {String} name 模型名称
+	 * @return {String} 模型路径
+	 * */
+	getPathByName(name) {
+		name = name || SELF_IMAGE.defaultModelName;
+		return this.modelMap[name];
+	},
+};
+
+const GLTF_IMAGE = {
+	modelMap: {
 		"那维莱特": {
 			modelPath: "/那维莱特/那维莱特.glb",
 			textureFiles: [
@@ -60,28 +86,10 @@ const PMX_IMAGE = {
 			},
 		},
 	},
-	// 默认模型
-	defaultModel: {
-		name: "万叶",
-		path: "/万叶/万叶.pmx",
-	},
-	/**
-	 * 通过 name 获取 path
-	 * @param {String} name 模型名称
-	 * @return {String} 模型路径, 默认返回 defaultModelPath
-	 * */
-	getPathByName(name) {
-		if (!name) {
-			return this.defaultModel.path;
-		}
-		return this.modelMap[name] || this.defaultModel.path;
-	},
-	validName(name) {
-		return !!this.modelMap[name];
-	},
 	getGlbConfigByName(name) {
-		return this.glbConfigMap[name];
+		return this.modelMap[name];
 	}
 };
 
-export default PMX_IMAGE;
+export {PMX_IMAGE, GLTF_IMAGE};
+export default SELF_IMAGE;
