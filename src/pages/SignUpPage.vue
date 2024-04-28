@@ -2,7 +2,7 @@
 import * as CHECK from '../utils/check';
 import {ElMessage} from "element-plus";
 import {signUp} from '@/api/user';
-import SELF_IMAGE from "@/utils/self-image";
+import SELF_IMAGE from "@/three/self-image/self-image";
 
 export default {
 	name: "LoginPage",

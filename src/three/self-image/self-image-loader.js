@@ -1,8 +1,9 @@
 import * as THREE from 'three';
-import {GLTFLoader} from "three/addons";
+import {MMDLoader} from "three/examples/jsm/loaders/MMDLoader.js";
 import {OrbitControls} from "three/addons";
-import {clearModels, resizeRendererToDisplaySize} from "@/three/common";
-import SELF_IMAGE from "@/utils/self-image";
+import {resizeRendererToDisplaySize, clearModels} from "@/three/common";
+import SELF_IMAGE from "@/three/self-image/self-image";
+
 // 全局变量用于持久引用
 let scene, renderer, camera, controls;
 let hemLight, dirLight;
@@ -61,66 +62,31 @@ export function initializeScene(canvas, renderer_width, renderer_height) {
 /**
  * @description 初始化Three.js
  * @param modelName 模型名称
- * @param renderer_width 宽度
- * @param renderer_height 高度
+ * @param renderer_width
+ * @param renderer_height
  * */
 export function loadWithModel(modelName, renderer_width, renderer_height) {
 	clearModels(scene);
 	renderer.setSize(renderer_width, renderer_height);
+
 	// 加载新模型
-	const glbConfig = SELF_IMAGE.getGlbConfigByName(modelName);
-	const modelPath = glbConfig.modelPath;
-	const shouldAddTexture = glbConfig.shouldAddTexture;
-	const textureFiles = glbConfig.textureFiles;
-	// 加载纹理
-	const textures = textureFiles.map((file) => {
-		const texture = new THREE.TextureLoader().load(file);
-		texture.flipY = false; // 调整纹理方向
-		return texture;
-	});
-	// 创建材质
-	const materials = textures.map((texture) => {
-		return new THREE.MeshBasicMaterial({map: texture});
-	});
-	const loader = new GLTFLoader();
-	let mixer;
+	const loader = new MMDLoader();
+	const modelPath = SELF_IMAGE.getPathByName(modelName);
 	loader.load(
 		modelPath,
-		function (gltf) {
-			const model = gltf.scene.children[0];
-			const animations = gltf.animations;
-			const idleAnimation = animations.find((animation) => {
-				return animation.name === glbConfig.animations.idle;
-			}) || null; // 如果没有找到动画，则返回null
-			// 创建动画混合器和动作
-			mixer = new THREE.AnimationMixer(model);
-			const idleAction = mixer.clipAction(idleAnimation);
-			if (idleAction) {
-				idleAction.play();
-			}
-			let index = 0;
-			model.traverse((o) => {
-				// 加载纹理
-				if (shouldAddTexture(o.type)) {
-					o.material = materials[index];
-					index++;
-				}
-				// 设置是否产生阴影和接受阴影
-				if (o.isMesh) {
-					o.castShadow = true;
-					o.receiveShadow = true;
-				}
-			});
-			scene.add(model);
+		function (mesh) {
+			scene.add(mesh);
 			// 调整模型位置
-			const box = new THREE.Box3().setFromObject(model);
+			const box = new THREE.Box3().setFromObject(mesh);
 			const center = box.getCenter(new THREE.Vector3());
-			model.position.sub(center); // 简化位置调整代码
+			mesh.position.sub(center); // 简化位置调整代码
+			// mesh.position.x += (mesh.position.x - center.x);
+			// mesh.position.y += (mesh.position.y - center.y);
+			// mesh.position.z += (mesh.position.z - center.z);
 			animate();
 		},
-		// called while loading is progressing
-		function ( xhr ) {
-			console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+		function (xhr) {
+			console.log(`${(xhr.loaded / xhr.total * 100).toFixed(2)}% loaded`);
 		},
 		function (error) {
 			console.error('An error happened', error);
@@ -131,7 +97,6 @@ export function loadWithModel(modelName, renderer_width, renderer_height) {
 	function animate() {
 		controls.update();
 		requestAnimationFrame(animate);
-		mixer.update(0.01);
 		renderer.render(scene, camera);
 
 		if (resizeRendererToDisplaySize(renderer)) {

@@ -12,9 +12,9 @@ import {
 } from 'element-plus';
 import * as CHECK from "@/utils/check";
 import {deepCopy} from "@/utils/copy";
-import {initializeScene, loadWithModel} from "@/three/self-image-loader";
+import {initializeScene, loadWithModel} from "@/three/self-image/self-image-loader";
 import {getUserInfo, modifyPassword, modifyUserInfo} from "@/api/user";
-import SELF_IMAGE from "@/utils/self-image";
+import SELF_IMAGE from "@/three/self-image/self-image";
 import STORAGE from "@/store";
 
 export default {
