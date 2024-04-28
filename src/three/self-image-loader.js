@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import {MMDLoader} from "three/examples/jsm/loaders/MMDLoader.js";
 import {OrbitControls} from "three/addons";
 import {resizeRendererToDisplaySize, clearModels} from "@/three/common";
+import SELF_IMAGE from "@/utils/self-image";
 
 // 全局变量用于持久引用
 let scene, renderer, camera, controls;
@@ -60,16 +61,17 @@ export function initializeScene(canvas, renderer_width, renderer_height) {
 
 /**
  * @description 初始化Three.js
- * @param modelPath 模型路径
+ * @param modelName 模型名称
  * @param renderer_width
  * @param renderer_height
  * */
-export function loadWithModel(modelPath, renderer_width, renderer_height) {
+export function loadWithModel(modelName, renderer_width, renderer_height) {
 	clearModels(scene);
 	renderer.setSize(renderer_width, renderer_height);
 
 	// 加载新模型
 	const loader = new MMDLoader();
+	const modelPath = SELF_IMAGE.getPathByName(modelName);
 	loader.load(
 		modelPath,
 		function (mesh) {

@@ -60,15 +60,15 @@ export function initializeScene(canvas, renderer_width, renderer_height) {
 
 /**
  * @description 初始化Three.js
- * @param imageName 模型名称
+ * @param modelName 模型名称
  * @param renderer_width 宽度
  * @param renderer_height 高度
  * */
-export function loadWithModel(imageName, renderer_width, renderer_height) {
+export function loadWithModel(modelName, renderer_width, renderer_height) {
 	clearModels(scene);
 	renderer.setSize(renderer_width, renderer_height);
 	// 加载新模型
-	const glbConfig = SELF_IMAGE.getGlbConfigByName(imageName);
+	const glbConfig = SELF_IMAGE.getGlbConfigByName(modelName);
 	const modelPath = glbConfig.modelPath;
 	const shouldAddTexture = glbConfig.shouldAddTexture;
 	const textureFiles = glbConfig.textureFiles;

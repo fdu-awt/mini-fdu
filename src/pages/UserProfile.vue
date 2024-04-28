@@ -163,7 +163,7 @@ export default {
 					this.shouldInitializeModel = false;
 					initializeScene(canvas, width, height);
 				}
-				loadWithModel(path, width, height);
+				loadWithModel(this.form.selfImage, width, height);
 			}
 		},
 		showPasswordModifyDialogForm() {
