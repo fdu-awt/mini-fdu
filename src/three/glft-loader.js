@@ -60,17 +60,16 @@ export function initializeScene(canvas, renderer_width, renderer_height) {
 
 /**
  * @description 初始化Three.js
- * @param modelPath 模型路径
- * @param renderer_width
- * @param renderer_height
+ * @param imageName 模型名称
+ * @param renderer_width 宽度
+ * @param renderer_height 高度
  * */
-export function loadWithModel(modelPath, renderer_width, renderer_height) {
+export function loadWithModel(imageName, renderer_width, renderer_height) {
 	clearModels(scene);
 	renderer.setSize(renderer_width, renderer_height);
 	// 加载新模型
-	const imageName = "多莉";
-	const glbConfig = 	SELF_IMAGE.getGlbConfigByName(imageName);
-	modelPath = glbConfig.modelPath;
+	const glbConfig = SELF_IMAGE.getGlbConfigByName(imageName);
+	const modelPath = glbConfig.modelPath;
 	const shouldAddTexture = glbConfig.shouldAddTexture;
 	const textureFiles = glbConfig.textureFiles;
 	// 加载纹理
@@ -84,21 +83,25 @@ export function loadWithModel(modelPath, renderer_width, renderer_height) {
 		return new THREE.MeshBasicMaterial({map: texture});
 	});
 	const loader = new GLTFLoader();
+	let mixer;
 	loader.load(
 		modelPath,
 		function (gltf) {
-			console.log("gltf:");
-			console.log(gltf);
 			const model = gltf.scene.children[0];
-			console.log("model:");
-			console.log(model);
+			const animations = gltf.animations;
+			const idleAnimation = animations.find((animation) => {
+				return animation.name === glbConfig.animations.idle;
+			}) || null; // 如果没有找到动画，则返回null
+			// 创建动画混合器和动作
+			mixer = new THREE.AnimationMixer(model);
+			const idleAction = mixer.clipAction(idleAnimation);
+			if (idleAction) {
+				idleAction.play();
+			}
 			let index = 0;
 			model.traverse((o) => {
 				// 加载纹理
-				console.log(index);
 				if (shouldAddTexture(o.type)) {
-					console.log(o);
-					console.log(o.name + "加载纹理");
 					o.material = materials[index];
 					index++;
 				}
@@ -128,6 +131,7 @@ export function loadWithModel(modelPath, renderer_width, renderer_height) {
 	function animate() {
 		controls.update();
 		requestAnimationFrame(animate);
+		mixer.update(0.01);
 		renderer.render(scene, camera);
 
 		if (resizeRendererToDisplaySize(renderer)) {

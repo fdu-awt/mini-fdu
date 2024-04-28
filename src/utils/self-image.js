@@ -40,50 +40,21 @@ const SELF_IMAGE = {
 				return type === "SkinnedMesh";
 			},
 		},
-		"荒泷一斗": { // 未完成
+		"荒泷一斗": {
 			modelPath: "/荒泷一斗/荒泷一斗.glb",
 			textureFiles: [
-				"/荒泷一斗/tex/体.png", // 0：
-				"/荒泷一斗/tex/颜.png", // 1： 头发
-				"/荒泷一斗/tex/颜.png",
 				"/荒泷一斗/tex/spa_h.png",
 				"/荒泷一斗/tex/髪.png",
+				"/荒泷一斗/tex/颜.png",
+				"/荒泷一斗/tex/体.png",
 				"/荒泷一斗/tex/肌.png",
-				"/荒泷一斗/tex/颜.png",
-				"/荒泷一斗/tex/颜.png",
-				"/荒泷一斗/tex/颜.png", // 目
-				"/荒泷一斗/hair.bmp",
-				"/荒泷一斗/hair.bmp",
-				"/荒泷一斗/hair.bmp",
-				"/荒泷一斗/hair.bmp",
-				"/荒泷一斗/hair.bmp",
-				"/荒泷一斗/hair.bmp",
-				"/荒泷一斗/hair.bmp",
-				"/荒泷一斗/hair.bmp",
-				"/荒泷一斗/hair.bmp",
-				"/荒泷一斗/hair.bmp",
-				"/荒泷一斗/hair.bmp",
-				"/荒泷一斗/hair.bmp",
-				"/荒泷一斗/hair.bmp",
-				"/荒泷一斗/hair.bmp",
-				"/荒泷一斗/hair.bmp",
-				"/荒泷一斗/hair.bmp",
-				"/荒泷一斗/hair.bmp",
-				"/荒泷一斗/hair.bmp",
-				"/荒泷一斗/hair.bmp",
-				"/荒泷一斗/hair.bmp",
-				"/荒泷一斗/hair.bmp",
-				"/荒泷一斗/hair.bmp",
-				"/荒泷一斗/hair.bmp",
-				"/荒泷一斗/hair.bmp",
-				"/荒泷一斗/hair.bmp",
-				"/荒泷一斗/hair.bmp",
-				"/荒泷一斗/hair.bmp",
-				"/荒泷一斗/hair.bmp",
-				"/荒泷一斗/hair.bmp",
-				"/荒泷一斗/hair.bmp",
-				"/荒泷一斗/hair.bmp",
 			],
+			// 动画名称
+			animations: {
+				idle: 'Idle',
+				running: "Running",
+				walking: 'Walking',
+			},
 			shouldAddTexture: (type) => {
 				return type === "SkinnedMesh";
 			},
