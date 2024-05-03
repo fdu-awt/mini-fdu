@@ -8,7 +8,7 @@ const SELF_IMAGE = {
 		'芭芭拉',
 	],
 	validName(name) {
-		return !!this.modelMap[name];
+		return !!this.models[name];
 	},
 };
 
