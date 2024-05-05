@@ -30,7 +30,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
 	if (to.meta.requireAuth) {
 		const user = STORAGE.getUser();
-		if (user && user.username && user.token) {
+		if (user && user.username && user.token && !STORAGE.isTokenExpired()) {
 			next();
 		} else {
 			ElNotification({
