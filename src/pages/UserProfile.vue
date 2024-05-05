@@ -115,6 +115,7 @@ export default {
 			modifyUserInfo(this.form.username, this.form.email, this.form.selfImage).then((data) => {
 				if (data.code === 200) {
 					this.formOld = deepCopy(this.form);
+					STORAGE.setSelfImage(this.form.selfImage);
 					ElMessage({
 						showClose: true,
 						message: data.msg,
@@ -138,6 +139,7 @@ export default {
 						this.form.selfImage = SELF_IMAGE.defaultModelName;
 						this.formOld.selfImage = SELF_IMAGE.defaultModelName;
 					}
+					STORAGE.setSelfImage(this.form.selfImage);
 					this.showModel();
 				}
 			}).catch((err) => {

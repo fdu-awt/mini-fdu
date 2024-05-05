@@ -1,3 +1,5 @@
+import STORAGE from "@/store";
+
 const SELF_IMAGE = {
 	defaultModelName: "荒泷一斗",
 	models: [
@@ -10,6 +12,12 @@ const SELF_IMAGE = {
 	validName(name) {
 		return !!this.models[name];
 	},
+	/**
+	 * 获取用户选择的模型名称
+	 * */
+	getModelName() {
+		return STORAGE.getSelfImage() || this.defaultModelName;
+	}
 };
 
 const PMX_IMAGE = {

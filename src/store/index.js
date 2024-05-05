@@ -43,7 +43,6 @@ const STORAGE = {
 	setSelfImage(selfImage) {
 		window.localStorage.setItem(SELF_IMAGE_KEY, selfImage);
 	}
-
 };
 
 // 实现二：使用sessionStorage
