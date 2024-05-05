@@ -80,6 +80,7 @@ const GLTF_IMAGE = {
 				idle: 'Idle',
 				running: "Running",
 				walking: 'Walking',
+				waving: 'Waving',
 			},
 			shouldAddTexture: (type) => {
 				return type === "SkinnedMesh";

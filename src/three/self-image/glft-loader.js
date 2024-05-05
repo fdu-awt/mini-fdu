@@ -90,7 +90,7 @@ export function loadWithModel(modelName, renderer_width, renderer_height) {
 			const model = gltf.scene.children[0];
 			const animations = gltf.animations;
 			const idleAnimation = animations.find((animation) => {
-				return animation.name === glbConfig.animations.running;
+				return animation.name === glbConfig.animations.waving;
 			}) || null; // 如果没有找到动画，则返回null
 			// 创建动画混合器和动作
 			mixer = new THREE.AnimationMixer(model);
