@@ -1,4 +1,4 @@
-import request from "@/api/index";
+import {userService as request} from "@/api/index";
 
 /**
  * 登陆<br/>
