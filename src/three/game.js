@@ -28,7 +28,7 @@ export class Game {
 		this.animations = {};
 
 		this.clock = new THREE.Clock();
-		this.playerController = new PlayerController();
+		this.playerController = null;
 
 		this.colliders = [];
 		this.remoteColliders = [];
@@ -130,26 +130,27 @@ export class Game {
 	}
 
 	createCameras() {
-		// 创建多个相机，且均作为player的子对象
+		// 创建多个相机
+		// 层级关系： player <-- cameraGroup <-- camera(多个)
+		this.cameraGroup = new THREE.Group();
 		const front = new THREE.Object3D();
 		front.position.set(112, 100, 600);
-		front.parent = this.player.object;
 		const back = new THREE.Object3D();
 		back.position.set(0, 300, -1050);
-		back.parent = this.player.object;
 		const chat = new THREE.Object3D();
 		chat.position.set(0, 200, -450);
-		chat.parent = this.player.object;
 		const wide = new THREE.Object3D();
 		wide.position.set(178, 139, 1665);
-		wide.parent = this.player.object;
 		const overhead = new THREE.Object3D();
 		overhead.position.set(0, 400, 0);
-		overhead.parent = this.player.object;
 		const collect = new THREE.Object3D();
 		collect.position.set(40, 82, 94);
-		collect.parent = this.player.object;
+		this.player.object.add(this.cameraGroup);
 		this.cameras = {front, back, wide, overhead, collect, chat};
+		// 将相机添加到相机组
+		for (let key in this.cameras) {
+			this.cameraGroup.add(this.cameras[key]);
+		}
 		this.activeCamera = this.cameras.back;
 	}
 
@@ -179,8 +180,9 @@ export class Game {
 			this.sun.position.copy(this.camera.position);
 			this.sun.position.y += 10;
 		}
-		this.playerController.update(dt);
-
+		if (this.playerController) {
+			this.playerController.update(dt);
+		}
 		if (this.player.mixer !== undefined
 			&& this.mode === this.modes.ACTIVE) {
 			this.player.mixer.update(dt);
@@ -316,12 +318,10 @@ class Player {
 			player.object.position.set(3122, 0, -173);
 			player.object.rotation.set(0, 2.6, 0);
 			player.object.add(object);
-
 			game.scene.add(player.object);
-			game.playerController.player = player.object;
-
 			if (player.local) {
 				game.createCameras();
+				game.playerController = new PlayerController(player.object, game.cameraGroup);
 				game.sun.target = game.player.object;
 				game.animations.Idle = object.animations[0];
 				// if (player.initSocket!==undefined) player.initSocket();
@@ -379,78 +379,78 @@ class PlayerLocal extends Player {
 		super(game, model);
 	}
 
-	move(dt){
+	move(dt) {
 		const pos = this.object.position.clone();
 		pos.y += 60;
 		let dir = new THREE.Vector3();
 		this.object.getWorldDirection(dir);
-		if (this.motion.forward<0) dir.negate();
+		if (this.motion.forward < 0) dir.negate();
 		let raycaster = new THREE.Raycaster(pos, dir);
 		let blocked = false;
 		const colliders = [...this.game.colliders, ...this.game.remoteColliders];
 
 		let intersect = raycaster.intersectObjects(colliders);
-		if (intersect.length>0){
-			if (intersect[0].distance<50) blocked = true;
+		if (intersect.length > 0) {
+			if (intersect[0].distance < 50) blocked = true;
 		}
 
-		if (!blocked){
-			if (this.motion.forward>0){
-				const speed = (this.action==='Running') ? 500 : 150;
-				this.object.translateZ(dt*speed);
-			}else{
-				this.object.translateZ(-dt*30);
+		if (!blocked) {
+			if (this.motion.forward > 0) {
+				const speed = (this.action === 'Running') ? 500 : 150;
+				this.object.translateZ(dt * speed);
+			} else {
+				this.object.translateZ(-dt * 30);
 			}
 		}
 
 		//cast left
-		dir.set(-1,0,0);
+		dir.set(-1, 0, 0);
 		dir.applyMatrix4(this.object.matrix);
 		dir.normalize();
 		raycaster = new THREE.Raycaster(pos, dir);
 
 		intersect = raycaster.intersectObjects(colliders);
-		if (intersect.length>0){
-			if (intersect[0].distance<50) this.object.translateX(100-intersect[0].distance);
+		if (intersect.length > 0) {
+			if (intersect[0].distance < 50) this.object.translateX(100 - intersect[0].distance);
 		}
 
 		//cast right
-		dir.set(1,0,0);
+		dir.set(1, 0, 0);
 		dir.applyMatrix4(this.object.matrix);
 		dir.normalize();
 		raycaster = new THREE.Raycaster(pos, dir);
 
 		intersect = raycaster.intersectObjects(colliders);
-		if (intersect.length>0){
-			if (intersect[0].distance<50) this.object.translateX(intersect[0].distance-100);
+		if (intersect.length > 0) {
+			if (intersect[0].distance < 50) this.object.translateX(intersect[0].distance - 100);
 		}
 
 		//cast down
-		dir.set(0,-1,0);
+		dir.set(0, -1, 0);
 		pos.y += 200;
 		raycaster = new THREE.Raycaster(pos, dir);
 		const gravity = 30;
 
 		intersect = raycaster.intersectObjects(colliders);
-		if (intersect.length>0){
+		if (intersect.length > 0) {
 			const targetY = pos.y - intersect[0].distance;
-			if (targetY > this.object.position.y){
+			if (targetY > this.object.position.y) {
 				//Going up
 				this.object.position.y = 0.8 * this.object.position.y + 0.2 * targetY;
 				this.velocityY = 0;
-			}else if (targetY < this.object.position.y){
+			} else if (targetY < this.object.position.y) {
 				//Falling
-				if (this.velocityY===undefined) this.velocityY = 0;
+				if (this.velocityY === undefined) this.velocityY = 0;
 				this.velocityY += dt * gravity;
 				this.object.position.y -= this.velocityY;
-				if (this.object.position.y < targetY){
+				if (this.object.position.y < targetY) {
 					this.velocityY = 0;
 					this.object.position.y = targetY;
 				}
 			}
 		}
 
-		this.object.rotateY(this.motion.turn*dt);
+		this.object.rotateY(this.motion.turn * dt);
 
 		// this.updateSocket();
 	}
