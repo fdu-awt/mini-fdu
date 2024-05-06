@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
 export default class PlayerController {
-	constructor(player, cameraGroup) {
+	constructor(player) {
 		// 按键是否按下
 		this.keyStates = {
 			W: false,
@@ -12,7 +12,8 @@ export default class PlayerController {
 
 		// 控制的玩家角色
 		this.player = player;
-		this.cameraGroup = cameraGroup;
+		this.cameraGroup = null;
+		this.cameras = {};
 
 		// 用三维向量表示玩家角色(人)运动漫游速度，初始速度设置为0
 		this.v = new THREE.Vector3(0, 0, 0);
@@ -26,11 +27,37 @@ export default class PlayerController {
 		// 旋转灵敏度
 		this.sensitivity = 600;
 		// 上下俯仰角度范围
-		this.angleMin = THREE.MathUtils.degToRad(-30);//角度转弧度
-		this.angleMax = THREE.MathUtils.degToRad(30);
+		this.angleMin = THREE.MathUtils.degToRad(-25);//角度转弧度
+		this.angleMax = THREE.MathUtils.degToRad(25);
 
+		this.createCameras();
 		this.addKeyListeners();
 		this.addMouseListeners();
+	}
+
+	createCameras() {
+		// 创建多个相机
+		// 层级关系： player <-- cameraGroup <-- camera(多个)
+		this.cameraGroup = new THREE.Group();
+		const front = new THREE.Object3D();
+		front.position.set(112, 100, 600);
+		const back = new THREE.Object3D();
+		back.position.set(0, 300, -1050);
+		const chat = new THREE.Object3D();
+		chat.position.set(0, 200, -450);
+		const wide = new THREE.Object3D();
+		wide.position.set(178, 139, 1665);
+		const overhead = new THREE.Object3D();
+		overhead.position.set(0, 400, 0);
+		const collect = new THREE.Object3D();
+		collect.position.set(40, 82, 94);
+		this.player.add(this.cameraGroup);
+		this.cameras = {front, back, wide, overhead, collect, chat};
+		// 将相机添加到相机组
+		for (let key in this.cameras) {
+			this.cameraGroup.add(this.cameras[key]);
+		}
+		this.cameras.active = this.cameras.back;
 	}
 
 	addKeyListeners() {

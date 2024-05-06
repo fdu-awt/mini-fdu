@@ -22,7 +22,6 @@ export class Game {
 		this.player = null;
 		this.cameras = [];
 		this.camera = null;
-		this.activeCamera = null;
 		this.renderer = null;
 		this.anims = ['Walking', 'Walking Backwards', 'Turn', 'Running', 'Pointing', 'Talking', 'Pointing Gesture'];
 		this.animations = {};
@@ -109,10 +108,6 @@ export class Game {
 		this.container.appendChild(this.renderer.domElement);
 	}
 
-	set activeCamera(object) {
-		this.cameras.active = object;
-	}
-
 	loadNextAnim(loader) {
 		const anim = this.anims.pop();
 		const game = this;
@@ -127,31 +122,6 @@ export class Game {
 				game.animate();
 			}
 		});
-	}
-
-	createCameras() {
-		// 创建多个相机
-		// 层级关系： player <-- cameraGroup <-- camera(多个)
-		this.cameraGroup = new THREE.Group();
-		const front = new THREE.Object3D();
-		front.position.set(112, 100, 600);
-		const back = new THREE.Object3D();
-		back.position.set(0, 300, -1050);
-		const chat = new THREE.Object3D();
-		chat.position.set(0, 200, -450);
-		const wide = new THREE.Object3D();
-		wide.position.set(178, 139, 1665);
-		const overhead = new THREE.Object3D();
-		overhead.position.set(0, 400, 0);
-		const collect = new THREE.Object3D();
-		collect.position.set(40, 82, 94);
-		this.player.object.add(this.cameraGroup);
-		this.cameras = {front, back, wide, overhead, collect, chat};
-		// 将相机添加到相机组
-		for (let key in this.cameras) {
-			this.cameraGroup.add(this.cameras[key]);
-		}
-		this.activeCamera = this.cameras.back;
 	}
 
 	animate() {
@@ -320,8 +290,8 @@ class Player {
 			player.object.add(object);
 			game.scene.add(player.object);
 			if (player.local) {
-				game.createCameras();
-				game.playerController = new PlayerController(player.object, game.cameraGroup);
+				game.playerController = new PlayerController(player.object);
+				game.cameras = game.playerController.cameras;
 				game.sun.target = game.player.object;
 				game.animations.Idle = object.animations[0];
 				// if (player.initSocket!==undefined) player.initSocket();
