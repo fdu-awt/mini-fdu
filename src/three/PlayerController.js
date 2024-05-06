@@ -12,6 +12,8 @@ export default class PlayerController {
 
 		// 控制的玩家角色
 		this.player = player;
+
+		this.camera = null;
 		this.cameraGroup = null;
 		this.cameras = {};
 
@@ -23,6 +25,9 @@ export default class PlayerController {
 		this.vMax = 1000;
 		//阻尼 当没有WASD加速的时候，角色慢慢减速停下来
 		this.damping = -0.04;
+
+		// 控制 第一、三人称
+		this.firstView = false;
 
 		// 旋转灵敏度
 		this.sensitivity = 600;
@@ -39,25 +44,38 @@ export default class PlayerController {
 		// 创建多个相机
 		// 层级关系： player <-- cameraGroup <-- camera(多个)
 		this.cameraGroup = new THREE.Group();
-		const front = new THREE.Object3D();
-		front.position.set(112, 100, 600);
-		const back = new THREE.Object3D();
-		back.position.set(0, 300, -1050);
-		const chat = new THREE.Object3D();
-		chat.position.set(0, 200, -450);
-		const wide = new THREE.Object3D();
-		wide.position.set(178, 139, 1665);
-		const overhead = new THREE.Object3D();
-		overhead.position.set(0, 400, 0);
-		const collect = new THREE.Object3D();
-		collect.position.set(40, 82, 94);
-		this.player.add(this.cameraGroup);
-		this.cameras = {front, back, wide, overhead, collect, chat};
+
+		this.firstViewCamera = new THREE.PerspectiveCamera(
+			45, window.innerWidth / window.innerHeight, 10, 200000
+		);
+		this.firstViewCamera.position.set(0, 300, 100);
+		this.firstViewCamera.lookAt(0, 300, 120);
+
+		this.thirdViewCamera = new THREE.PerspectiveCamera(
+			45, window.innerWidth / window.innerHeight, 10, 200000
+		);
+		this.thirdViewCamera.position.set(0, 300, -1050);
+		this.thirdViewCamera.lookAt(0,300,2);
+
+		this.cameras = {
+			firstViewCamera: this.firstViewCamera,
+			thirdViewCamera: this.thirdViewCamera
+		};
 		// 将相机添加到相机组
 		for (let key in this.cameras) {
 			this.cameraGroup.add(this.cameras[key]);
 		}
-		this.cameras.active = this.cameras.back;
+		this.activeCamera = this.firstView ? this.firstViewCamera : this.thirdViewCamera;
+		this.player.add(this.cameraGroup);
+	}
+
+	set activeCamera(camera) {
+		this.cameras.active = camera;
+		this.camera = camera;
+	}
+
+	get activeCamera() {
+		return this.cameras.active;
 	}
 
 	addKeyListeners() {
@@ -74,6 +92,10 @@ export default class PlayerController {
 				break;
 			case "d":
 				this.keyStates.D = true;
+				break;
+			case "v":
+				this.firstView = !this.firstView;
+				this.activeCamera = this.firstView ? this.firstViewCamera : this.thirdViewCamera;
 				break;
 			}
 		});

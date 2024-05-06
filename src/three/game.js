@@ -20,8 +20,6 @@ export class Game {
 		this.scene = null;
 		this.environment = new Town(this);
 		this.player = null;
-		this.cameras = [];
-		this.camera = null;
 		this.renderer = null;
 		this.anims = ['Walking', 'Walking Backwards', 'Turn', 'Running', 'Pointing', 'Talking', 'Pointing Gesture'];
 		this.animations = {};
@@ -61,7 +59,6 @@ export class Game {
 
 	init() {
 		this.mode = this.modes.INITIALISING;
-		this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 10, 200000);
 
 		this.scene = new THREE.Scene();
 		this.scene.background = new THREE.Color(0x00a0f0);
@@ -134,20 +131,8 @@ export class Game {
 			}
 		}
 		if (this.player.motion !== undefined) this.player.move(dt);
-		if (this.cameras !== undefined
-			&& this.cameras.active !== undefined
-			&& this.player.object !== undefined) {
-			// 使用线性插值 (lerp) 来平滑地将摄像机的位置移动到当前激活摄像机(this.cameras.active)的世界坐标位置。
-			// 第三个参数0.05表示插值的权重，控制平滑移动的速度，
-			// 数值越小移动越平滑但速度越慢，数值越大则速度越快但可能会显得突兀。
-			this.camera.position.lerp(this.cameras.active.getWorldPosition(new THREE.Vector3()), 0.05);
-			const pos = this.player.object.position.clone();
-			// 让摄像机的焦点在玩家对象的上方(俯视视角)
-			pos.y += 300;
-			this.camera.lookAt(pos);
-		}
 		if (this.sun !== undefined) {
-			this.sun.position.copy(this.camera.position);
+			this.sun.position.copy(this.playerController.activeCamera.position);
 			this.sun.position.y += 10;
 		}
 		if (this.playerController) {
@@ -157,7 +142,7 @@ export class Game {
 			&& this.mode === this.modes.ACTIVE) {
 			this.player.mixer.update(dt);
 		}
-		this.renderer.render(this.scene, this.camera);
+		this.renderer.render(this.scene, this.playerController.activeCamera);
 		requestAnimationFrame(this.animate.bind(this));
 	}
 
@@ -291,7 +276,6 @@ class Player {
 			game.scene.add(player.object);
 			if (player.local) {
 				game.playerController = new PlayerController(player.object);
-				game.cameras = game.playerController.cameras;
 				game.sun.target = game.player.object;
 				game.animations.Idle = object.animations[0];
 				// if (player.initSocket!==undefined) player.initSocket();
