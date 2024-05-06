@@ -66,7 +66,7 @@ export default class PlayerController {
 			this.cameraGroup.add(this.cameras[key]);
 		}
 		this.activeCamera = this.firstView ? this.firstViewCamera : this.thirdViewCamera;
-		this.player.add(this.cameraGroup);
+		this.player.object.add(this.cameraGroup);
 	}
 
 	set activeCamera(camera) {
@@ -98,6 +98,7 @@ export default class PlayerController {
 				this.activeCamera = this.firstView ? this.firstViewCamera : this.thirdViewCamera;
 				break;
 			}
+			this.playerControl((this.keyStates.W ? 1 : 0) - (this.keyStates.S ? 1 : 0), (this.keyStates.A ? 1 : 0) - (this.keyStates.D ? 1 : 0));
 		});
 		document.addEventListener('keyup', (e) => {
 			switch (e.key) {
@@ -114,6 +115,7 @@ export default class PlayerController {
 				this.keyStates.D = false;
 				break;
 			}
+			this.playerControl((this.keyStates.W ? 1 : 0) - (this.keyStates.S ? 1 : 0), (this.keyStates.A ? 1 : 0) - (this.keyStates.D ? 1 : 0));
 		});
 	}
 
@@ -126,7 +128,7 @@ export default class PlayerController {
 			// 进入指针模式后，才能根据鼠标位置控制人旋转
 			if (document.pointerLockElement === document.body) {
 				// 左右旋转
-				this.player.rotation.y -= event.movementX / this.sensitivity;
+				this.player.object.rotation.y -= event.movementX / this.sensitivity;
 				// 鼠标上下滑动，让相机视线上下转动
 				// 相机父对象cameraGroup绕着x轴旋转,camera跟着转动
 				this.cameraGroup.rotation.x += event.movementY / this.sensitivity;
@@ -142,10 +144,39 @@ export default class PlayerController {
 		});
 	}
 
+	playerControl(forward, turn) {
+		turn = -turn;
+
+		if (forward > 0.3) {
+			if (this.player.action !== 'Walking' && this.player.action !== 'Running') {
+				this.player.action = 'Walking';
+			}
+		} else if (forward < -0.3) {
+			if (this.player.action !== 'Walking Backwards') {
+				this.player.action = 'Walking Backwards';
+			}
+		} else {
+			forward = 0;
+			if (Math.abs(turn) > 0.1) {
+				if (this.player.action !== 'Turn') this.player.action = 'Turn';
+			} else if (this.player.action !== "Idle") {
+				this.player.action = 'Idle';
+			}
+		}
+
+		if (forward === 0 && turn === 0) {
+			delete this.player.motion;
+		} else {
+			this.player.motion = { forward, turn };
+		}
+
+		// this.player.updateSocket();
+	}
+
 	update(deltaTime) {
 		if (this.v.length() < this.vMax) { // 限制最高速度
 			const front = new THREE.Vector3();
-			this.player.getWorldDirection(front); // 获取玩家角色的前方向
+			this.player.object.getWorldDirection(front); // 获取玩家角色的前方向
 			const up = new THREE.Vector3(0, 1, 0);//y方向
 			const left = up.clone().cross(front);
 			if (this.keyStates.W) {
@@ -174,6 +205,6 @@ export default class PlayerController {
 		// 在间隔deltaTime时间内，玩家角色位移变化计算(速度*时间)
 		// 当v为0，位置更新不会变化
 		const deltaPos = this.v.clone().multiplyScalar(deltaTime);
-		this.player.position.add(deltaPos);//更新玩家角色的位置
+		this.player.object.position.add(deltaPos);//更新玩家角色的位置
 	}
 }

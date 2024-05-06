@@ -136,7 +136,7 @@ export class Game {
 			this.sun.position.y += 10;
 		}
 		if (this.playerController) {
-			this.playerController.update(dt);
+			// this.playerController.update(dt);
 		}
 		if (this.player.mixer !== undefined
 			&& this.mode === this.modes.ACTIVE) {
@@ -275,7 +275,7 @@ class Player {
 			player.object.add(object);
 			game.scene.add(player.object);
 			if (player.local) {
-				game.playerController = new PlayerController(player.object);
+				game.playerController = new PlayerController(player);
 				game.sun.target = game.player.object;
 				game.animations.Idle = object.animations[0];
 				// if (player.initSocket!==undefined) player.initSocket();
@@ -292,6 +292,7 @@ class Player {
 				// const players = game.initialisingPlayers.splice(game.initialisingPlayers.indexOf(this), 1);
 				// game.remotePlayers.push(players[0]);
 			}
+			if (game.animations.Idle !== undefined) player.action = "Idle";
 		});
 	}
 
