@@ -98,7 +98,7 @@ export default class PlayerController {
 				this.activeCamera = this.firstView ? this.firstViewCamera : this.thirdViewCamera;
 				break;
 			}
-			this.playerControl((this.keyStates.W ? 1 : 0) - (this.keyStates.S ? 1 : 0), (this.keyStates.A ? 1 : 0) - (this.keyStates.D ? 1 : 0));
+			// this.playerControl((this.keyStates.W ? 1 : 0) - (this.keyStates.S ? 1 : 0), (this.keyStates.A ? 1 : 0) - (this.keyStates.D ? 1 : 0));
 		});
 		document.addEventListener('keyup', (e) => {
 			switch (e.key) {
@@ -115,7 +115,7 @@ export default class PlayerController {
 				this.keyStates.D = false;
 				break;
 			}
-			this.playerControl((this.keyStates.W ? 1 : 0) - (this.keyStates.S ? 1 : 0), (this.keyStates.A ? 1 : 0) - (this.keyStates.D ? 1 : 0));
+			// this.playerControl((this.keyStates.W ? 1 : 0) - (this.keyStates.S ? 1 : 0), (this.keyStates.A ? 1 : 0) - (this.keyStates.D ? 1 : 0));
 		});
 	}
 
@@ -201,6 +201,14 @@ export default class PlayerController {
 			// 多次循环乘以0.96(v*0.96*0.96*0.96...),v就会无限逼近于0。
 			// v*(1 + damping) = v + v * damping
 			this.v.addScaledVector(this.v, this.damping);//速度衰减
+		}
+		const vl = this.v.length();
+		if (vl < 20) {
+			this.player.action = "Idle";
+		} else if (vl <= 200) {
+			this.player.action = "Walking";
+		} else {
+			this.player.action = "Running";
 		}
 		// 在间隔deltaTime时间内，玩家角色位移变化计算(速度*时间)
 		// 当v为0，位置更新不会变化

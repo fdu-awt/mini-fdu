@@ -123,27 +123,19 @@ export class Game {
 
 	animate() {
 		const dt = this.clock.getDelta();
-		if (this.player.action === 'Walking') {
-			const elapsedTime = Date.now() - this.player.actionTime;
-			if (elapsedTime > 1000
-				&& this.player.motion.forward > 0) {
-				this.player.action = 'Running';
-			}
+		requestAnimationFrame(this.animate.bind(this));
+		if (this.player.mixer !== undefined
+			&& this.mode === this.modes.ACTIVE) {
+			this.player.mixer.update(dt);
 		}
-		if (this.player.motion !== undefined) this.player.move(dt);
 		if (this.sun !== undefined) {
 			this.sun.position.copy(this.playerController.activeCamera.position);
 			this.sun.position.y += 10;
 		}
 		if (this.playerController) {
-			// this.playerController.update(dt);
-		}
-		if (this.player.mixer !== undefined
-			&& this.mode === this.modes.ACTIVE) {
-			this.player.mixer.update(dt);
+			this.playerController.update(dt);
 		}
 		this.renderer.render(this.scene, this.playerController.activeCamera);
-		requestAnimationFrame(this.animate.bind(this));
 	}
 
 	/**
@@ -297,7 +289,6 @@ class Player {
 	}
 
 	set action(name) {
-		//Make a copy of the clip if this is a remote player
 		if (name === "Init") {
 			this.actionName = name;
 			return;
@@ -319,7 +310,6 @@ class Player {
 		action.time = 0;
 		this.mixer.stopAllAction();
 		this.actionName = name;
-		this.actionTime = Date.now();
 		action.fadeIn(0.5);
 		action.play();
 	}
