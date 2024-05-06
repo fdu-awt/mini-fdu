@@ -1,7 +1,7 @@
 import SELF_IMAGE, {FBX_IMAGE} from "@/three/self-image/self-image";
 import * as THREE from 'three';
 import {FBXLoader, OrbitControls} from "three/addons";
-import PlayerController from "@/three/playerController";
+import PlayerController from "@/three/PlayerController";
 import {Preloader} from "@/utils/preloader";
 
 export class Game {
