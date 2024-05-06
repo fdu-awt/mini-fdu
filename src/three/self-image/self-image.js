@@ -1,16 +1,9 @@
 import STORAGE from "@/store";
 
 const SELF_IMAGE = {
-	defaultModelName: "荒泷一斗",
-	models: [
-		'云堇',
-		'多莉',
-		'荒泷一斗',
-		'那维莱特',
-		'芭芭拉',
-	],
+	defaultModelName: "FireFighter",
 	validName(name) {
-		return !!this.models[name];
+		return !!FBX_IMAGE.PEOPLE[name];
 	},
 	/**
 	 * 获取用户选择的模型名称
@@ -100,5 +93,27 @@ const GLTF_IMAGE = {
 	}
 };
 
-export {PMX_IMAGE, GLTF_IMAGE};
+const FBX_IMAGE = {
+	SCENE_PATH: "fbx/town.fbx",
+	CUBE_TEXTURE_PATH: "/images/",
+	ANIMATION_PATH_PREFIX: "/fbx/anims/",
+	MODEL_PATH_PREFIX: "/fbx/people",
+	TEXTURE_PATH_PREFIX: "/images/SimplePeople_",
+	PEOPLE: ['BeachBabe', 'BusinessMan', 'Doctor', 'FireFighter', 'Housewife', 'Policeman', 'Prostitute', 'Punk', 'RiotCop', 'Roadworker', 'Robber', 'Sheriff', 'Streetman', 'Waitress'],
+	COLOURS: ['Black', 'Brown', 'White'],
+	randomColour() {
+		return this.COLOURS[Math.floor(Math.random() * this.COLOURS.length)];
+	},
+	getModelPathByName(name) {
+		return `${this.MODEL_PATH_PREFIX}/${name}.fbx`;
+	},
+	getTexturePath(model, colour) {
+		return `${this.TEXTURE_PATH_PREFIX}${model}_${colour}.png`;
+	},
+	getAnimPath(anim) {
+		return `${this.ANIMATION_PATH_PREFIX}${anim}.fbx`;
+	},
+};
+
+export {PMX_IMAGE, GLTF_IMAGE, FBX_IMAGE};
 export default SELF_IMAGE;
