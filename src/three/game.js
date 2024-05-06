@@ -155,11 +155,6 @@ export class Game {
 
 	animate() {
 		const dt = this.clock.getDelta();
-		requestAnimationFrame(this.animate.bind(this));
-		if (this.player.mixer !== undefined
-			&& this.mode === this.modes.ACTIVE) {
-			this.player.mixer.update(dt);
-		}
 		if (this.player.action === 'Walking') {
 			const elapsedTime = Date.now() - this.player.actionTime;
 			if (elapsedTime > 1000
@@ -185,7 +180,13 @@ export class Game {
 			this.sun.position.y += 10;
 		}
 		this.playerController.update(dt);
+
+		if (this.player.mixer !== undefined
+			&& this.mode === this.modes.ACTIVE) {
+			this.player.mixer.update(dt);
+		}
 		this.renderer.render(this.scene, this.camera);
+		requestAnimationFrame(this.animate.bind(this));
 	}
 
 	/**
