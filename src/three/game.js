@@ -1,6 +1,6 @@
 import SELF_IMAGE, {FBX_IMAGE} from "@/three/self-image/self-image";
 import * as THREE from 'three';
-import {FBXLoader, OrbitControls} from "three/addons";
+import {FBXLoader} from "three/addons";
 import PlayerController from "@/three/PlayerController";
 import {Preloader} from "@/utils/preloader";
 
@@ -118,53 +118,6 @@ export class Game {
 			this.playerController.update(dt);
 		}
 		this.renderer.render(this.scene, this.playerController.activeCamera);
-	}
-
-	/**
-	 * @description 初始化Three.js
-	 * @param {HTMLCanvasElement} canvas 画布
-	 * */
-	static initializeThreeScene(canvas) {
-		// 创建场景
-		const scene = new THREE.Scene();
-		scene.background = new THREE.Color('#eee');
-
-		// 创建渲染器
-		const renderer = new THREE.WebGLRenderer({
-			canvas,
-			antialias: true // 抗锯齿
-		});
-		renderer.shadowMap.enabled = true;
-
-		// 创建相机
-		const camera = new THREE.PerspectiveCamera(
-			70, // FOV 视场角
-			window.innerWidth / window.innerHeight, // 纵横比（aspect）
-			0.1, // near 和 far 近剪裁面和远剪裁面定义了可视范围的深度
-			1000
-		);
-		camera.position.set(0, 1.6, -35);//玩家角色后面一点
-		camera.lookAt(0, 1.6, 0);//对着人身上某个点  视线大致沿着人的正前方
-
-		const controls = new OrbitControls(camera, renderer.domElement);
-		controls.enableDamping = true;
-
-		// 全局光源设置
-		// 创建半球光
-		const hemLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.9);
-		hemLight.position.set(0, 50, 0);
-		scene.add(hemLight);
-
-		// 创建定向光
-		const dirLight =
-			new THREE.DirectionalLight(0xffffff, 2.4);
-		// 设置光源位置
-		dirLight.position.set(0, 20, 20);
-		// 启用阴影
-		dirLight.castShadow = true;
-		dirLight.shadow.mapSize = new THREE.Vector2(1024, 1024);
-		scene.add(dirLight);
-		return {scene, renderer, camera, controls, hemLight, dirLight};
 	}
 }
 
