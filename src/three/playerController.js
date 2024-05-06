@@ -94,17 +94,23 @@ export default class PlayerController {
 
 	update(deltaTime) {
 		if (this.v.length() < this.vMax) { // 限制最高速度
+			const front = new THREE.Vector3();
+			this.player.getWorldDirection(front); // 获取玩家角色的前方向
+			const up = new THREE.Vector3(0, 1, 0);//y方向
+			const left = up.clone().cross(front);
 			if (this.keyStates.W) {
 				// W键按下时候，速度随着时间增加
-				const front = new THREE.Vector3();
-				this.player.getWorldDirection(front); // 获取玩家角色的前方向
 				this.v.add(front.multiplyScalar(this.a * deltaTime));
 			}
 			if (this.keyStates.S) {
 				// S键按下时候，速度随着时间增加
-				const back = new THREE.Vector3();
-				this.player.getWorldDirection(back); // 获取玩家角色的后方向
-				this.v.add(back.multiplyScalar(- this.a * deltaTime));
+				this.v.add(front.multiplyScalar(- this.a * deltaTime));
+			}
+			if (this.keyStates.A) {
+				this.v.add(left.multiplyScalar(this.a * deltaTime));
+			}
+			if (this.keyStates.D) {
+				this.v.add(left.multiplyScalar(- this.a * deltaTime));
 			}
 		}
 		if (!this.keyStates.W && !this.keyStates.S && !this.keyStates.A && !this.keyStates.D) {
