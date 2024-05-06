@@ -9,11 +9,11 @@ export default class PlayerController {
 			S: false,
 			D: false,
 		};
-		// 鼠标左键是否按下
-		this.leftButtonBool = false;
+
 		// 控制的玩家角色
 		this.player = player;
 		this.cameraGroup = cameraGroup;
+
 		// 用三维向量表示玩家角色(人)运动漫游速度，初始速度设置为0
 		this.v = new THREE.Vector3(0, 0, 0);
 		//加速度：调节按键加速快慢
@@ -22,9 +22,12 @@ export default class PlayerController {
 		this.vMax = 1000;
 		//阻尼 当没有WASD加速的时候，角色慢慢减速停下来
 		this.damping = -0.04;
+
+		// 旋转灵敏度
+		this.sensitivity = 600;
 		// 上下俯仰角度范围
-		this.angleMin = THREE.MathUtils.degToRad(-15);//角度转弧度
-		this.angleMax = THREE.MathUtils.degToRad(15);
+		this.angleMin = THREE.MathUtils.degToRad(-30);//角度转弧度
+		this.angleMax = THREE.MathUtils.degToRad(30);
 
 		this.addKeyListeners();
 		this.addMouseListeners();
@@ -67,19 +70,17 @@ export default class PlayerController {
 
 	addMouseListeners() {
 		document.addEventListener('mousedown', () => {
-			this.leftButtonBool = true;
-		});
-		document.addEventListener('mouseup', () => {
-			this.leftButtonBool = false;
+			document.body.requestPointerLock();//body页面指针锁定
+			// document.exitPointerLock();//退出指针锁定
 		});
 		document.addEventListener('mousemove', (event) => {
-			//鼠标左键按下时候，才旋转玩家角色
-			if (this.leftButtonBool) {
+			// 进入指针模式后，才能根据鼠标位置控制人旋转
+			if (document.pointerLockElement === document.body) {
 				// 左右旋转
-				this.player.rotation.y -= event.movementX / 600;
+				this.player.rotation.y -= event.movementX / this.sensitivity;
 				// 鼠标上下滑动，让相机视线上下转动
 				// 相机父对象cameraGroup绕着x轴旋转,camera跟着转动
-				this.cameraGroup.rotation.x += event.movementY / 600;
+				this.cameraGroup.rotation.x += event.movementY / this.sensitivity;
 				// 如果 .rotation.x 小于angleMin，就设置为angleMin
 				if (this.cameraGroup.rotation.x < this.angleMin) {
 					this.cameraGroup.rotation.x = this.angleMin;
