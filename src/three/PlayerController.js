@@ -144,6 +144,7 @@ export default class PlayerController {
 		});
 	}
 
+	// TODO 弃用
 	playerControl(forward, turn) {
 		turn = -turn;
 

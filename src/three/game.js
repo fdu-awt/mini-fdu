@@ -21,8 +21,6 @@ export class Game {
 		this.environment = new Town(this);
 		this.player = null;
 		this.renderer = null;
-		this.anims = ['Walking', 'Walking Backwards', 'Turn', 'Running', 'Pointing', 'Talking', 'Pointing Gesture'];
-		this.animations = {};
 
 		this.clock = new THREE.Clock();
 		this.playerController = null;
@@ -48,7 +46,7 @@ export class Game {
 				game.init();
 			}
 		};
-		this.anims.forEach((anim) => {
+		Player.anims.forEach((anim) => {
 			options.assets.push(FBX_IMAGE.getAnimPath(anim));
 		});
 		options.assets.push(FBX_IMAGE.SCENE_PATH);
@@ -103,22 +101,6 @@ export class Game {
 		this.renderer.setSize(window.innerWidth, window.innerHeight);
 		this.renderer.shadowMap.enabled = true;
 		this.container.appendChild(this.renderer.domElement);
-	}
-
-	loadNextAnim(loader) {
-		const anim = this.anims.pop();
-		const game = this;
-		loader.load(FBX_IMAGE.getAnimPath(anim), function (object) {
-			game.player.animations[anim] = object.animations[0];
-			if (game.anims.length > 0) {
-				game.loadNextAnim(loader);
-			} else {
-				delete game.anims;
-				game.action = "Idle";
-				game.mode = game.modes.ACTIVE;
-				game.animate();
-			}
-		});
 	}
 
 	animate() {
@@ -223,17 +205,46 @@ class Town extends Environment {
 				'py.jpg', 'ny.jpg',
 				'pz.jpg', 'nz.jpg'
 			]);
-			game.loadNextAnim(loader);
 		});
 	}
 }
 
 class Player {
+	static anims = ['Walking', 'Walking Backwards', 'Turn', 'Running', 'Pointing', 'Talking', 'Pointing Gesture'];
+	static modes = Object.freeze({
+		INIT: Symbol("init"),
+		CHANGING: Symbol("changing"),
+		ACTIVE: Symbol("active"),
+	});
 	constructor(game) {
+		this.mode = Player.modes.INIT;
 		this.local = true;
 		this.game = game;
-		this.animations = this.game.animations;
+
+		this.mixer = null;
+		this.actionObjs = {};
+		this.activeAction = null;
+		this.activateActionName = null;
+
 		this.loadModel(SELF_IMAGE.getModelName());
+	}
+
+	loadAnimations(loader) {
+		const player = this;
+		const game = this.game;
+		Player.anims.forEach((anim) => {
+			loader.load(FBX_IMAGE.getAnimPath(anim), function (object) {
+				const clip = object.animations[0];
+				// clip生成action
+				const action = player.mixer.clipAction(clip);
+				action.name = anim;
+				action.weight = 0.0;
+				player.actionObjs[anim] = action;
+				action.play();
+			});
+		});
+		game.mode = game.modes.ACTIVE;
+		game.animate();
 	}
 
 	loadModel(modelName) {
@@ -269,53 +280,47 @@ class Player {
 			if (player.local) {
 				game.playerController = new PlayerController(player);
 				game.sun.target = game.player.object;
-				game.animations.Idle = object.animations[0];
-				// if (player.initSocket!==undefined) player.initSocket();
+				const clip = object.animations[0];
+				const action = player.mixer.clipAction(clip);
+				action.name = "Idle";
+				action.weight = 1.0;
+				player.actionObjs.Idle = action;
+				player.activeAction = action;
+				action.play();
 			} else {
-				// const geometry = new THREE.BoxGeometry(100,300,100);
-				// const material = new THREE.MeshBasicMaterial({visible:false});
-				// const box = new THREE.Mesh(geometry, material);
-				// box.name = "Collider";
-				// box.position.set(0, 150, 0);
-				// player.object.add(box);
-				// player.collider = box;
-				// player.object.userData.id = player.id;
-				// player.object.userData.remotePlayer = true;
-				// const players = game.initialisingPlayers.splice(game.initialisingPlayers.indexOf(this), 1);
-				// game.remotePlayers.push(players[0]);
+				// TODO 远程 player
 			}
-			if (game.animations.Idle !== undefined) player.action = "Idle";
+			player.loadAnimations(loader);
+			player.mode = Player.modes.ACTIVE;
+			player.action = "Idle";
 		});
 	}
 
 	set action(name) {
-		if (name === "Init") {
-			this.actionName = name;
+		if (this.mode === Player.modes.INIT || this.mode === Player.modes.CHANGING) {
 			return;
 		}
-		if (this.actionName === name) return;
-		console.log(`Player.action: ${name}`);
-		const clip = (this.local) ? this.animations[name] : THREE.AnimationClip.parse(THREE.AnimationClip.toJSON(this.animations[name]));
-		const action = this.mixer.clipAction(clip);
-		// 一次性动画
-		if (name === 'Pointing Gesture' || name === 'Pointing') {
-			// 设置动画为只播放一次
-			action.setLoop(THREE.LoopOnce);
-			// 动画播放完成后，将动作设置为Idle
-			this.mixer.addEventListener('finished', function () {
-				this.action = 'Idle';
-				// this.updateSocket(); // 发送动作到服务器
-			}.bind(this));
+		if (this.activateActionName === name) {
+			return;
 		}
-		action.time = 0;
-		this.mixer.stopAllAction();
-		this.actionName = name;
-		action.fadeIn(0.5);
-		action.play();
+		this.activeAction.weight = 0.0;
+		this.activeAction = this.actionObjs[name];
+		this.activeAction.weight = 1.0;
+		this.activateActionName = name;
+		// 一次性动画
+		// if (name === 'Pointing Gesture' || name === 'Pointing') {
+		// 	// 设置动画为只播放一次
+		// 	action.setLoop(THREE.LoopOnce);
+		// 	// 动画播放完成后，将动作设置为Idle
+		// 	this.mixer.addEventListener('finished', function () {
+		// 		this.action = 'Idle';
+		// 		// this.updateSocket(); // 发送动作到服务器
+		// 	}.bind(this));
+		// }
 	}
 
 	get action() {
-		return this.actionName;
+		return this.activateActionName;
 	}
 }
 
