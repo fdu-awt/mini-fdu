@@ -13,11 +13,14 @@ export default class PlayerController {
 		this.leftButtonBool = false;
 		// 控制的玩家角色
 		this.player = null;
-		// 用三维向量表示玩家角色(人)运动漫游速度
-		this.v = new THREE.Vector3(0, 0, 100); //初始速度设置为0
-		this.a = 20; //加速度：调节按键加速快慢
-		this.vMax = 100; //速度上限
-		this.damping = -0.04; //阻尼 当没有WASD加速的时候，人、车等玩家角色慢慢减速停下来
+		// 用三维向量表示玩家角色(人)运动漫游速度，初始速度设置为0
+		this.v = new THREE.Vector3(0, 0, 0);
+		//加速度：调节按键加速快慢
+		this.a = 12;
+		//速度上限
+		this.vMax = 100;
+		//阻尼 当没有WASD加速的时候，角色慢慢减速停下来
+		this.damping = -0.04;
 
 		this.addKeyListeners();
 		this.addMouseListeners();

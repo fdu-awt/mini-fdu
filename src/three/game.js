@@ -184,8 +184,8 @@ export class Game {
 			this.sun.position.copy(this.camera.position);
 			this.sun.position.y += 10;
 		}
-		this.renderer.render(this.scene, this.camera);
 		this.playerController.update(dt);
+		this.renderer.render(this.scene, this.camera);
 	}
 
 	/**
