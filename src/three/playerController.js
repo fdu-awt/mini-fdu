@@ -2,13 +2,16 @@ import * as THREE from "three";
 
 export default class PlayerController {
 	constructor() {
-		// 案件是否按下
+		// 按键是否按下
 		this.keyStates = {
 			W: false,
 			A: false,
 			S: false,
 			D: false,
 		};
+		// 鼠标左键是否按下
+		this.leftButtonBool = false;
+		// 控制的玩家角色
 		this.player = null;
 		// 用三维向量表示玩家角色(人)运动漫游速度
 		this.v = new THREE.Vector3(0, 0, 100); //初始速度设置为0
@@ -16,6 +19,11 @@ export default class PlayerController {
 		this.vMax = 100; //速度上限
 		this.damping = -0.04; //阻尼 当没有WASD加速的时候，人、车等玩家角色慢慢减速停下来
 
+		this.addKeyListeners();
+		this.addMouseListeners();
+	}
+
+	addKeyListeners() {
 		document.addEventListener('keydown', (e) => {
 			switch (e.key) {
 			case "w":
@@ -48,8 +56,9 @@ export default class PlayerController {
 				break;
 			}
 		});
-		// 鼠标左键是否按下
-		this.leftButtonBool = false;
+	}
+
+	addMouseListeners() {
 		document.addEventListener('mousedown', () => {
 			this.leftButtonBool = true;
 		});
@@ -58,7 +67,7 @@ export default class PlayerController {
 		});
 		document.addEventListener('mousemove', (event) => {
 			//鼠标左键按下时候，才旋转玩家角色
-			if(this.leftButtonBool){
+			if (this.leftButtonBool) {
 				this.player.rotation.y -= event.movementX / 600;
 			}
 		});
@@ -69,7 +78,7 @@ export default class PlayerController {
 			// W键按下时候，速度随着时间增加
 			if (this.v.length() < this.vMax) { // 限制最高速度
 				//先假设W键对应运动方向为z
-				const front = new THREE.Vector3(0,0,1);
+				const front = new THREE.Vector3(0, 0, 1);
 				this.player.getWorldDirection(front); // 获取玩家角色的前方向
 				this.v.add(front.multiplyScalar(this.a * deltaTime));
 			}
@@ -77,7 +86,7 @@ export default class PlayerController {
 		if (this.keyStates.S) {
 			// S键按下时候，速度随着时间增加
 			if (this.v.length() < this.vMax) { // 限制最高速度
-				const back = new THREE.Vector3(0,0,-1);
+				const back = new THREE.Vector3(0, 0, -1);
 				this.player.getWorldDirection(back); // 获取玩家角色的后方向
 				this.v.add(back.multiplyScalar(this.a * deltaTime));
 			}
