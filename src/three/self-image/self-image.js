@@ -10,6 +10,12 @@ const SELF_IMAGE = {
 	 * */
 	getModelName() {
 		return STORAGE.getSelfImage() || this.defaultModelName;
+	},
+	/**
+	 * @description 获取可供选择的模型名称
+	 * */
+	getModelChoices() {
+		return FBX_IMAGE.PEOPLE;
 	}
 };
 

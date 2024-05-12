@@ -70,10 +70,10 @@ export default {
 	},
 	methods: {
 		selfImageChoices() {
-			if (this.choices.length > 0) {
+			if (this.choices) {
 				return this.choices;
 			} else  {
-				this.choices = SELF_IMAGE.models;
+				this.choices = SELF_IMAGE.getModelChoices;
 				return this.choices;
 			}
 		},
