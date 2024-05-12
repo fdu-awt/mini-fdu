@@ -59,9 +59,9 @@ export function responseFulfilled(res) {
 	} else {
 		// code = 200 时
 		if (res.data.uxApi) {
-			if (res.data.success) {
+			if (res.data.success) { // 业务成功
 				return res.data;
-			} else {
+			} else { // 业务失败
 				apiEmitter.emit(API_EVENTS.OTHER_ERROR, msg);
 				return Promise.reject(res);
 			}

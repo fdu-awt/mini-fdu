@@ -49,6 +49,7 @@ services.forEach(service => {
 });
 
 // 请求错误的全局事件处理器
+// 在这里处理，可以只注册一遍
 apiEmitter.on(API_EVENTS.INTERNAL_ERROR, (msg) => {
 	console.error("请求错误的全局事件处理器，INTERNAL_ERROR：", msg);
 	ElMessage({
@@ -58,7 +59,7 @@ apiEmitter.on(API_EVENTS.INTERNAL_ERROR, (msg) => {
 	});
 });
 apiEmitter.on(API_EVENTS.OTHER_ERROR, (msg) => {
-	console.error("请求错误的全局事件处理器，OTHER_ERROR：", msg);
+	console.warn("请求错误的全局事件处理器，OTHER_ERROR：", msg);
 	ElNotification({
 		title: msg,
 		type: 'error',
