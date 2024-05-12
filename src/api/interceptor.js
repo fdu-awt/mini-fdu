@@ -1,6 +1,7 @@
 import STORAGE from "@/store";
 import router from "@/router";
 import { ElMessage, ElMessageBox, ElNotification } from 'element-plus';
+import apiEmitter, {API_EVENTS} from "@/event/ApiEventEmitter";
 
 const EXPIRED_MESSAGE = "登录状态已过期";
 
@@ -54,17 +55,8 @@ export function responseFulfilled(res) {
 	const msg = res.data.msg;
 	if (code === 401) {
 		// 未授权
-		ElMessageBox.alert('您需要登录以访问这个页面。', '未授权访问', {
-			confirmButtonText: '前往登录',
-			type: 'warning'
-		}).then(() => {
-			STORAGE.logOut();
-			router.push({
-				path: '/login',
-				query: { redirect: router.currentRoute.value.fullPath }
-			}).then();
-		});
-		return Promise.reject(new Error(msg));
+		apiEmitter.emit(API_EVENTS.UN_AUTH, msg);
+		return Promise.reject(new Error("未授权: " + msg));
 	} else if (code === 500) {
 		// 服务器内部错误
 		ElMessage({
@@ -100,7 +92,6 @@ export function responseFulfilled(res) {
 }
 
 export function responseRejected(error) {
-	console.error("err: " + error);
 	let { message } = error;
 	if (message.includes("Network Error")) {
 		message = "后端连接异常";
