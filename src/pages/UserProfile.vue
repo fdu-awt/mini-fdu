@@ -31,7 +31,7 @@ export default {
 	data() {
 		return {
 			buttonMsg: "选择虚拟形象",
-			choices: [],
+			choices: SELF_IMAGE.getModelChoices(),
 			form: {
 				username: "",
 				email: "",
@@ -69,14 +69,6 @@ export default {
 		this.getUserInfo();
 	},
 	methods: {
-		selfImageChoices() {
-			if (this.choices) {
-				return this.choices;
-			} else  {
-				this.choices = SELF_IMAGE.getModelChoices;
-				return this.choices;
-			}
-		},
 		handleSubmit () {
 			const username_check = CHECK.checkUsername(this.form.username);
 			if (!username_check.pass) {
@@ -97,6 +89,7 @@ export default {
 				return;
 			}
 			if (!SELF_IMAGE.validName(this.form.selfImage)) {
+				console.warn("选择了错误的虚拟形象", this.form.selfImage);
 				ElMessage({
 					showClose: true,
 					message: "请选择正确的虚拟形象",
@@ -140,7 +133,8 @@ export default {
 						this.formOld.selfImage = SELF_IMAGE.defaultModelName;
 					}
 					STORAGE.setSelfImage(this.form.selfImage);
-					this.showModel();
+					// TODO 使用showModel
+					this.showModelEmpty();
 				}
 			}).catch((err) => {
 				console.error(err);
@@ -155,7 +149,10 @@ export default {
 				this.shouldInitializeModel = false;
 				initializeScene(canvas, width, height);
 			}
+			// TODO 使用整理的模型加载函数
 			loadWithModel(this.form.selfImage, width, height);
+		},
+		showModelEmpty() {
 		},
 		showPasswordModifyDialogForm() {
 			this.passwordModifyDialogVisible = true;
@@ -219,11 +216,11 @@ export default {
 					<el-form-item label="虚拟形象">
 						<el-select
 								v-model="form.selfImage"
-								@change="showModel"
+								@change="showModelEmpty"
 								filterable
 								placeholder="请选择虚拟形象">
 							<el-option
-									v-for="item in selfImageChoices()"
+									v-for="item in choices"
 									:key="item"
 									:label="item"
 									:value="item">

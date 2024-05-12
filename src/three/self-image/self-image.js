@@ -3,7 +3,7 @@ import STORAGE from "@/store";
 const SELF_IMAGE = {
 	defaultModelName: "FireFighter",
 	validName(name) {
-		return !!FBX_IMAGE.PEOPLE[name];
+		return FBX_IMAGE.PEOPLE.includes(name);
 	},
 	/**
 	 * 获取用户选择的模型名称
