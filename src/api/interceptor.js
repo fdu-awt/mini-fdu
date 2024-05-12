@@ -1,22 +1,13 @@
 import STORAGE from "@/store";
-import router from "@/router";
-import { ElMessage, ElMessageBox, ElNotification } from 'element-plus';
 import apiEmitter, {API_EVENTS} from "@/event/ApiEventEmitter";
-
-const EXPIRED_MESSAGE = "登录状态已过期";
 
 export function requestFulfilled(config) {
 	// 是否需要设置 token
 	const token = STORAGE.getToken();
 	const isToken = (config.headers || {}).isToken === false;
-	if (token && !isToken) {
-		// 判断token是否过期
-		const isTokenExpired = STORAGE.isTokenExpired();
-		if (isTokenExpired) {
-			return Promise.reject(new Error(EXPIRED_MESSAGE));
-		} else {
-			config.headers["Authorization"] = "Bearer " + token;
-		}
+	const isTokenExpired = STORAGE.isTokenExpired();
+	if (token && !isToken && !isTokenExpired) {
+		config.headers["Authorization"] = "Bearer " + token;
 	}
 	// get请求映射params参数
 	if (config.method === "get" && config.params) {
@@ -56,21 +47,14 @@ export function responseFulfilled(res) {
 	if (code === 401) {
 		// 未授权
 		apiEmitter.emit(API_EVENTS.UN_AUTH, msg);
-		return Promise.reject(new Error("未授权: " + msg));
+		return Promise.reject(new Error(msg));
 	} else if (code === 500) {
 		// 服务器内部错误
-		ElMessage({
-			showClose: true,
-			message: msg,
-			type: "error",
-		});
+		apiEmitter.emit(API_EVENTS.INTERNAL_ERROR, msg);
 		return Promise.reject(new Error(msg));
 	} else if (code !== 200) {
-		// 请求失败
-		ElNotification({
-			title: msg,
-			type: 'error',
-		});
+		// 请求失败 但未区分状态码
+		apiEmitter.emit(API_EVENTS.OTHER_ERROR, msg);
 		return Promise.reject(new Error(msg));
 	} else {
 		// code = 200 时
@@ -78,15 +62,11 @@ export function responseFulfilled(res) {
 			if (res.data.success) {
 				return res.data;
 			} else {
-				ElNotification({
-					title: msg,
-					type: 'error'
-				});
-				console.error(res);
+				apiEmitter.emit(API_EVENTS.OTHER_ERROR, msg);
 				return Promise.reject(res);
 			}
-		} else {
-			return res.data;
+		} else { // 非 uxApi，直接返回res
+			return res;
 		}
 	}
 }
@@ -101,22 +81,6 @@ export function responseRejected(error) {
 		message = "请求异常：" +
 			message.substr(message.length - 3);
 	}
-	if (message === EXPIRED_MESSAGE) {
-		ElMessageBox.alert('您的登录状态已过期，请重新登录。', '登录状态过期', {
-			confirmButtonText: '前往登录',
-			type: 'warning'
-		}).then(() => {
-			STORAGE.logOut();
-			router.push({
-				path: '/login',
-				query: { redirect: router.currentRoute.value.fullPath }
-			}).then();
-		});
-	} else {
-		ElNotification({
-			title: message,
-			type: 'error',
-		});
-	}
+	apiEmitter.emit(API_EVENTS.NETWORK_ERROR, message);
 	return Promise.reject(error);
 }
