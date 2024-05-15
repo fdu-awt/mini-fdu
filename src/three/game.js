@@ -1,4 +1,4 @@
-import SELF_IMAGE, {FBX_IMAGE} from "@/three/self-image/self-image";
+import {FBX_IMAGE} from "@/three/self-image/self-image";
 import * as THREE from 'three';
 import {FBXLoader} from "three/addons";
 import PlayerController from "@/three/PlayerController";
@@ -93,7 +93,7 @@ export class Game {
 		this.sun = light;
 		this.scene.add(light);
 
-		this.player = new PlayerLocal(this);
+		this.player = new PlayerLocal(this, STORAGE.getSelfImage(), STORAGE.getUserId());
 
 		this.environment.load();
 
@@ -172,17 +172,25 @@ class Player {
 		CHANGING: Symbol("changing"),
 		ACTIVE: Symbol("active"),
 	});
-	constructor(game) {
+	constructor(game, model, userId) {
 		this.mode = Player.modes.INIT;
-		this.local = true;
 		this.game = game;
+		this.model = model;
+		this.userId = userId;
+		this.local = true;
 
 		this.mixer = null;
 		this.actionObjs = {};
 		this.activeAction = null;
 		this.activateActionName = null;
 
-		this.loadModel(SELF_IMAGE.getModelName());
+		if (this.userId === undefined || this.userId === '') {
+			if (this.local) {
+				gameEventEmitter.emit(GAME_EVENTS.NO_LOCAL_USER_ID, "No user ID, maybe not logged in.");
+			}
+			return;
+		}
+		this.loadModel(this.model);
 	}
 
 	loadAnimations(loader) {
@@ -281,14 +289,12 @@ class Player {
 }
 
 class PlayerLocal extends Player {
-	constructor(game, model) {
-		super(game, model);
-		this.local = true;
-		this.userId = STORAGE.getUserId();
-		if (this.userId === undefined || this.userId === '') {
-			gameEventEmitter.emit(GAME_EVENTS.NO_LOCAL_USER_ID, "No user ID, maybe not logged in.");
-			return;
-		}
+	constructor(game, model, userId) {
+		super(game, model, userId);
+		this.initWebSocket();
+	}
+
+	initWebSocket(){
 		this.gameWebSocketService = new GameWebSocketService();
 		this.gameWebSocketService.connect(this.userId);
 	}

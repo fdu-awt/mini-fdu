@@ -2,6 +2,8 @@
 // 令牌将在浏览器会话之间持久保存，直到明确地清除它。
 // 这意味着用户刷新页面或关闭浏览器时，令牌仍然存在。
 
+import SELF_IMAGE from "@/three/self-image/self-image";
+
 const USER_KEY = 'user';
 const SELF_IMAGE_KEY = 'selfImage';
 
@@ -47,7 +49,12 @@ const STORAGE = {
 		window.localStorage.removeItem(SELF_IMAGE_KEY);
 	},
 	getSelfImage() {
-		return window.localStorage.getItem(SELF_IMAGE_KEY) || '';
+		let selfImage = window.localStorage.getItem(SELF_IMAGE_KEY);
+		if (!selfImage) {
+			selfImage = SELF_IMAGE.defaultModelName;
+			this.setSelfImage(selfImage);
+		}
+		return selfImage;
 	},
 	setSelfImage(selfImage) {
 		window.localStorage.setItem(SELF_IMAGE_KEY, selfImage);
