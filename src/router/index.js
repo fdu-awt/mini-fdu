@@ -5,6 +5,7 @@ import LogInPage from "@/pages/LogInPage.vue";
 import SignUpPage from "@/pages/SignUpPage.vue";
 import UserProfile from "@/pages/UserProfile.vue";
 import NotFoundPage from "@/pages/NotFoundPage.vue";
+import VideoChatDemo from "@/components/VideoChatDemo.vue";
 import STORAGE from "../store";
 import {ElMessageBox, ElNotification} from 'element-plus';
 import apiEmitter, {API_EVENTS} from "@/event/ApiEventEmitter";
@@ -18,6 +19,7 @@ const routes = [
 	{path: '/login', component: LogInPage, meta: {requireAuth: false}},
 	{path: '/signup', component: SignUpPage, meta: {requireAuth: false}},
 	{path: '/profile', component: UserProfile, meta: {requireAuth: true}},
+	{path: '/video', component: VideoChatDemo, meta: {requireAuth: false}},
 	// 捕获所有未处理的路径
 	{path: '/:pathMatch(.*)*', component: NotFoundPage, meta: {requireAuth: false}},
 ];
