@@ -25,6 +25,7 @@ export class Game {
 		this.player = null;
 		this.renderer = null;
 		this.remoteData = [];
+		this.initialisingPlayers = [];
 		this.remotePlayers = [];
 
 		this.clock = new THREE.Clock();
@@ -108,9 +109,109 @@ export class Game {
 		this.container.appendChild(this.renderer.domElement);
 	}
 
+	updateRemotePlayers(dt){
+		// 检查是否有远程数据、LocalPlayer 玩家对象以及 LocalPlayer 的 userId 是否存在。
+		// 如果没有，则直接返回，不做任何更新。
+		if (this.remoteData===undefined || this.remoteData.length === 0
+			|| this.player===undefined || this.player.userId===undefined){
+			return;
+		}
+		const game = this;
+		//Get all remotePlayers from remoteData array
+		// 用于存储更新后 的远程玩家
+		const remotePlayers = [];
+		// 用于存储更新后 远程玩家的碰撞体
+		const remoteColliders = [];
+
+		this.remoteData.forEach( function(data){
+			// 忽略本地玩家
+			if (game.player.userId === data.userId){
+				return;
+			}
+			// 查找当前远程玩家是否处于初始化中
+			let iPlayer;
+			game.initialisingPlayers.forEach( function(player){
+				if (player.userId === data.userId) iPlayer = player;
+			});
+			// 如果处于初始化中，则返回
+			if (iPlayer!==undefined) return;
+			// 查找当前远程玩家是否已经存在
+			let rPlayer;
+			game.remotePlayers.forEach( function(player){
+				if (player.userId === data.userId) rPlayer = player;
+			});
+			// 如果不存在，则初始化远程玩家
+			if (rPlayer===undefined){
+				console.log("远程玩家不存在，初始化远程玩家");
+				console.log(data);
+				game.initialisingPlayers.push( new Player(game, data.model, data.colour, data.userId, false));
+			} else {
+				// 远程玩家已经存在，则加入到 remotePlayers 数组中，之后进行更新
+				remotePlayers.push(rPlayer);
+				remoteColliders.push(rPlayer.collider);
+			}
+		});
+
+		// 清理不再存在的远程玩家
+		this.scene.children.forEach( function(object){
+			if (object.userData.remotePlayer &&
+				game.getRemotePlayerById(object.userData.userId) === undefined){
+				game.scene.remove(object);
+			}
+		});
+
+		// 使用上面筛选的远程玩家和碰撞体更新远程玩家和碰撞体数组
+		// 仅包含：已经存在、未处于初始化 的 远程玩家 与 其对应的碰撞体
+		this.remotePlayers = remotePlayers;
+		this.remoteColliders = remoteColliders;
+		// 更新每个远程玩家
+		this.remotePlayers.forEach(function(player){ player.update( dt ); });
+	}
+
+	getRemotePlayerById(id){
+		if (this.remotePlayers===undefined || this.remotePlayers.length===0) return;
+
+		const players = this.remotePlayers.filter(function(player){
+			if (player.userId === id) return true;
+		});
+
+		if (players.length===0) return;
+
+		return players[0];
+	}
+
+	removePlayer(player){
+		this.scene.remove(player.object);
+		this.remotePlayers.splice(this.remotePlayers.indexOf(player), 1);
+		this.remoteColliders.splice(this.remoteColliders.indexOf(player.collider), 1);
+	}
+
+	removePlayers(deletedPlayerUserId){
+		// 已经初始化的远程玩家
+		const players = this.remotePlayers.filter(function(player){
+			if (player.userId === deletedPlayerUserId) return true;
+		});
+		players.forEach((player) => {
+			this.scene.remove(player.object);
+			this.remotePlayers.splice(this.remotePlayers.indexOf(player), 1);
+			this.remoteColliders.splice(this.remoteColliders.indexOf(player.collider), 1);
+		});
+		// 处于初始化中的远程玩家
+		const iPlayers = this.initialisingPlayers.filter(function(player){
+			if (player.userId === deletedPlayerUserId) return true;
+		});
+		iPlayers.forEach((player) => {
+			this.scene.remove(player.object);
+			this.initialisingPlayers.splice(this.initialisingPlayers.indexOf(player), 1);
+		});
+	}
+
 	animate() {
 		const dt = this.clock.getDelta();
 		requestAnimationFrame(this.animate.bind(this));
+
+		this.updateRemotePlayers(dt);
+
 		if (this.player.mixer !== undefined
 			&& this.mode === this.modes.ACTIVE) {
 			this.player.mixer.update(dt);
@@ -174,25 +275,28 @@ class Player {
 		CHANGING: Symbol("changing"),
 		ACTIVE: Symbol("active"),
 	});
-	constructor(game, model, userId) {
+
+	constructor(game, model, colour, userId, local) {
 		this.mode = Player.modes.INIT;
 		this.game = game;
 		this.model = model;
+		this.colour = colour;
 		this.userId = userId;
-		this.local = true;
+		this.local = local;
 
 		this.mixer = null;
 		this.actionObjs = {};
 		this.activeAction = null;
 		this.activateActionName = null;
-
 		if (this.userId === undefined || this.userId === '') {
 			if (this.local) {
 				gameEventEmitter.emit(GAME_EVENTS.NO_LOCAL_USER_ID, "No user ID, maybe not logged in.");
+			} else {
+				console.error("No user ID for remote player");
 			}
 			return;
 		}
-		this.loadModel(this.model);
+		this.loadModel(this.model, this.colour);
 	}
 
 	loadAnimations(loader) {
@@ -213,7 +317,7 @@ class Player {
 		game.animate();
 	}
 
-	loadModel(modelName) {
+	loadModel(modelName, colour) {
 		const game = this.game;
 		const player = this;
 		// 加载新模型
@@ -231,7 +335,7 @@ class Player {
 				}
 			});
 			const textureLoader = new THREE.TextureLoader();
-			textureLoader.load(FBX_IMAGE.getTexturePath(modelName, FBX_IMAGE.randomColour()), function (texture) {
+			textureLoader.load(FBX_IMAGE.getTexturePath(modelName, colour), function (texture) {
 				object.traverse(function (child) {
 					if (child.isMesh) {
 						child.material.map = texture;
@@ -246,20 +350,40 @@ class Player {
 			if (player.local) {
 				game.playerController = new PlayerController(player, game.container);
 				game.sun.target = game.player.object;
-				const clip = object.animations[0];
-				const action = player.mixer.clipAction(clip);
-				action.name = "Idle";
-				action.weight = 1.0;
-				player.actionObjs.Idle = action;
-				player.activeAction = action;
-				action.play();
 			} else {
-				// TODO 远程 player
+				console.log("Load new remote player: " + player.userId);
+				const geometry = new THREE.BoxGeometry(100,300,100);
+				const material = new THREE.MeshBasicMaterial({visible:false});
+				const box = new THREE.Mesh(geometry, material);
+				box.name = "Collider";
+				box.position.set(0, 150, 0);
+				player.object.add(box);
+				player.collider = box;
+				player.object.userData.userId = player.userId;
+				player.object.userData.remotePlayer = true;
+				const players = game.initialisingPlayers.splice(game.initialisingPlayers.indexOf(this), 1);
+				game.remotePlayers.push(players[0]);
 			}
 			player.loadAnimations(loader);
 			player.mode = Player.modes.ACTIVE;
+			const clip = object.animations[0];
+			const action = player.mixer.clipAction(clip);
+			action.name = "Idle";
+			action.weight = 1.0;
+			player.actionObjs.Idle = action;
+			player.activeAction = action;
+			action.play();
 			player.action = "Idle";
 		});
+	}
+
+	changeModel(modelName, colour) {
+		// 移除旧模型
+		this.game.scene.remove(this.object);
+		this.loadModel(modelName, colour);
+		if (this.local) {
+			this.socketOnLocalUpdate();
+		}
 	}
 
 	set action(name) {
@@ -288,11 +412,40 @@ class Player {
 	get action() {
 		return this.activateActionName;
 	}
+
+	/**
+	 * 用于 remotePlayer
+	 * */
+	update(dt){
+		this.mixer.update(dt);
+		if (this.game.remoteData.length>0){
+			let found = false;
+			for(let data of this.game.remoteData){
+				if (data.userId !== this.userId) continue;
+				//Found the player
+				const model = data.model;
+				const colour = data.colour;
+				// console.log(`Player.update: ${model}, ${colour}`);
+				if (model !== this.model || colour !== this.colour){
+					// 如果模型或颜色发生变化，则更新模型
+					this.changeModel(model, colour);
+				} else {
+					// 否则更新位置和动作
+					this.object.position.set( data.x, data.y, data.z );
+					const euler = new THREE.Euler(data.pb, data.heading, data.pb);
+					this.object.quaternion.setFromEuler( euler );
+					this.action = data.action;
+				}
+				found = true;
+			}
+			if (!found) this.game.removePlayer(this);
+		}
+	}
 }
 
 class PlayerLocal extends Player {
 	constructor(game, model, userId) {
-		super(game, model, userId);
+		super(game, model, FBX_IMAGE.randomColour(), userId, true);
 		this.initWebSocket();
 	}
 
@@ -300,34 +453,12 @@ class PlayerLocal extends Player {
 		this.gameWebSocketService = new GameWebSocketService();
 		this.gameWebSocketService.connect(this.userId);
 		this.gameWebSocketService.onMessage(GAME_WS_MSG_TYPES.REMOTE_DATA, (message) => {
-			this.game.remoteDate = message.data;
+			this.game.remoteData = message.data;
 		});
 		this.gameWebSocketService.onMessage(GAME_WS_MSG_TYPES.REMOTE_PLAYER_DELETED, (message) => {
-			const deletedUserId = message.id;
-			// TODO
-			const players = this.game.remoteData.filter((player) => player.userId === deletedUserId);
-			console.log(players);
+			const deletedUserId = message.userId;
+			this.game.removePlayers(deletedUserId);
 		});
-		// 等待3秒后初始化本地玩家
-		setTimeout(() => {
-			this.socketOnLocalInit();
-		}, 600);
-	}
-
-	socketOnLocalInit(){
-		const data = {
-			userId: this.userId,
-			model: this.model,
-			colour:  this.colour,
-			x: this.object.position.x,
-			y: this.object.position.y,
-			z: this.object.position.z,
-			h: this.object.rotation.y,
-			pb: this.object.rotation.x,
-			action: this.action
-		};
-		console.log("localInit", data);
-		this.gameWebSocketService.gameEmit(GAME_WS_EMIT_EVENTS.LOCAL_INIT, data);
 	}
 
 	socketOnLocalUpdate(){

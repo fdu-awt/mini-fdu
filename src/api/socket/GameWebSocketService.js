@@ -12,8 +12,7 @@ const GAME_WS_MSG_TYPES = Object.freeze({
  * GameWebSocketService 中可以发送的事件常量
  * */
 const GAME_WS_EMIT_EVENTS = Object.freeze({
-	LOCAL_INIT: Symbol("init"),
-	LOCAL_UPDATE: Symbol("update"),
+	LOCAL_UPDATE: Symbol("local_update"),
 });
 
 /**
