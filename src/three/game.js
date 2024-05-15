@@ -432,7 +432,7 @@ class Player {
 				} else {
 					// 否则更新位置和动作
 					this.object.position.set( data.x, data.y, data.z );
-					const euler = new THREE.Euler(data.pb, data.heading, data.pb);
+					const euler = new THREE.Euler(data.pb, data.h, data.pb);
 					this.object.quaternion.setFromEuler( euler );
 					this.action = data.action;
 				}
