@@ -4,19 +4,6 @@ import store from "@/store";
 
 export default {
 	name: "VideoChatDemo",
-	data() {
-		return {
-			localStream: null,
-			remoteStream: null,
-			peerConnection: null,
-			iceServers: {
-				iceServers: [
-					{urls: "stun:stun.services.mozilla.com"},
-					{urls: "stun:stun.l.google.com:19302"},
-				],
-			},
-		};
-	},
 	mounted() {
 		this.init();
 	},

@@ -50,7 +50,8 @@ class VideoChat {
 				this.rtcPeerConnection.onicecandidate = this.handleIceCandidate;
 				this.rtcPeerConnection.ontrack = this.handleRemoteStream;
 
-				const url = `${this.signalingServerUrl}/${this.userId}`;
+				// const url = `${this.signalingServerUrl}/${this.userId}`;
+				const url = 'ws://localhost:3000';
 				this.ws = new WebSocket(url);
 
 				this.ws.addEventListener('open', () => {
@@ -59,7 +60,7 @@ class VideoChat {
 
 					this.rtcPeerConnection.createOffer()
 						.then(offer => {
-							this.rtcPeerConnection.setLocalDescription(offer);
+							this.rtcPeerConnection.setLocalDescription(offer).then();
 							// 发送 offer 给信令服务器
 							this.ws.send(JSON.stringify({ offer: offer }));
 						});
