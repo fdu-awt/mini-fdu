@@ -9,16 +9,14 @@ const STORAGE = {
 	getUser() {
 		const user = window.localStorage.getItem(USER_KEY);
 		return user ? JSON.parse(user) : {
-			user: {
-				id: '',
-				username: '',
-				token: '',
-				tokenExpireTime: '',
-			}
+			id: '',
+			username: '',
+			token: '',
+			tokenExpireTime: '',
 		};
 	},
 	getUserId() {
-		return STORAGE.getUser().user.id;
+		return STORAGE.getUser().id;
 	},
 	getToken() {
 		return STORAGE.getUser().token;
