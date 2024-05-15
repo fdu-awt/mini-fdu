@@ -1,5 +1,13 @@
 /**
- * 通用的 WebSocket 服务类
+ * 通用的 WebSocket 服务类 <br/>
+ *
+ * 用法示例： <br/>
+ * const ws = new WebSocketService("ws://localhost:8080/ws"); <br/>
+ * ws.on("open", (event) => {}); <br/>
+ * ws.on("message", (message) => {}); <br/>
+ * ws.on("close", (event) => {}); <br/>
+ * ws.on("error", (error) => {}); <br/>
+ * ws.connect(userId); <br/>
  * */
 class WebSocketService {
 	constructor(url) {
@@ -10,8 +18,9 @@ class WebSocketService {
 
 	connect(userId) {
 		console.log("WebSocket connecting...");
-		console.log("WebSocket URL:", `${this.url}/${userId}`);
-		this.socket = new WebSocket(`${this.url}/${userId}`);
+		const socket_url = `${this.url}/${userId}`;
+		console.log("WebSocket URL:", socket_url);
+		this.socket = new WebSocket(socket_url);
 
 		this.socket.onopen = (event) => {
 			console.log("WebSocket connection established");
@@ -21,7 +30,7 @@ class WebSocketService {
 		};
 
 		this.socket.onmessage = (event) => {
-			console.log("WebSocket message received:", event.data);
+			console.debug("WebSocket message received:", event.data);
 			const message = JSON.parse(event.data);
 			if (this.eventHandlers.message) {
 				this.eventHandlers.message(message);
@@ -53,6 +62,10 @@ class WebSocketService {
 
 	on(event, handler) {
 		this.eventHandlers[event] = handler;
+	}
+
+	emit(event, data) {
+		this.socket.emit(event, data);
 	}
 }
 

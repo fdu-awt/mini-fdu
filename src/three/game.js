@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import {FBXLoader} from "three/addons";
 import PlayerController from "@/three/PlayerController";
 import {Preloader} from "@/utils/preloader";
-import GameWebSocketService from "@/api/socket/GameWebSocketService";
+import GameWebSocketService, {GAME_WS_EMIT_EVENTS, GAME_WS_MSG_TYPES} from "@/api/socket/GameWebSocketService";
 import gameEventEmitter, {GAME_EVENTS} from "@/event/GameEventEmitter";
 import STORAGE from "@/store";
 
@@ -24,6 +24,8 @@ export class Game {
 		this.environment = new Town(this);
 		this.player = null;
 		this.renderer = null;
+		this.remoteData = [];
+		this.remotePlayers = [];
 
 		this.clock = new THREE.Clock();
 		this.playerController = null;
@@ -297,6 +299,31 @@ class PlayerLocal extends Player {
 	initWebSocket(){
 		this.gameWebSocketService = new GameWebSocketService();
 		this.gameWebSocketService.connect(this.userId);
+		this.gameWebSocketService.onMessage(GAME_WS_MSG_TYPES.REMOTE_DATA, (message) => {
+			this.game.remoteDate = message.data;
+		});
+		this.gameWebSocketService.onMessage(GAME_WS_MSG_TYPES.REMOTE_PLAYER_DELETED, (message) => {
+			const deletedUserId = message.id;
+			// TODO
+			const players = this.game.remoteData.filter((player) => player.userId === deletedUserId);
+			console.log(players);
+		});
+	}
+
+	updateSocket(){
+		if (this.gameWebSocketService !== undefined){
+			const data = {
+				model: this.model,
+				colour: this.colour,
+				x: this.object.position.x,
+				y: this.object.position.y,
+				z: this.object.position.z,
+				h: this.object.rotation.y,
+				pb: this.object.rotation.x,
+				action: this.action
+			};
+			this.gameWebSocketService.emit(GAME_WS_EMIT_EVENTS.LOCAL_UPDATE, data);
+		}
 	}
 
 	move(dt) {
