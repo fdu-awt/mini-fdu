@@ -12,8 +12,8 @@ const GAME_WS_MSG_TYPES = Object.freeze({
  * GameWebSocketService 中可以发送的事件常量
  * */
 const GAME_WS_EMIT_EVENTS = Object.freeze({
+	LOCAL_INIT: Symbol("init"),
 	LOCAL_UPDATE: Symbol("update"),
-
 });
 
 /**
@@ -23,6 +23,13 @@ class GameWebSocketService extends WebSocketService{
 	constructor() {
 		super(process.env.VUE_APP_GAME_WEBSOCKET_BASE_URL);
 		this.messageHandlers = {};
+		this.eventHandlers.message = (message) => {
+			const messageType = Object.keys(GAME_WS_MSG_TYPES).find(key => GAME_WS_MSG_TYPES[key].description === message.type);
+			const handler = this.messageHandlers[GAME_WS_MSG_TYPES[messageType]];
+			if (handler) {
+				handler(message);
+			}
+		};
 	}
 
 	/**
@@ -34,17 +41,11 @@ class GameWebSocketService extends WebSocketService{
 		if (this.messageHandlers[type]) {
 			throw new Error("Message handler already exists");
 		}
-		// 如果 type 不是 GAME_WB_MSG_TYPES 中的值，则抛出异常
+		// 如果 type 不是 GAME_WS_MSG_TYPES 中的值，则抛出异常
 		if (!Object.values(GAME_WS_MSG_TYPES).includes(type)) {
-			throw new Error("Invalid message type" + type);
+			throw new Error("Invalid message type: " + type.toString());
 		}
 		this.messageHandlers[type] = handler;
-		this.eventHandlers.message = (message) => {
-			const handler = this.messageHandlers[message.type];
-			if (handler) {
-				handler(message);
-			}
-		};
 	}
 
 	on(event, handler) {
@@ -60,11 +61,12 @@ class GameWebSocketService extends WebSocketService{
 	 * @param {Symbol} event 事件类型, 必须是 GAME_WS_EMIT_EVENTS 中的值
 	 * @param {Object} data 消息数据
 	 * */
-	emit(event, data) {
+	gameEmit(event, data) {
 		if (!Object.values(GAME_WS_EMIT_EVENTS).includes(event)) {
 			throw new Error("Invalid event type" + event);
 		}
-		this.socket.emit(event, data);
+		console.log("GameWebSocketService emit:", event.description, data);
+		super.emit(event.description, data);
 	}
 }
 

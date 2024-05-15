@@ -64,8 +64,16 @@ class WebSocketService {
 		this.eventHandlers[event] = handler;
 	}
 
+	/**
+	 * @param {String} event 事件类型
+	 * @param {Object} data 事件数据
+	 * */
 	emit(event, data) {
-		this.socket.emit(event, data);
+		const message = {
+			type: event,
+			data: data,
+		};
+		this.sendMessage(message);
 	}
 }
 
