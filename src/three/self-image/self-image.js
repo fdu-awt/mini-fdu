@@ -100,11 +100,11 @@ const GLTF_IMAGE = {
 };
 
 const FBX_IMAGE = {
-	SCENE_PATH: "fbx/town.fbx",
-	CUBE_TEXTURE_PATH: "/images/",
-	ANIMATION_PATH_PREFIX: "/fbx/anims/",
-	MODEL_PATH_PREFIX: "/fbx/people",
-	TEXTURE_PATH_PREFIX: "/images/SimplePeople_",
+	SCENE_PATH: "/fbx_models/fbx/town.fbx",
+	CUBE_TEXTURE_PATH: "/fbx_models/images/",
+	ANIMATION_PATH_PREFIX: "/fbx_models/fbx/anims/",
+	MODEL_PATH_PREFIX: "/fbx_models/fbx/people",
+	TEXTURE_PATH_PREFIX: "/fbx_models/images/SimplePeople_",
 	PEOPLE: ['BeachBabe', 'BusinessMan', 'Doctor', 'FireFighter', 'Housewife', 'Policeman', 'Prostitute', 'Punk', 'RiotCop', 'Roadworker', 'Robber', 'Sheriff', 'Streetman', 'Waitress'],
 	COLOURS: ['Black', 'Brown', 'White'],
 	randomColour() {
