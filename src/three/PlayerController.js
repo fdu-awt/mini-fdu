@@ -223,5 +223,7 @@ export default class PlayerController {
 		// 当v为0，位置更新不会变化
 		const deltaPos = this.v.clone().multiplyScalar(deltaTime);
 		this.player.object.position.add(deltaPos);//更新玩家角色的位置
+		// 更新 socket 信息
+		this.player.socketOnLocalUpdate();
 	}
 }

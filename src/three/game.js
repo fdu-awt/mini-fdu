@@ -308,11 +308,32 @@ class PlayerLocal extends Player {
 			const players = this.game.remoteData.filter((player) => player.userId === deletedUserId);
 			console.log(players);
 		});
+		// 等待3秒后初始化本地玩家
+		setTimeout(() => {
+			this.socketOnLocalInit();
+		}, 600);
 	}
 
-	updateSocket(){
+	socketOnLocalInit(){
+		const data = {
+			userId: this.userId,
+			model: this.model,
+			colour:  this.colour,
+			x: this.object.position.x,
+			y: this.object.position.y,
+			z: this.object.position.z,
+			h: this.object.rotation.y,
+			pb: this.object.rotation.x,
+			action: this.action
+		};
+		console.log("localInit", data);
+		this.gameWebSocketService.gameEmit(GAME_WS_EMIT_EVENTS.LOCAL_INIT, data);
+	}
+
+	socketOnLocalUpdate(){
 		if (this.gameWebSocketService !== undefined){
 			const data = {
+				userId: this.userId,
 				model: this.model,
 				colour: this.colour,
 				x: this.object.position.x,
@@ -322,7 +343,7 @@ class PlayerLocal extends Player {
 				pb: this.object.rotation.x,
 				action: this.action
 			};
-			this.gameWebSocketService.emit(GAME_WS_EMIT_EVENTS.LOCAL_UPDATE, data);
+			this.gameWebSocketService.gameEmit(GAME_WS_EMIT_EVENTS.LOCAL_UPDATE, data);
 		}
 	}
 
