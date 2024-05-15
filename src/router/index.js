@@ -8,6 +8,7 @@ import NotFoundPage from "@/pages/NotFoundPage.vue";
 import STORAGE from "../store";
 import {ElMessageBox, ElNotification} from 'element-plus';
 import apiEmitter, {API_EVENTS} from "@/event/ApiEventEmitter";
+import gameEventEmitter, {GAME_EVENTS} from "@/event/GameEventEmitter";
 
 // 定义路由
 const routes = [
@@ -49,23 +50,36 @@ router.beforeEach((to, from, next) => {
 	}
 });
 
+function notifyAndGoLogin(msg) {
+	ElMessageBox.alert(msg, '未授权访问', {
+		confirmButtonText: '前往登录',
+		type: 'warning'
+	}).then(() => {
+		STORAGE.logOut();
+		router.replace({
+			path: '/login',
+			query: {redirect: router.currentRoute.value.fullPath}
+		}).then();
+	}).catch(() => {
+		notifyAndGoLogin(msg);
+	});
+}
+
 // 监听未授权事件
 apiEmitter.on(API_EVENTS.UN_AUTH, (msg) => {
-	function notifyAndGoLogin() {
-		ElMessageBox.alert(msg, '未授权访问', {
-			confirmButtonText: '前往登录',
-			type: 'warning'
-		}).then(() => {
-			STORAGE.logOut();
-			router.push({
-				path: '/login',
-				query: {redirect: router.currentRoute.value.fullPath}
-			}).then();
-		}).catch(() => {
-			notifyAndGoLogin();
-		});
-	}
-	notifyAndGoLogin();
+	console.error("未授权事件，UN_AUTH：", msg);
+	notifyAndGoLogin(msg);
+});
+
+// 监听游戏错误事件
+// 事实上，这个事件的触发晚于 路由守卫 的检查
+gameEventEmitter.on(GAME_EVENTS.NO_LOCAL_USER_ID, (msg) => {
+	console.error("游戏事件，NO_LOCAL_USER_ID：", msg);
+	STORAGE.logOut();
+	router.replace({
+		path: '/login',
+		query: {redirect: router.currentRoute.value.fullPath}
+	}).then();
 });
 
 export default router;
