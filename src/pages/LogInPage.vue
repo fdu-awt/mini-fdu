@@ -36,12 +36,8 @@ export default {
 							type: "success",
 						});
 						// 登陆成功后，记录store
-						const user = {
-							username: username,
-							token: data.object.token,
-							tokenExpireTime: data.object.tokenExpireTime,
-						};
-						store.loginSuccess(user);
+						const user = data.object;
+						store.loginSuccess(user.id, user.username, user.token, user.tokenExpireTime);
 						const redirect = this.$route.query.redirect;
 						if (redirect) {
 							// 如果 url 中有 redirect 参数，则跳转到 redirect 指定的页面

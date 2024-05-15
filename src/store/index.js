@@ -10,10 +10,15 @@ const STORAGE = {
 		const user = window.localStorage.getItem(USER_KEY);
 		return user ? JSON.parse(user) : {
 			user: {
+				id: '',
 				username: '',
 				token: '',
 				tokenExpireTime: '',
-			}};
+			}
+		};
+	},
+	getUserId() {
+		return STORAGE.getUser().user.id;
 	},
 	getToken() {
 		return STORAGE.getUser().token;
@@ -30,7 +35,13 @@ const STORAGE = {
 		const timeNow = new Date();
 		return timeNow.getTime() > expireTime.getTime();
 	},
-	loginSuccess(user) {
+	loginSuccess(userId, username, token, tokenExpireTime) {
+		const user = {
+			id: userId,
+			username: username,
+			token: token,
+			tokenExpireTime: tokenExpireTime,
+		};
 		window.localStorage.setItem(USER_KEY, JSON.stringify(user));
 	},
 	logOut() {
