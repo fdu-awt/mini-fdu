@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
 export default class PlayerController {
-	constructor(player) {
+	constructor(player, controllerElement) {
 		// 按键是否按下
 		this.keyStates = {
 			W: false,
@@ -12,6 +12,8 @@ export default class PlayerController {
 
 		// 控制的玩家角色
 		this.player = player;
+		// 控制器作用的容器
+		this.controllerElement = controllerElement;
 
 		this.camera = null;
 		this.cameraGroup = null;
@@ -120,26 +122,32 @@ export default class PlayerController {
 	}
 
 	addMouseListeners() {
-		document.addEventListener('mousedown', () => {
-			document.body.requestPointerLock();//body页面指针锁定
-			// document.exitPointerLock();//退出指针锁定
-		});
+		if (this.controllerElement) {
+			if (document.body.contains(this.controllerElement)){
+				this.controllerElement.addEventListener('click', () => {
+					if (this.controllerElement) {
+						if (document.body.contains(this.controllerElement)) {
+							this.controllerElement.requestPointerLock();//指针锁定
+						}
+					}
+				});
+			}
+		}
 		document.addEventListener('mousemove', (event) => {
 			// 进入指针模式后，才能根据鼠标位置控制人旋转
-			if (document.pointerLockElement === document.body) {
-				// 左右旋转
-				this.player.object.rotation.y -= event.movementX / this.sensitivity;
-				// 鼠标上下滑动，让相机视线上下转动
-				// 相机父对象cameraGroup绕着x轴旋转,camera跟着转动
-				this.cameraGroup.rotation.x += event.movementY / this.sensitivity;
-				// 如果 .rotation.x 小于angleMin，就设置为angleMin
-				if (this.cameraGroup.rotation.x < this.angleMin) {
-					this.cameraGroup.rotation.x = this.angleMin;
-				}
-				// 如果 .rotation.x 大于angleMax，就设置为angleMax
-				if (this.cameraGroup.rotation.x > this.angleMax) {
-					this.cameraGroup.rotation.x = this.angleMax;
-				}
+			if (document.pointerLockElement !== this.controllerElement) return;
+			// 左右旋转
+			this.player.object.rotation.y -= event.movementX / this.sensitivity;
+			// 鼠标上下滑动，让相机视线上下转动
+			// 相机父对象cameraGroup绕着x轴旋转,camera跟着转动
+			this.cameraGroup.rotation.x += event.movementY / this.sensitivity;
+			// 如果 .rotation.x 小于angleMin，就设置为angleMin
+			if (this.cameraGroup.rotation.x < this.angleMin) {
+				this.cameraGroup.rotation.x = this.angleMin;
+			}
+			// 如果 .rotation.x 大于angleMax，就设置为angleMax
+			if (this.cameraGroup.rotation.x > this.angleMax) {
+				this.cameraGroup.rotation.x = this.angleMax;
 			}
 		});
 	}

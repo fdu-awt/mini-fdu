@@ -3,6 +3,9 @@ import * as THREE from 'three';
 import {FBXLoader} from "three/addons";
 import PlayerController from "@/three/PlayerController";
 import {Preloader} from "@/utils/preloader";
+import GameWebSocketService from "@/api/socket/GameWebSocketService";
+import gameEventEmitter, {GAME_EVENTS} from "@/event/GameEventEmitter";
+import STORAGE from "@/store";
 
 export class Game {
 	constructor(container) {
@@ -231,7 +234,7 @@ class Player {
 			player.object.add(object);
 			game.scene.add(player.object);
 			if (player.local) {
-				game.playerController = new PlayerController(player);
+				game.playerController = new PlayerController(player, game.container);
 				game.sun.target = game.player.object;
 				const clip = object.animations[0];
 				const action = player.mixer.clipAction(clip);
@@ -280,6 +283,14 @@ class Player {
 class PlayerLocal extends Player {
 	constructor(game, model) {
 		super(game, model);
+		this.local = true;
+		this.userId = STORAGE.getUserId();
+		if (this.userId === undefined || this.userId === '') {
+			gameEventEmitter.emit(GAME_EVENTS.NO_LOCAL_USER_ID, "No user ID, maybe not logged in.");
+			return;
+		}
+		this.gameWebSocketService = new GameWebSocketService();
+		this.gameWebSocketService.connect(this.userId);
 	}
 
 	move(dt) {
