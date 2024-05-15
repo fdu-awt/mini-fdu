@@ -9,7 +9,7 @@ if (!navigator.mediaDevices.getUserMedia) {
 			const getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.getUserMedia;
 
 			if (!getUserMedia) {
-				reject(new Error('getUserMedia is not implemented in this browser'));
+				reject(new Error('getUserMedia 在此浏览器中未实现'));
 			} else {
 				getUserMedia.call(navigator, params, resolve, reject);
 			}
@@ -25,6 +25,10 @@ class VideoChat {
 		this.userId = userId;
 		this.rtcPeerConnection = null;
 		this.ws = null;
+
+		this.handleIceCandidate = this.handleIceCandidate.bind(this);
+		this.handleRemoteStream = this.handleRemoteStream.bind(this);
+		this.handleSignalingData = this.handleSignalingData.bind(this);
 	}
 
 	start() {
@@ -56,7 +60,7 @@ class VideoChat {
 					this.rtcPeerConnection.createOffer()
 						.then(offer => {
 							this.rtcPeerConnection.setLocalDescription(offer);
-							// Send the offer to the signaling server
+							// 发送 offer 给信令服务器
 							this.ws.send(JSON.stringify({ offer: offer }));
 						});
 				});
@@ -75,8 +79,8 @@ class VideoChat {
 	}
 
 	handleIceCandidate(event) {
-		if (event.candidate) {
-			// Send the ICE candidate to the signaling server
+		if (event.candidate && this.ws) {
+			// 发送 ICE candidate 给信令服务器
 			this.ws.send(JSON.stringify({ type: 'iceCandidate', candidate: event.candidate }));
 		}
 	}
@@ -85,25 +89,41 @@ class VideoChat {
 		this.remoteVideo.srcObject = event.streams[0];
 	}
 
-	handleSignalingData(data) {
-		const parsedData = JSON.parse(data.data);
+	handleSignalingData(event) {
+		try {
+			const parsedData = JSON.parse(event.data);
 
-		if (parsedData.offer) {
-			// Handle the offer from the other peer
-			// Set the remote description and create an answer
-			this.rtcPeerConnection.setRemoteDescription(new RTCSessionDescription(parsedData.offer));
-			this.rtcPeerConnection.createAnswer()
-				.then(answer => this.rtcPeerConnection.setLocalDescription(answer))
-				.then(() => {
-					// Send the answer to the signaling server
-					this.ws.send(JSON.stringify({ answer: this.rtcPeerConnection.localDescription }));
-				});
-		} else if (parsedData.answer) {
-			// Handle the answer from the other peer
-			this.rtcPeerConnection.setRemoteDescription(new RTCSessionDescription(parsedData.answer));
-		} else if (parsedData.iceCandidate) {
-			// Handle ICE candidates from the other peer
-			this.rtcPeerConnection.addIceCandidate(new RTCIceCandidate(parsedData.iceCandidate));
+			if (parsedData.offer) {
+				// 处理来自另一端的 offer
+				this.rtcPeerConnection.setRemoteDescription(new RTCSessionDescription(parsedData.offer))
+					.then(() => {
+						return this.rtcPeerConnection.createAnswer();
+					})
+					.then(answer => {
+						return this.rtcPeerConnection.setLocalDescription(answer);
+					})
+					.then(() => {
+						// 发送 answer 给信令服务器
+						this.ws.send(JSON.stringify({ answer: this.rtcPeerConnection.localDescription }));
+					})
+					.catch(error => {
+						console.error('Failed to handle offer: ', error);
+					});
+			} else if (parsedData.answer) {
+				// 处理来自另一端的 answer
+				this.rtcPeerConnection.setRemoteDescription(new RTCSessionDescription(parsedData.answer))
+					.catch(error => {
+						console.error('Failed to handle answer: ', error);
+					});
+			} else if (parsedData.iceCandidate) {
+				// 处理来自另一端的 ICE candidates
+				this.rtcPeerConnection.addIceCandidate(new RTCIceCandidate(parsedData.iceCandidate))
+					.catch(error => {
+						console.error('Failed to add ICE Candidate: ', error);
+					});
+			}
+		} catch (error) {
+			console.error('Failed to parse signaling data: ', error);
 		}
 	}
 }
