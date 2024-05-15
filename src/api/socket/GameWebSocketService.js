@@ -65,7 +65,6 @@ class GameWebSocketService extends WebSocketService{
 		if (!Object.values(GAME_WS_EMIT_EVENTS).includes(event)) {
 			throw new Error("Invalid event type" + event);
 		}
-		console.log("GameWebSocketService emit:", event.description, data);
 		super.emit(event.description, data);
 	}
 }
