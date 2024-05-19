@@ -2,9 +2,11 @@
 
 ## 技术栈
 
+- node.js 18.3.0
 - vue-router
 - vue-store
 - three.js
+
 ```shell
 npm install three --save
 ```
