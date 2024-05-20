@@ -1,23 +1,6 @@
-if (navigator.mediaDevices === undefined) {
-	navigator.mediaDevices = {};
-}
+import getUserMedia from "@/utils/UserMedia";
 
-// 检查是否存在 getUserMedia
-if (!navigator.mediaDevices.getUserMedia) {
-	navigator.mediaDevices.getUserMedia = function(params) {
-		return new Promise((resolve, reject) => {
-			const getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.getUserMedia;
-
-			if (!getUserMedia) {
-				reject(new Error('getUserMedia 在此浏览器中未实现'));
-			} else {
-				getUserMedia.call(navigator, params, resolve, reject);
-			}
-		});
-	};
-}
-
-class VideoChat {
+class VideoChatService {
 	constructor(localVideo, remoteVideo, signalingServerUrl, userId) {
 		this.localVideo = localVideo;
 		this.remoteVideo = remoteVideo;
@@ -32,7 +15,7 @@ class VideoChat {
 	}
 
 	start() {
-		navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+		getUserMedia({ video: true, audio: true })
 			.then(stream => {
 				// 处理成功获取用户媒体流的逻辑
 				if ('srcObject' in this.localVideo) {
@@ -50,8 +33,8 @@ class VideoChat {
 				this.rtcPeerConnection.onicecandidate = this.handleIceCandidate;
 				this.rtcPeerConnection.ontrack = this.handleRemoteStream;
 
-				// const url = `${this.signalingServerUrl}/${this.userId}`;
-				const url = 'ws://localhost:3000';
+				const url = `${this.signalingServerUrl}/${this.userId}`;
+				// const url = 'ws://localhost:3000';
 				this.ws = new WebSocket(url);
 
 				this.ws.addEventListener('open', () => {
@@ -80,9 +63,9 @@ class VideoChat {
 	}
 
 	handleIceCandidate(event) {
-		if (event.candidate && this.ws) {
+		if (event.candidate) {
 			// 发送 ICE candidate 给信令服务器
-			this.ws.send(JSON.stringify({ type: 'iceCandidate', candidate: event.candidate }));
+			this.ws.send(JSON.stringify({ iceCandidate: event.candidate }));
 		}
 	}
 
@@ -129,4 +112,4 @@ class VideoChat {
 	}
 }
 
-export default VideoChat;
+export default VideoChatService;

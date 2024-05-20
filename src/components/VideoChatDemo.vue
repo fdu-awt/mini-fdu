@@ -1,5 +1,5 @@
 <script>
-import VideoChat from "@/video-chat";
+import VideoChatService from "@/api/socket/VideoChatService";
 import store from "@/store";
 
 export default {
@@ -14,9 +14,11 @@ export default {
 			const remoteVideo = document.getElementById('remoteVideo');
 			const signalingServerUrl = process.env.VUE_APP_VIDEO_CHAT_WEBSOCKET_BASE_URL;
 			const userId = store.getUserId();
-			const videoChat = new VideoChat(localVideo, remoteVideo, signalingServerUrl, userId);
+			// TODO 如果本机演示，需要使用不同的 userId
+			// store.setUserId(userId+1);
+			const videoChatService = new VideoChatService(localVideo, remoteVideo, signalingServerUrl, userId);
 			startButton.addEventListener('click', () => {
-				videoChat.start();
+				videoChatService.start();
 			});
 		},
 	},
