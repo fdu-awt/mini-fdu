@@ -390,13 +390,21 @@ class Player {
 		if (this.mode === Player.modes.INIT || this.mode === Player.modes.CHANGING) {
 			return;
 		}
+		if (!this.actionObjs[name]) {
+			console.error("Invalid action name: " + name);
+			return;
+		}
 		if (this.activateActionName === name) {
 			return;
 		}
-		this.activeAction.weight = 0.0;
-		this.activeAction = this.actionObjs[name];
-		this.activeAction.weight = 1.0;
-		this.activateActionName = name;
+		if (this.activeAction) {
+			this.activeAction.weight = 0.0;
+			this.activeAction = this.actionObjs[name];
+			this.activeAction.weight = 1.0;
+			this.activateActionName = name;
+		} else {
+			console.error("this.activeAction is undefined.");
+		}
 		// 一次性动画
 		// if (name === 'Pointing Gesture' || name === 'Pointing') {
 		// 	// 设置动画为只播放一次
@@ -430,7 +438,7 @@ class Player {
 					// 如果模型或颜色发生变化，则更新模型
 					this.changeModel(model, colour);
 				} else {
-					// 否则更新位置和动作
+					// 否则更新位置、朝向和动作
 					this.object.position.set( data.x, data.y, data.z );
 					const euler = new THREE.Euler(data.pb, data.h, data.pb);
 					this.object.quaternion.setFromEuler( euler );
