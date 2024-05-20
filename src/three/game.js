@@ -287,25 +287,9 @@ class Player {
 		const game = this.game;
 		const player = this;
 		// 加载新模型
-		game.selfImageLoader.load(modelName).then((object) => {
+		game.selfImageLoader.load(modelName, colour).then((object) => {
 			object.mixer = new THREE.AnimationMixer(object);
 			player.mixer = object.mixer;
-
-			object.name = "Person";
-			object.traverse(function (child) {
-				if (child.isMesh) {
-					child.castShadow = true;
-					child.receiveShadow = true;
-				}
-			});
-			const textureLoader = new THREE.TextureLoader();
-			textureLoader.load(FBX_IMAGE.getTexturePath(modelName, colour), function (texture) {
-				object.traverse(function (child) {
-					if (child.isMesh) {
-						child.material.map = texture;
-					}
-				});
-			});
 			player.object = new THREE.Object3D();
 			player.object.position.set(3122, 0, -173);
 			player.object.rotation.set(0, 2.6, 0);

@@ -1,6 +1,6 @@
 <script>
 import {Game} from "@/three/game";
-import {FbxSelfImageLoader} from "@/three/SelfImageLoader";
+import {Lab1FbxSelfImageLoader} from "@/three/SelfImageLoader";
 import {Town} from "@/three/GameEnvironment";
 
 export default {
@@ -12,7 +12,7 @@ export default {
 	},
 	mounted() {
 		const container = document.getElementById('canvas-container');
-		this.game = new Game(container, new Town() , new FbxSelfImageLoader());
+		this.game = new Game(container, new Town() , new Lab1FbxSelfImageLoader());
 	},
 };
 </script>

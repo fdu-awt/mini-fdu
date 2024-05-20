@@ -1,5 +1,6 @@
 import {FBX_IMAGE} from "@/three/self-image/self-image";
 import {FBXLoader} from "three/addons";
+import * as THREE from "three";
 
 class SelfImageLoader{
 	constructor() {
@@ -40,5 +41,38 @@ class FbxSelfImageLoader extends SelfImageLoader{
 	}
 }
 
+class Lab1FbxSelfImageLoader extends FbxSelfImageLoader{
+	constructor() {
+		super();
+	}
+
+	load(modelName, colour){
+		const modelPath = FBX_IMAGE.getModelPathByName(modelName);
+		colour = colour || FBX_IMAGE.randomColour();
+		return new Promise((resolve, reject) => {
+			FbxSelfImageLoader.FBX_LOADER.load(modelPath, (object) => {
+				object.name = "Person";
+				object.traverse(function (child) {
+					if (child.isMesh) {
+						child.castShadow = true;
+						child.receiveShadow = true;
+					}
+				});
+				const textureLoader = new THREE.TextureLoader();
+				textureLoader.load(FBX_IMAGE.getTexturePath(modelName, colour), function (texture) {
+					object.traverse(function (child) {
+						if (child.isMesh) {
+							child.material.map = texture;
+						}
+					});
+				});
+				resolve(object);
+			}, undefined, (error) => {
+				reject(error);
+			});
+		});
+	}
+}
+
 export default SelfImageLoader;
-export {FbxSelfImageLoader};
+export {FbxSelfImageLoader, Lab1FbxSelfImageLoader};
