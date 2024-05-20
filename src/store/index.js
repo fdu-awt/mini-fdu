@@ -20,6 +20,11 @@ const STORAGE = {
 	getUserId() {
 		return STORAGE.getUser().id;
 	},
+	setUserId(userId){
+		const user = STORAGE.getUser();
+		user.id = userId;
+		window.localStorage.setItem(USER_KEY, JSON.stringify(user));
+	},
 	getToken() {
 		return STORAGE.getUser().token;
 	},
