@@ -288,7 +288,6 @@ class Player {
 		const player = this;
 		// 加载新模型
 		game.selfImageLoader.load(modelName, colour).then((object) => {
-			object.mixer = new THREE.AnimationMixer(object);
 			player.mixer = object.mixer;
 			player.object = new THREE.Object3D();
 			player.object.position.set(3122, 0, -173);

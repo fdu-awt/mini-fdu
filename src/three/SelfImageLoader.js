@@ -51,6 +51,7 @@ class Lab1FbxSelfImageLoader extends FbxSelfImageLoader{
 		colour = colour || FBX_IMAGE.randomColour();
 		return new Promise((resolve, reject) => {
 			FbxSelfImageLoader.FBX_LOADER.load(modelPath, (object) => {
+				object.mixer = new THREE.AnimationMixer(object);
 				object.name = "Person";
 				object.traverse(function (child) {
 					if (child.isMesh) {
