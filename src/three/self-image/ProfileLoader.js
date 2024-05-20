@@ -1,3 +1,5 @@
+// 用于 ProfilePage 加载个人形象的模型
+
 import * as THREE from 'three';
 import {MMDLoader} from "three/examples/jsm/loaders/MMDLoader.js";
 import {OrbitControls} from "three/addons";
