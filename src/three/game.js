@@ -1,14 +1,20 @@
 import {FBX_IMAGE} from "@/three/self-image/self-image";
 import * as THREE from 'three';
-import {FBXLoader} from "three/addons";
 import PlayerController from "@/three/PlayerController";
+import {Town} from "@/three/GameEnvironment";
+import {FbxSelfImageLoader} from "@/three/SelfImageLoader";
 import {Preloader} from "@/utils/preloader";
 import GameWebSocketService, {GAME_WS_EMIT_EVENTS, GAME_WS_MSG_TYPES} from "@/api/socket/GameWebSocketService";
 import gameEventEmitter, {GAME_EVENTS} from "@/event/GameEventEmitter";
 import STORAGE from "@/store";
 
 export class Game {
-	constructor(container) {
+	/**
+	 * @param {HTMLElement} container
+	 * @param {GameEnvironment} environment
+	 * @param {SelfImageLoader} selfImageLoader
+	 * */
+	constructor(container, environment, selfImageLoader) {
 		this.modes = Object.freeze({
 			NONE: Symbol("none"),
 			PRELOAD: Symbol("preload"),
@@ -21,7 +27,8 @@ export class Game {
 		this.container = container;
 
 		this.scene = null;
-		this.environment = new Town(this);
+		this.environment = environment || new Town();
+		this.selfImageLoader = selfImageLoader || new FbxSelfImageLoader();
 		this.player = null;
 		this.renderer = null;
 		this.remoteData = [];
@@ -98,7 +105,7 @@ export class Game {
 
 		this.player = new PlayerLocal(this, STORAGE.getSelfImage(), STORAGE.getUserId());
 
-		this.environment.load();
+		this.environment.load(this, undefined);
 
 		this.renderer = new THREE.WebGLRenderer({
 			antialias: true,  // 抗锯齿
@@ -227,47 +234,6 @@ export class Game {
 	}
 }
 
-class Environment {
-	constructor(game) {
-		this.game = game;
-	}
-
-	load() {
-	}
-}
-
-class Town extends Environment {
-	constructor(game) {
-		super(game);
-	}
-
-	load() {
-		const game = this.game;
-		const loader = new FBXLoader();
-		loader.load(FBX_IMAGE.SCENE_PATH, function (object) {
-			game.scene.add(object);
-			object.traverse(function (child) {
-				if (child.isMesh) {
-					if (child.name.startsWith("proxy")) {
-						game.colliders.push(child);
-						child.material.visible = false;
-					} else {
-						child.castShadow = true;
-						child.receiveShadow = true;
-					}
-				}
-			});
-			const cubeTextureLoader = new THREE.CubeTextureLoader();
-			cubeTextureLoader.setPath(FBX_IMAGE.CUBE_TEXTURE_PATH);
-			game.scene.background = cubeTextureLoader.load([
-				'px.jpg', 'nx.jpg',
-				'py.jpg', 'ny.jpg',
-				'pz.jpg', 'nz.jpg'
-			]);
-		});
-	}
-}
-
 class Player {
 	static anims = ['Walking', 'Walking Backwards', 'Turn', 'Running', 'Pointing', 'Talking', 'Pointing Gesture'];
 	static modes = Object.freeze({
@@ -321,9 +287,7 @@ class Player {
 		const game = this.game;
 		const player = this;
 		// 加载新模型
-		const loader = new FBXLoader();
-		const modelPath = FBX_IMAGE.getModelPathByName(modelName);
-		loader.load(modelPath, function (object) {
+		game.selfImageLoader.load(modelName).then((object) => {
 			object.mixer = new THREE.AnimationMixer(object);
 			player.mixer = object.mixer;
 
@@ -364,7 +328,7 @@ class Player {
 				const players = game.initialisingPlayers.splice(game.initialisingPlayers.indexOf(this), 1);
 				game.remotePlayers.push(players[0]);
 			}
-			player.loadAnimations(loader);
+			player.loadAnimations(game.selfImageLoader.getOriginalLoader());
 			player.mode = Player.modes.ACTIVE;
 			const clip = object.animations[0];
 			const action = player.mixer.clipAction(clip);
@@ -374,6 +338,9 @@ class Player {
 			player.activeAction = action;
 			action.play();
 			player.action = "Idle";
+		}).then(() => {
+		}).catch((error) => {
+			console.error("Player.loadModel: " + error);
 		});
 	}
 
