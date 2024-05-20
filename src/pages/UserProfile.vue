@@ -12,7 +12,7 @@ import {
 } from 'element-plus';
 import * as CHECK from "@/utils/check";
 import {deepCopy} from "@/utils/copy";
-import {initializeScene, loadWithModel} from "@/three/self-image/pmx-loader";
+import {initializeScene, loadWithModel} from "@/three/self-image/ProfileLoader";
 import {getUserInfo, modifyPassword, modifyUserInfo} from "@/api/user";
 import SELF_IMAGE from "@/three/self-image/self-image";
 import STORAGE from "@/store";
@@ -133,8 +133,7 @@ export default {
 						this.formOld.selfImage = SELF_IMAGE.defaultModelName;
 					}
 					STORAGE.setSelfImage(this.form.selfImage);
-					// TODO 使用showModel
-					this.showModelEmpty();
+					this.showModel();
 				}
 			}).catch((err) => {
 				console.error(err);
@@ -149,10 +148,7 @@ export default {
 				this.shouldInitializeModel = false;
 				initializeScene(canvas, width, height);
 			}
-			// TODO 使用整理的模型加载函数
 			loadWithModel(this.form.selfImage, width, height);
-		},
-		showModelEmpty() {
 		},
 		showPasswordModifyDialogForm() {
 			this.passwordModifyDialogVisible = true;
@@ -216,7 +212,7 @@ export default {
 					<el-form-item label="虚拟形象">
 						<el-select
 								v-model="form.selfImage"
-								@change="showModelEmpty"
+								@change="showModel"
 								filterable
 								placeholder="请选择虚拟形象">
 							<el-option
