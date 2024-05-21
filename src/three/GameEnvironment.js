@@ -53,12 +53,7 @@ class GuangHuaLou extends GameEnvironment{
 			game.scene.add(object);
 			object.traverse(function (child) {
 				if(child.isMesh) {
-					if(child.name.startsWith("proxy")) {
-						// TODO
-					}
-					else {
-						// TODO
-					}
+					// TODO 
 				}
 			});
 		});
