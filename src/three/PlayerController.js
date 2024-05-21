@@ -82,6 +82,7 @@ export default class PlayerController {
 
 	addKeyListeners() {
 		document.addEventListener('keydown', (e) => {
+			console.log(e.key);
 			switch (e.key) {
 			case "w":
 				this.keyStates.W = true;
@@ -98,6 +99,14 @@ export default class PlayerController {
 			case "v":
 				this.firstView = !this.firstView;
 				this.activeCamera = this.firstView ? this.firstViewCamera : this.thirdViewCamera;
+				break;
+			case "e":
+				this.player.action = 'Pointing';
+				this.player.socketOnLocalUpdate();
+				break;
+			case "q":
+				this.player.action = 'Pointing Gesture';
+				this.player.socketOnLocalUpdate();
 				break;
 			}
 			// this.playerControl((this.keyStates.W ? 1 : 0) - (this.keyStates.S ? 1 : 0), (this.keyStates.A ? 1 : 0) - (this.keyStates.D ? 1 : 0));

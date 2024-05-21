@@ -348,23 +348,24 @@ class Player {
 			return;
 		}
 		if (this.activeAction) {
+			// 一次性动画
+			console.log("Set weight to 0.0: " + this.activeAction.name);
 			this.activeAction.weight = 0.0;
 			this.activeAction = this.actionObjs[name];
 			this.activeAction.weight = 1.0;
 			this.activateActionName = name;
+			if (name === 'Pointing Gesture' || name === 'Pointing') {
+				// 设置动画为只播放一次
+				this.activeAction.setLoop(THREE.LoopOnce);
+				// 动画播放完成后，将动作设置为Idle
+				this.mixer.addEventListener('finished', function () {
+					this.action = 'Idle';
+				}.bind(this));
+			}
 		} else {
 			console.error("this.activeAction is undefined.");
 		}
-		// 一次性动画
-		// if (name === 'Pointing Gesture' || name === 'Pointing') {
-		// 	// 设置动画为只播放一次
-		// 	action.setLoop(THREE.LoopOnce);
-		// 	// 动画播放完成后，将动作设置为Idle
-		// 	this.mixer.addEventListener('finished', function () {
-		// 		this.action = 'Idle';
-		// 		// this.updateSocket(); // 发送动作到服务器
-		// 	}.bind(this));
-		// }
+
 	}
 
 	get action() {
