@@ -3,7 +3,7 @@ import HomePage from "@/pages/HomePage.vue";
 import AboutPage from "@/pages/AboutPage.vue";
 import LogInPage from "@/pages/LogInPage.vue";
 import SignUpPage from "@/pages/SignUpPage.vue";
-import UserProfile from "@/pages/UserProfile.vue";
+import UserProfile from "@/components/UserProfilePage.vue";
 import NotFoundPage from "@/pages/NotFoundPage.vue";
 import VideoChatDemo from "@/components/VideoChatDemo.vue";
 import STORAGE from "../store";
