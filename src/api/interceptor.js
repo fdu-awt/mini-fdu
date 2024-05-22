@@ -1,5 +1,5 @@
 import STORAGE from "@/store";
-import apiEmitter, {API_EVENTS} from "@/event/ApiEventEmitter";
+import apiErrorEmitter, {API_ERROR_EVENTS} from "@/event/ApiErrorEventEmitter";
 
 export function requestFulfilled(config) {
 	// 是否需要设置 token
@@ -46,15 +46,15 @@ export function responseFulfilled(res) {
 	const msg = res.data.msg;
 	if (code === 401) {
 		// 未授权
-		apiEmitter.emit(API_EVENTS.UN_AUTH, msg);
+		apiErrorEmitter.emit(API_ERROR_EVENTS.UN_AUTH, msg);
 		return Promise.reject(new Error(msg));
 	} else if (code === 500) {
 		// 服务器内部错误
-		apiEmitter.emit(API_EVENTS.INTERNAL_ERROR, msg);
+		apiErrorEmitter.emit(API_ERROR_EVENTS.INTERNAL_ERROR, msg);
 		return Promise.reject(new Error(msg));
 	} else if (code !== 200) {
 		// 请求失败 但未区分状态码
-		apiEmitter.emit(API_EVENTS.OTHER_ERROR, msg);
+		apiErrorEmitter.emit(API_ERROR_EVENTS.OTHER_ERROR, msg);
 		return Promise.reject(new Error(msg));
 	} else {
 		// code = 200 时
@@ -62,7 +62,7 @@ export function responseFulfilled(res) {
 			if (res.data.success) { // 业务成功
 				return res.data;
 			} else { // 业务失败
-				apiEmitter.emit(API_EVENTS.OTHER_ERROR, msg);
+				apiErrorEmitter.emit(API_ERROR_EVENTS.OTHER_ERROR, msg);
 				return Promise.reject(res);
 			}
 		} else { // 非 uxApi，直接返回res
@@ -81,6 +81,6 @@ export function responseRejected(error) {
 		message = "请求异常：" +
 			message.substr(message.length - 3);
 	}
-	apiEmitter.emit(API_EVENTS.NETWORK_ERROR, message);
+	apiErrorEmitter.emit(API_ERROR_EVENTS.NETWORK_ERROR, message);
 	return Promise.reject(error);
 }

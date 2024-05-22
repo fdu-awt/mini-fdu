@@ -8,6 +8,7 @@ import GameWebSocketService, {GAME_WS_EMIT_EVENTS, GAME_WS_MSG_TYPES} from "@/ap
 import ChatWebSocketService from "@/api/socket/ChatWebSocketService";
 import gameEventEmitter, {GAME_EVENTS} from "@/event/GameEventEmitter";
 import STORAGE from "@/store";
+import gameErrorEventEmitter, {GAME_ERROR_EVENTS} from "@/event/GameErrorEventEmitter";
 
 export class Game {
 	/**
@@ -129,6 +130,11 @@ export class Game {
 		this.renderer.setSize(window.innerWidth, window.innerHeight);
 		this.renderer.shadowMap.enabled = true;
 		this.container.appendChild(this.renderer.domElement);
+
+		// 处理用户选择个人形象
+		gameEventEmitter.on(GAME_EVENTS.USER_SELF_IMAGE_CHANGE, (selfImageName) => {
+			this.player.changeModel(selfImageName, FBX_IMAGE.randomColour());
+		});
 	}
 
 	updateRemotePlayers(dt){
@@ -271,7 +277,7 @@ class Player {
 		this.activateActionName = null;
 		if (this.userId === undefined || this.userId === '') {
 			if (this.local) {
-				gameEventEmitter.emit(GAME_EVENTS.NO_LOCAL_USER_ID, "No user ID, maybe not logged in.");
+				gameErrorEventEmitter.emit(GAME_ERROR_EVENTS.NO_LOCAL_USER_ID, "No user ID, maybe not logged in.");
 			} else {
 				console.error("No user ID for remote player");
 			}
@@ -298,15 +304,34 @@ class Player {
 		game.animate();
 	}
 
-	loadModel(modelName, colour) {
+	loadModel(modelName, colour, init= true) {
 		const game = this.game;
 		const player = this;
+		let position;
+		// 位置信息
+		if (init) {
+			position = {
+				x: 3122,
+				y: 0,
+				z: -173,
+				h: 2.6,
+				pb: 0,
+			};
+		} else {
+			position = {
+				x: this.object.position.x,
+				y: this.object.position.y,
+				z: this.object.position.z,
+				h: this.object.rotation.y,
+				pb: this.object.rotation.x,
+			};
+		}
 		// 加载新模型
 		game.selfImageLoader.load(modelName, colour).then((object) => {
 			player.mixer = object.mixer;
 			player.object = new THREE.Object3D();
-			player.object.position.set(3122, 0, -173);
-			player.object.rotation.set(0, 2.6, 0);
+			player.object.position.set(position.x, position.y, position.z);
+			player.object.rotation.set(0, position.h, 0);
 			player.object.add(object);
 			game.scene.add(player.object);
 			if (player.local) {
@@ -323,8 +348,10 @@ class Player {
 				player.collider = box;
 				player.object.userData.userId = player.userId;
 				player.object.userData.remotePlayer = true;
-				const players = game.initialisingPlayers.splice(game.initialisingPlayers.indexOf(this), 1);
-				game.remotePlayers.push(players[0]);
+				if (init){
+					const players = game.initialisingPlayers.splice(game.initialisingPlayers.indexOf(this), 1);
+					game.remotePlayers.push(players[0]);
+				}
 			}
 			player.loadAnimations(game.selfImageLoader.getOriginalLoader());
 			player.mode = Player.modes.ACTIVE;
@@ -343,9 +370,12 @@ class Player {
 	}
 
 	changeModel(modelName, colour) {
+		this.model = modelName;
+		this.colour = colour;
 		// 移除旧模型
 		this.game.scene.remove(this.object);
-		this.loadModel(modelName, colour);
+		// 加载新模型
+		this.loadModel(modelName, colour, false);
 		if (this.local) {
 			this.socketOnLocalUpdate();
 		}
@@ -363,23 +393,24 @@ class Player {
 			return;
 		}
 		if (this.activeAction) {
+			// 一次性动画
+			console.log("Set weight to 0.0: " + this.activeAction.name);
 			this.activeAction.weight = 0.0;
 			this.activeAction = this.actionObjs[name];
 			this.activeAction.weight = 1.0;
 			this.activateActionName = name;
+			if (name === 'Pointing Gesture' || name === 'Pointing') {
+				// 设置动画为只播放一次
+				this.activeAction.setLoop(THREE.LoopOnce);
+				// 动画播放完成后，将动作设置为Idle
+				this.mixer.addEventListener('finished', function () {
+					this.action = 'Idle';
+				}.bind(this));
+			}
 		} else {
 			console.error("this.activeAction is undefined.");
 		}
-		// 一次性动画
-		// if (name === 'Pointing Gesture' || name === 'Pointing') {
-		// 	// 设置动画为只播放一次
-		// 	action.setLoop(THREE.LoopOnce);
-		// 	// 动画播放完成后，将动作设置为Idle
-		// 	this.mixer.addEventListener('finished', function () {
-		// 		this.action = 'Idle';
-		// 		// this.updateSocket(); // 发送动作到服务器
-		// 	}.bind(this));
-		// }
+
 	}
 
 	get action() {
@@ -411,12 +442,11 @@ class Player {
 					// // 检查用户之间的距离，但是这里不太灵
 					// const distance = this.object.position.distanceTo(this.game.player.object.position);
 					// console.log(distance);
+					//这里后面需要改逻辑直接用点击用户头顶名字开启聊天
 					const distance = 3;
 					if (distance < 10) {
-						// console.log("我们距离很近诶");
 						this.showChatButton(data.userId);
 					} else {
-						// console.log("我们距离很远诶");
 						this.hideChatButton();
 					}
 				}

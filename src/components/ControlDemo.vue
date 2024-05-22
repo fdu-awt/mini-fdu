@@ -1,26 +1,16 @@
-<template>
-  <div id="canvas-container">
-    <!-- Your game canvas will be here -->
-    <ChatBox
-        v-if="isChatBoxVisible"
-        :localId="localId"
-        :remoteId="remoteId"
-        :socket="socket"
-        @close="closeChatBox"
-    />
-  </div>
-</template>
-
 <script>
-import { Game } from "@/three/game";
-import { Lab1FbxSelfImageLoader } from "@/three/SelfImageLoader";
-import { GuangHuaLou } from "@/three/GameEnvironment";
+import {Game} from "@/three/game";
+import {Lab1FbxSelfImageLoader} from "@/three/SelfImageLoader";
+// import {Town} from "@/three/GameEnvironment";
+import {GuangHuaLou} from "@/three/GameEnvironment";
+import SettingDialog from "@/components/SettingDialog.vue";
 import ChatBox from "@/components/ChatBox.vue"; // 导入子组件
 
 export default {
 	name: "ControlDemo",
 	components: {
-		ChatBox  // 注册子组件
+		ChatBox,
+		SettingDialog// 注册子组件
 	},
 	data() {
 		return {
@@ -28,19 +18,34 @@ export default {
 			isChatBoxVisible: false, // 用于控制ChatBox的显示
 			localId: null,
 			remoteId: null,
-			socket: null
+			socket: null,
+			canvasContainer: null,
+			showSettingDialog: false,
 		};
 	},
 	mounted() {
-		const container = document.getElementById('canvas-container');
-		this.game = new Game(container, new GuangHuaLou(), new Lab1FbxSelfImageLoader());
-
+		this.canvasContainer = document.getElementById('canvas-container');
+		this.game = new Game(this.canvasContainer, new GuangHuaLou() , new Lab1FbxSelfImageLoader());
+		this.listenKeyDown();
 		// 假设Game有一个方法可以添加点击事件监听
 		window.addEventListener('objectClicked', (event) => {
 			this.handleObjectClick(event.detail.localId, event.detail.remoteId, event.detail.socket);
 		});
 	},
 	methods: {
+		listenKeyDown(){
+			document.addEventListener('keydown', (e) => {
+				if (e.key === 'z') {
+					this.showSettingDialog = !this.showSettingDialog;
+					// 解除鼠标锁定
+					this.game.playerController.unlockPointer();
+				}
+			});
+		},
+		onSettingDialogClose(){
+			console.log('onSettingDialogClose');
+			this.showSettingDialog = false;
+		},
 		handleObjectClick(localId, remoteId, socket) {
 			this.localId = localId;
 			this.remoteId = remoteId;
@@ -50,6 +55,19 @@ export default {
 		closeChatBox() {
 			this.isChatBoxVisible = false; // 关闭ChatBox的方法
 		}
-	}
+	},
 };
 </script>
+
+<template>
+  <div id="canvas-container"></div>
+  <SettingDialog :show="showSettingDialog" @close="onSettingDialogClose"/>
+  <ChatBox socket="socket" remote-id="remoteId" local-id="localId"></ChatBox>
+</template>
+
+<style scoped>
+#canvas-container {
+  width: 100%;
+  height: 100%;
+}
+</style>

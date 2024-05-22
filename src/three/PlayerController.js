@@ -50,8 +50,8 @@ export default class PlayerController {
 		this.firstViewCamera = new THREE.PerspectiveCamera(
 			45, window.innerWidth / window.innerHeight, 10, 200000
 		);
-		this.firstViewCamera.position.set(0, 300, 100);
-		this.firstViewCamera.lookAt(0, 300, 120);
+		this.firstViewCamera.position.set(0, 250, 100);
+		this.firstViewCamera.lookAt(0, 250, 120);
 
 		this.thirdViewCamera = new THREE.PerspectiveCamera(
 			45, window.innerWidth / window.innerHeight, 10, 200000
@@ -82,6 +82,7 @@ export default class PlayerController {
 
 	addKeyListeners() {
 		document.addEventListener('keydown', (e) => {
+			console.log(e.key);
 			switch (e.key) {
 			case "w":
 				this.keyStates.W = true;
@@ -98,6 +99,14 @@ export default class PlayerController {
 			case "v":
 				this.firstView = !this.firstView;
 				this.activeCamera = this.firstView ? this.firstViewCamera : this.thirdViewCamera;
+				break;
+			case "e":
+				this.player.action = 'Pointing';
+				this.player.socketOnLocalUpdate();
+				break;
+			case "q":
+				this.player.action = 'Pointing Gesture';
+				this.player.socketOnLocalUpdate();
 				break;
 			}
 			// this.playerControl((this.keyStates.W ? 1 : 0) - (this.keyStates.S ? 1 : 0), (this.keyStates.A ? 1 : 0) - (this.keyStates.D ? 1 : 0));
@@ -120,28 +129,39 @@ export default class PlayerController {
 			// this.playerControl((this.keyStates.W ? 1 : 0) - (this.keyStates.S ? 1 : 0), (this.keyStates.A ? 1 : 0) - (this.keyStates.D ? 1 : 0));
 		});
 	}
-	addMouseListeners() {
-		// if (this.controllerElement) {
-		// 	if (document.body.contains(this.controllerElement)){
-		// 		this.controllerElement.addEventListener('click', () => {
-		// 			if (this.controllerElement) {
-		// 				if (document.body.contains(this.controllerElement)) {
-		// 					this.controllerElement.requestPointerLock();//指针锁定
-		// 				}
-		// 			}
-		// 		});
-		// 	}
-		// }
-		//方便聊天功能调试，按F键进入世界
-		document.addEventListener('keydown', (e) => {
-			if (e.key === 'f') {
-				if (this.controllerElement) {
-					if (document.body.contains(this.controllerElement)) {
-						this.controllerElement.requestPointerLock();
-					}
+
+	unlockPointer() {
+		if (this.controllerElement) {
+			if (document.body.contains(this.controllerElement)){
+				if (document.pointerLockElement === this.controllerElement) {
+					document.exitPointerLock();
 				}
 			}
-		});
+		}
+	}
+
+	addMouseListeners() {
+		if (this.controllerElement) {
+			if (document.body.contains(this.controllerElement)){
+				this.controllerElement.addEventListener('click', () => {
+					if (this.controllerElement) {
+						if (document.body.contains(this.controllerElement)) {
+							this.controllerElement.requestPointerLock();//指针锁定
+						}
+					}
+				});
+			}
+		}
+		// //方便聊天功能调试，按F键进入世界
+		// document.addEventListener('keydown', (e) => {
+		// 	if (e.key === 'f') {
+		// 		if (this.controllerElement) {
+		// 			if (document.body.contains(this.controllerElement)) {
+		// 				this.controllerElement.requestPointerLock();
+		// 			}
+		// 		}
+		// 	}
+		// });
 		document.addEventListener('mousemove', (event) => {
 			// 进入指针模式后，才能根据鼠标位置控制人旋转
 			if (document.pointerLockElement !== this.controllerElement) return;
