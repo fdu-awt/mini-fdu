@@ -29,6 +29,19 @@ export default class PlayerController {
 		//阻尼 当没有WASD加速的时候，角色慢慢减速停下来
 		this.damping = -0.04;
 
+		// 运动速度阈值
+		this.speedThresholds = {
+			idle(vl){
+				return vl < 100;
+			},
+			walking (vl) {
+				return vl <= 200;
+			},
+			running (vl) {
+				return vl > 200;
+			}
+		};
+
 		// 控制 第一、三人称
 		this.firstView = false;
 
@@ -220,9 +233,9 @@ export default class PlayerController {
 			this.v.addScaledVector(this.v, this.damping);//速度衰减
 		}
 		const vl = this.v.length();
-		if (vl < 20) {
+		if (this.speedThresholds.idle(vl)) {
 			this.player.action = "Idle";
-		} else if (vl <= 200) {
+		} else if (this.speedThresholds.walking(vl)) {
 			this.player.action = "Walking";
 		} else {
 			this.player.action = "Running";
