@@ -1,4 +1,4 @@
-const API_EVENTS = Object.freeze({
+const API_ERROR_EVENTS = Object.freeze({
 	UN_AUTH: Symbol("un_authorized"),
 	VALIDATE_ERROR: Symbol("validate_error"),
 	INTERNAL_ERROR: Symbol("internal_error"),
@@ -7,7 +7,7 @@ const API_EVENTS = Object.freeze({
 	OTHER_ERROR: Symbol("other_error"),
 });
 
-class ApiEventEmitter {
+class ApiErrorEventEmitter {
 	constructor() {
 		this.events = {};
 	}
@@ -27,5 +27,5 @@ class ApiEventEmitter {
 	}
 }
 
-export { API_EVENTS };
-export default new ApiEventEmitter();
+export { API_ERROR_EVENTS };
+export default new ApiErrorEventEmitter();
