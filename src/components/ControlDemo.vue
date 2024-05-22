@@ -16,7 +16,7 @@ export default {
 	},
 	data() {
 		return {
-			game: null,,
+			game: null,
 			isChatBoxVisible: false, // 用于控制ChatBox的显示
 			localId: null,
 			remoteId: null,
@@ -61,11 +61,12 @@ export default {
 </script>
 
 <template>
-  <div id="canvas-container"></div>
+	<div id="canvas-container"></div>
 
 	<PostDialog/>	
-  <SettingDialog :show="showSettingDialog" @close="onSettingDialogClose"/>
-  <ChatBox v-if="isChatBoxVisible" :socket="socket" :remote-id="remoteId" :local-id="localId" @close="closeChatBox" />
+	
+	<SettingDialog :show="showSettingDialog" @close="onSettingDialogClose"/>
+	<ChatBox v-if="isChatBoxVisible" :socket="socket" :remote-id="remoteId" :local-id="localId" @close="closeChatBox" />
 </template>
 
 <style scoped>
