@@ -48,6 +48,8 @@ export class Game {
 		this.colliders = [];
 		this.remoteColliders = [];
 
+		this.post = [];
+
 		// 定义 npc
 		// TODO 根据需求定义NPC
 		this.npc1 = new NPC(
@@ -138,6 +140,7 @@ export class Game {
 		this.scene.add(light);
 
 		this.environment.load(this, undefined);
+		this.bindEventsForPosts(this);
 		// 加载 npc 和 玩家动画
 		this.loadAnimations().then(() => {
 			// 加载玩家
@@ -244,6 +247,44 @@ export class Game {
 				break;
 			}
 		});
+	}
+
+	bindEventsForPosts(game){
+		const raycaster = new THREE.Raycaster();
+		const mouse = new THREE.Vector2();
+
+		function onMouseClick(event) {
+			mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+			mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+			
+			if(game.playerController!=undefined){
+				raycaster.setFromCamera(mouse, game.playerController.camera);
+				const intersects = raycaster.intersectObjects(game.scene.children, true);
+
+				console.log("intersects", intersects);
+				if(intersects.length > 0){
+					// ElMessage({
+					// 	showClose: true,
+					// 	message: intersects[0].object.name,
+					// 	type: "success",
+					// });
+					if(intersects[0].object.name.startsWith("post")){
+						// const post = intersects[0].object;
+						// post.material = new THREE.MeshBasicMaterial({ 
+						// 	color: 0xff0000,
+						// 	side: THREE.DoubleSide,
+						// });
+						
+						const post_id = Number(intersects[0].object.name.substring(4));
+						let event = new Event("ClickPost");
+						event.key = post_id;
+						window.dispatchEvent(event);
+					}					
+				}
+			}
+		}
+
+		window.addEventListener("click", onMouseClick, false);
 	}
 	
 	updateRemotePlayers(dt){

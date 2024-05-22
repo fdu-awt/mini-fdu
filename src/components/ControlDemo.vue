@@ -1,15 +1,16 @@
 <script>
 import {Game} from "@/three/game";
 import {Lab1FbxSelfImageLoader} from "@/three/SelfImageLoader";
-// import {Town} from "@/three/GameEnvironment";
 import {GuangHuaLou} from "@/three/GameEnvironment";
 import SettingDialog from "@/components/SettingDialog.vue";
 import ChatBox from "@/components/ChatBox.vue";
 import gameEventEmitter, {GAME_EVENTS}  from "@/event/GameEventEmitter";
+import PostDialog from "@/components/PostDialog.vue";
 
 export default {
 	name: "ControlDemo",
 	components: {
+		PostDialog,
 		ChatBox,
 		SettingDialog,
 	},
@@ -60,9 +61,12 @@ export default {
 </script>
 
 <template>
-  <div id="canvas-container"></div>
-  <SettingDialog :show="showSettingDialog" @close="onSettingDialogClose"/>
-  <ChatBox v-if="isChatBoxVisible" :socket="socket" :remote-id="remoteId" :local-id="localId" @close="closeChatBox" />
+	<div id="canvas-container"></div>
+
+	<PostDialog/>	
+	
+	<SettingDialog :show="showSettingDialog" @close="onSettingDialogClose"/>
+	<ChatBox v-if="isChatBoxVisible" :socket="socket" :remote-id="remoteId" :local-id="localId" @close="closeChatBox" />
 </template>
 
 <style scoped>
