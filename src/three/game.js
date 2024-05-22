@@ -135,8 +135,64 @@ export class Game {
 		gameEventEmitter.on(GAME_EVENTS.USER_SELF_IMAGE_CHANGE, (selfImageName) => {
 			this.player.changeModel(selfImageName, FBX_IMAGE.randomColour());
 		});
+
+		// 监听键盘事件
+		this.listenKeyDown();
+		this.listenKeyUp();
 	}
 
+	listenKeyDown(){
+		document.addEventListener('keydown', (e) => {
+			console.log(e.key);
+			switch (e.key) {
+			case "w":
+				gameEventEmitter.emit(GAME_EVENTS.KEY_DOWN_W);
+				break;
+			case "a":
+				gameEventEmitter.emit(GAME_EVENTS.KEY_DOWN_A);
+				break;
+			case "s":
+				gameEventEmitter.emit(GAME_EVENTS.KEY_DOWN_S);
+				break;
+			case "d":
+				gameEventEmitter.emit(GAME_EVENTS.KEY_DOWN_D);
+				break;
+			case "v":
+				gameEventEmitter.emit(GAME_EVENTS.KEY_DOWN_V);
+				break;
+			case "e":
+				gameEventEmitter.emit(GAME_EVENTS.KEY_DOWN_E);
+				break;
+			case "q":
+				gameEventEmitter.emit(GAME_EVENTS.KEY_DOWN_Q);
+				break;
+			case "z":
+				gameEventEmitter.emit(GAME_EVENTS.KEY_DOWN_Z);
+				break;
+			}
+		});
+	}
+	
+	listenKeyUp() {
+		document.addEventListener('keyup', (e) => {
+			console.log(e.key);
+			switch (e.key) {
+			case "w":
+				gameEventEmitter.emit(GAME_EVENTS.KEY_UP_W);
+				break;
+			case "a":
+				gameEventEmitter.emit(GAME_EVENTS.KEY_UP_A);
+				break;
+			case "s":
+				gameEventEmitter.emit(GAME_EVENTS.KEY_UP_S);
+				break;
+			case "d":
+				gameEventEmitter.emit(GAME_EVENTS.KEY_UP_D);
+				break;
+			}
+		});
+	}
+	
 	updateRemotePlayers(dt){
 		// 检查是否有远程数据、LocalPlayer 玩家对象以及 LocalPlayer 的 userId 是否存在。
 		// 如果没有，则直接返回，不做任何更新。
