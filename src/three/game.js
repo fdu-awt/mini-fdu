@@ -6,6 +6,7 @@ import {FbxSelfImageLoader} from "@/three/SelfImageLoader";
 import {Preloader} from "@/utils/preloader";
 import GameWebSocketService, {GAME_WS_EMIT_EVENTS, GAME_WS_MSG_TYPES} from "@/api/socket/GameWebSocketService";
 import gameErrorEventEmitter, {GAME_ERROR_EVENTS} from "@/event/GameErrorEventEmitter";
+import gameEventEmitter, {GAME_EVENTS} from "@/event/GameEventEmitter";
 import STORAGE from "@/store";
 
 export class Game {
@@ -114,6 +115,11 @@ export class Game {
 		this.renderer.setSize(window.innerWidth, window.innerHeight);
 		this.renderer.shadowMap.enabled = true;
 		this.container.appendChild(this.renderer.domElement);
+
+		// 处理用户选择个人形象
+		gameEventEmitter.on(GAME_EVENTS.USER_SELF_IMAGE_CHANGE, (selfImageName) => {
+			this.player.changeModel(selfImageName, FBX_IMAGE.randomColour());
+		});
 	}
 
 	updateRemotePlayers(dt){
@@ -328,6 +334,8 @@ class Player {
 	}
 
 	changeModel(modelName, colour) {
+		this.model = modelName;
+		this.colour = colour;
 		// 移除旧模型
 		this.game.scene.remove(this.object);
 		this.loadModel(modelName, colour);
