@@ -1,13 +1,10 @@
-const API_EVENTS = Object.freeze({
-	UN_AUTH: Symbol("un_authorized"),
-	VALIDATE_ERROR: Symbol("validate_error"),
-	INTERNAL_ERROR: Symbol("internal_error"),
-	NETWORK_ERROR: Symbol("network_error"),
+const GAME_ERROR_EVENTS = Object.freeze({
+	NO_LOCAL_USER_ID: Symbol("no_local_user_id"),
 	// 其他错误
 	OTHER_ERROR: Symbol("other_error"),
 });
 
-class ApiEventEmitter {
+class GameErrorEventEmitter {
 	constructor() {
 		this.events = {};
 	}
@@ -27,5 +24,5 @@ class ApiEventEmitter {
 	}
 }
 
-export { API_EVENTS };
-export default new ApiEventEmitter();
+export { GAME_ERROR_EVENTS };
+export default new GameErrorEventEmitter();

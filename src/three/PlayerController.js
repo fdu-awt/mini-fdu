@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import gameEventEmitter, {GAME_EVENTS}  from "@/event/GameEventEmitter";
 
 export default class PlayerController {
 	constructor(player, controllerElement) {
@@ -28,6 +29,19 @@ export default class PlayerController {
 		//阻尼 当没有WASD加速的时候，角色慢慢减速停下来
 		this.damping = -0.04;
 
+		// 运动速度阈值
+		this.speedThresholds = {
+			idle(vl){
+				return vl < 100;
+			},
+			walking (vl) {
+				return vl <= 200;
+			},
+			running (vl) {
+				return vl > 200;
+			}
+		};
+
 		// 控制 第一、三人称
 		this.firstView = false;
 
@@ -37,9 +51,43 @@ export default class PlayerController {
 		this.angleMin = THREE.MathUtils.degToRad(-25);//角度转弧度
 		this.angleMax = THREE.MathUtils.degToRad(25);
 
+		// 按键事件监听
+		this.key_down_w = () => {this.keyStates.W = true;};
+		this.key_down_a = () => {this.keyStates.A = true;};
+		this.key_down_s = () => {this.keyStates.S = true;};
+		this.key_down_d = () => {this.keyStates.D = true;};
+
+		this.key_down_v = () => {
+			this.firstView = !this.firstView;
+			this.activeCamera = this.firstView ? this.firstViewCamera : this.thirdViewCamera;
+		};
+		this.key_down_e = () => {
+			this.player.action = 'Pointing';
+			this.player.socketOnLocalUpdate();
+		};
+		this.key_down_q = () => {
+			this.player.action = 'Pointing Gesture';
+			this.player.socketOnLocalUpdate();
+		};
+
+		this.key_up_w = () => {this.keyStates.W = false;};
+		this.key_up_a = () => {this.keyStates.A = false;};
+		this.key_up_s = () => {this.keyStates.S = false;};
+		this.key_up_d = () => {this.keyStates.D = false;};
+
 		this.createCameras();
 		this.addKeyListeners();
 		this.addMouseListeners();
+		// 处理：请求解锁鼠标锁定
+		gameEventEmitter.on(
+			GAME_EVENTS.REQUEST_POINTER_UNLOCK,
+			this.unlockPointer.bind(this)
+		);
+		// 处理：申请打字控制
+		gameEventEmitter.on(
+			GAME_EVENTS.REQUEST_CHAT_CONTROL,
+			this.cancelKeyListeners.bind(this)
+		);
 	}
 
 	createCameras() {
@@ -50,8 +98,8 @@ export default class PlayerController {
 		this.firstViewCamera = new THREE.PerspectiveCamera(
 			45, window.innerWidth / window.innerHeight, 10, 200000
 		);
-		this.firstViewCamera.position.set(0, 300, 100);
-		this.firstViewCamera.lookAt(0, 300, 120);
+		this.firstViewCamera.position.set(0, 250, 100);
+		this.firstViewCamera.lookAt(0, 250, 120);
 
 		this.thirdViewCamera = new THREE.PerspectiveCamera(
 			45, window.innerWidth / window.innerHeight, 10, 200000
@@ -81,44 +129,45 @@ export default class PlayerController {
 	}
 
 	addKeyListeners() {
-		document.addEventListener('keydown', (e) => {
-			switch (e.key) {
-			case "w":
-				this.keyStates.W = true;
-				break;
-			case "a":
-				this.keyStates.A = true;
-				break;
-			case "s":
-				this.keyStates.S = true;
-				break;
-			case "d":
-				this.keyStates.D = true;
-				break;
-			case "v":
-				this.firstView = !this.firstView;
-				this.activeCamera = this.firstView ? this.firstViewCamera : this.thirdViewCamera;
-				break;
+		gameEventEmitter
+			.on(GAME_EVENTS.KEY_DOWN_W, this.key_down_w)
+			.on(GAME_EVENTS.KEY_DOWN_A, this.key_down_a)
+			.on(GAME_EVENTS.KEY_DOWN_S, this.key_down_s)
+			.on(GAME_EVENTS.KEY_DOWN_D, this.key_down_d);
+		gameEventEmitter
+			.on(GAME_EVENTS.KEY_DOWN_V, this.key_down_v)
+			.on(GAME_EVENTS.KEY_DOWN_E, this.key_down_e)
+			.on(GAME_EVENTS.KEY_DOWN_Q, this.key_down_q);
+		gameEventEmitter
+			.on(GAME_EVENTS.KEY_UP_W, this.key_up_w)
+			.on(GAME_EVENTS.KEY_UP_A, this.key_up_a)
+			.on(GAME_EVENTS.KEY_UP_S, this.key_up_s)
+			.on(GAME_EVENTS.KEY_UP_D, this.key_up_d);
+	}
+
+	cancelKeyListeners() {
+		gameEventEmitter
+			.off(GAME_EVENTS.KEY_DOWN_W, this.key_down_w)
+			.off(GAME_EVENTS.KEY_DOWN_A, this.key_down_a)
+			.off(GAME_EVENTS.KEY_DOWN_S, this.key_down_s)
+			.off(GAME_EVENTS.KEY_DOWN_D, this.key_down_d)
+			.off(GAME_EVENTS.KEY_DOWN_V, this.key_down_v)
+			.off(GAME_EVENTS.KEY_DOWN_E, this.key_down_e)
+			.off(GAME_EVENTS.KEY_DOWN_Q, this.key_down_q)
+			.off(GAME_EVENTS.KEY_UP_W, this.key_up_w)
+			.off(GAME_EVENTS.KEY_UP_A, this.key_up_a)
+			.off(GAME_EVENTS.KEY_UP_S, this.key_up_s)
+			.off(GAME_EVENTS.KEY_UP_D, this.key_up_d);
+	}
+
+	unlockPointer() {
+		if (this.controllerElement) {
+			if (document.body.contains(this.controllerElement)){
+				if (document.pointerLockElement === this.controllerElement) {
+					document.exitPointerLock();
+				}
 			}
-			// this.playerControl((this.keyStates.W ? 1 : 0) - (this.keyStates.S ? 1 : 0), (this.keyStates.A ? 1 : 0) - (this.keyStates.D ? 1 : 0));
-		});
-		document.addEventListener('keyup', (e) => {
-			switch (e.key) {
-			case "w":
-				this.keyStates.W = false;
-				break;
-			case "a":
-				this.keyStates.A = false;
-				break;
-			case "s":
-				this.keyStates.S = false;
-				break;
-			case "d":
-				this.keyStates.D = false;
-				break;
-			}
-			// this.playerControl((this.keyStates.W ? 1 : 0) - (this.keyStates.S ? 1 : 0), (this.keyStates.A ? 1 : 0) - (this.keyStates.D ? 1 : 0));
-		});
+		}
 	}
 
 	addMouseListeners() {
@@ -128,6 +177,8 @@ export default class PlayerController {
 					if (this.controllerElement) {
 						if (document.body.contains(this.controllerElement)) {
 							this.controllerElement.requestPointerLock();//指针锁定
+							// 恢复游戏控制
+							this.addKeyListeners();
 						}
 					}
 				});
@@ -150,36 +201,6 @@ export default class PlayerController {
 				this.cameraGroup.rotation.x = this.angleMax;
 			}
 		});
-	}
-
-	// TODO 弃用
-	playerControl(forward, turn) {
-		turn = -turn;
-
-		if (forward > 0.3) {
-			if (this.player.action !== 'Walking' && this.player.action !== 'Running') {
-				this.player.action = 'Walking';
-			}
-		} else if (forward < -0.3) {
-			if (this.player.action !== 'Walking Backwards') {
-				this.player.action = 'Walking Backwards';
-			}
-		} else {
-			forward = 0;
-			if (Math.abs(turn) > 0.1) {
-				if (this.player.action !== 'Turn') this.player.action = 'Turn';
-			} else if (this.player.action !== "Idle") {
-				this.player.action = 'Idle';
-			}
-		}
-
-		if (forward === 0 && turn === 0) {
-			delete this.player.motion;
-		} else {
-			this.player.motion = { forward, turn };
-		}
-
-		// this.player.updateSocket();
 	}
 
 	update(deltaTime) {
@@ -212,9 +233,9 @@ export default class PlayerController {
 			this.v.addScaledVector(this.v, this.damping);//速度衰减
 		}
 		const vl = this.v.length();
-		if (vl < 20) {
+		if (this.speedThresholds.idle(vl)) {
 			this.player.action = "Idle";
-		} else if (vl <= 200) {
+		} else if (this.speedThresholds.walking(vl)) {
 			this.player.action = "Walking";
 		} else {
 			this.player.action = "Running";

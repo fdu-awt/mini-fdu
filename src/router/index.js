@@ -8,8 +8,8 @@ import NotFoundPage from "@/pages/NotFoundPage.vue";
 import VideoChatDemo from "@/components/VideoChatDemo.vue";
 import STORAGE from "../store";
 import {ElMessageBox, ElNotification} from 'element-plus';
-import apiEmitter, {API_EVENTS} from "@/event/ApiEventEmitter";
-import gameEventEmitter, {GAME_EVENTS} from "@/event/GameEventEmitter";
+import apiErrorEmitter, {API_ERROR_EVENTS} from "@/event/ApiErrorEventEmitter";
+import gameErrorEventEmitter, {GAME_ERROR_EVENTS} from "@/event/GameErrorEventEmitter";
 
 // 定义路由
 const routes = [
@@ -68,14 +68,14 @@ function notifyAndGoLogin(msg) {
 }
 
 // 监听未授权事件
-apiEmitter.on(API_EVENTS.UN_AUTH, (msg) => {
+apiErrorEmitter.on(API_ERROR_EVENTS.UN_AUTH, (msg) => {
 	console.error("未授权事件，UN_AUTH：", msg);
 	notifyAndGoLogin(msg);
 });
 
 // 监听游戏错误事件
 // 事实上，这个事件的触发晚于 路由守卫 的检查
-gameEventEmitter.on(GAME_EVENTS.NO_LOCAL_USER_ID, (msg) => {
+gameErrorEventEmitter.on(GAME_ERROR_EVENTS.NO_LOCAL_USER_ID, (msg) => {
 	console.error("游戏事件，NO_LOCAL_USER_ID：", msg);
 	STORAGE.logOut();
 	router.replace({
