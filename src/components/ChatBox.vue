@@ -10,15 +10,7 @@
               :class="['message-item', { 'my-message': message.ifSelf, 'other-message': !message.ifSelf }]"
           >
             <el-avatar :src="message.ifSelf ? userAvatar : remoteAvatar" class="message-avatar"></el-avatar>
-            <div class="message-content">
-              <template v-if="message.type == 'text'">
-                {{ message.message }}
-              </template>
-              <template v-else-if="message.type == 'video'">
-                通话时长: {{ message.message }}
-              </template>
-            </div>
-<!--            <div class="message-content">{{ message.message }}</div>-->
+            <div class="message-content">{{ message.message }}</div>
           </div>
         </div>
       </el-scrollbar>
