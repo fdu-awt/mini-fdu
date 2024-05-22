@@ -7,7 +7,7 @@ import {Preloader} from "@/utils/preloader";
 import GameWebSocketService, {GAME_WS_EMIT_EVENTS, GAME_WS_MSG_TYPES} from "@/api/socket/GameWebSocketService";
 import gameEventEmitter, {GAME_EVENTS} from "@/event/GameEventEmitter";
 import STORAGE from "@/store";
-import { ElMessage } from "element-plus";
+// import { ElMessage } from "element-plus";
 
 export class Game {
 	/**
@@ -134,18 +134,23 @@ export class Game {
 
 				console.log("intersects", intersects);
 				if(intersects.length > 0){
-					ElMessage({
-						showClose: true,
-						message: intersects[0].object.name,
-						type: "success",
-					});
+					// ElMessage({
+					// 	showClose: true,
+					// 	message: intersects[0].object.name,
+					// 	type: "success",
+					// });
 					if(intersects[0].object.name.startsWith("post")){
-						const post = intersects[0].object;
-						post.material = new THREE.MeshBasicMaterial({ 
-							color: 0xff0000,
-							side: THREE.DoubleSide,
-						});
-					}
+						// const post = intersects[0].object;
+						// post.material = new THREE.MeshBasicMaterial({ 
+						// 	color: 0xff0000,
+						// 	side: THREE.DoubleSide,
+						// });
+						
+						const post_id = Number(intersects[0].object.name.substring(4));
+						let event = new Event("ClickPost");
+						event.key = post_id;
+						window.dispatchEvent(event);
+					}					
 				}
 			}
 		}

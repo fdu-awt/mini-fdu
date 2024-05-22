@@ -1,14 +1,17 @@
 <script>
 import {Game} from "@/three/game";
 import {Lab1FbxSelfImageLoader} from "@/three/SelfImageLoader";
-// import {Town} from "@/three/GameEnvironment";
 import {GuangHuaLou} from "@/three/GameEnvironment";
+import PostDialog from "@/components/PostDialog.vue";
 
 export default {
 	name: "ControlDemo",
+	components: {
+		PostDialog,
+	},
 	data() {
 		return {
-			game: null
+			game: null,
 		};
 	},
 	mounted() {
@@ -20,6 +23,8 @@ export default {
 
 <template>
 	<div id="canvas-container"></div>
+
+	<PostDialog/>	
 </template>
 
 <style scoped>
