@@ -10,6 +10,7 @@ import gameEventEmitter, {GAME_EVENTS} from "@/event/GameEventEmitter";
 import STORAGE from "@/store";
 import gameErrorEventEmitter, {GAME_ERROR_EVENTS} from "@/event/GameErrorEventEmitter";
 import {createPlayerNameText} from "@/three/common";
+import NPC from "@/three/NPC";
 
 export class Game {
 	/**
@@ -43,6 +44,18 @@ export class Game {
 
 		this.colliders = [];
 		this.remoteColliders = [];
+
+		// 定义 npc
+		// TODO 根据需求定义NPC
+		this.npc1 = new NPC(
+			this,
+			"Doctor",
+			FBX_IMAGE.randomColour(),
+			"NPC1",
+			{x: 3122, y: 0, z: -173,},
+			{x: 0, y: 2.6, z: 0,},
+			{x: 0, y: 320, z: 0,});
+		this.npcs = [this.npc1];
 
 		this.preload();
 	}
@@ -123,6 +136,9 @@ export class Game {
 		this.player = new PlayerLocal(this, STORAGE.getSelfImage(), STORAGE.getUserId(), STORAGE.getUsername());
 
 		this.environment.load(this, undefined);
+
+		// 加载NPC
+		this.npcs.forEach((npc)=>{npc.init();});
 
 		this.renderer = new THREE.WebGLRenderer({
 			antialias: true,  // 抗锯齿
@@ -466,12 +482,12 @@ class Player {
 			return;
 		}
 		if (this.activeAction) {
-			// 一次性动画
 			console.log("Set weight to 0.0: " + this.activeAction.name);
 			this.activeAction.weight = 0.0;
 			this.activeAction = this.actionObjs[name];
 			this.activeAction.weight = 1.0;
 			this.activateActionName = name;
+			// 一次性动画
 			if (name === 'Pointing Gesture' || name === 'Pointing') {
 				// 设置动画为只播放一次
 				this.activeAction.setLoop(THREE.LoopOnce);
