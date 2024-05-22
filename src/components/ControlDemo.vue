@@ -4,13 +4,14 @@ import {Lab1FbxSelfImageLoader} from "@/three/SelfImageLoader";
 // import {Town} from "@/three/GameEnvironment";
 import {GuangHuaLou} from "@/three/GameEnvironment";
 import SettingDialog from "@/components/SettingDialog.vue";
-import ChatBox from "@/components/ChatBox.vue"; // 导入子组件
+import ChatBox from "@/components/ChatBox.vue";
+import gameEventEmitter, {GAME_EVENTS}  from "@/event/GameEventEmitter";
 
 export default {
 	name: "ControlDemo",
 	components: {
 		ChatBox,
-		SettingDialog// 注册子组件
+		SettingDialog,
 	},
 	data() {
 		return {
@@ -34,12 +35,11 @@ export default {
 	},
 	methods: {
 		listenKeyDown(){
-			document.addEventListener('keydown', (e) => {
-				if (e.key === 'z') {
-					this.showSettingDialog = !this.showSettingDialog;
-					// 解除鼠标锁定
-					this.game.playerController.unlockPointer();
-				}
+			// 按下 Z 键时显示后台设置页面
+			gameEventEmitter.on(GAME_EVENTS.KEY_DOWN_Z, () => {
+				this.showSettingDialog = !this.showSettingDialog;
+				// 申请解除鼠标锁定
+				gameEventEmitter.emit(GAME_EVENTS.REQUEST_POINTER_UNLOCK);
 			});
 		},
 		onSettingDialogClose(){
