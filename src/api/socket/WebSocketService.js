@@ -13,6 +13,7 @@ class WebSocketService {
 	constructor(url) {
 		this.url = url;
 		this.socket = null;
+		this.currentMessage=null;
 		this.eventHandlers = {};
 	}
 
@@ -32,6 +33,7 @@ class WebSocketService {
 		this.socket.onmessage = (event) => {
 			console.debug("WebSocket message received:", event.data);
 			const message = JSON.parse(event.data);
+			this.currentMessage=message;
 			if (this.eventHandlers.message) {
 				this.eventHandlers.message(message);
 			}

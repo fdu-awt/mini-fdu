@@ -5,6 +5,7 @@ import {Town} from "@/three/GameEnvironment";
 import {FbxSelfImageLoader} from "@/three/SelfImageLoader";
 import {Preloader} from "@/utils/preloader";
 import GameWebSocketService, {GAME_WS_EMIT_EVENTS, GAME_WS_MSG_TYPES} from "@/api/socket/GameWebSocketService";
+import ChatWebSocketService from "@/api/socket/ChatWebSocketService";
 import gameEventEmitter, {GAME_EVENTS} from "@/event/GameEventEmitter";
 import STORAGE from "@/store";
 
@@ -42,6 +43,20 @@ export class Game {
 		this.remoteColliders = [];
 
 		this.preload();
+	}
+	openChat(localId, remoteId, socket) {
+		const chatEventData = {
+			localId: localId,
+			remoteId: remoteId,
+			socket: socket
+		};
+		// document.exitPointerLock();
+		// //如果有对话框，就退出世界 逻辑在哪里写的
+		// if (document.pointerLockElement === this.playerController.controllerElement) {
+		// 	document.exitPointerLock();
+		// }
+		const event = new CustomEvent('objectClicked', { detail: chatEventData });
+		window.dispatchEvent(event);
 	}
 
 	preload() {
@@ -393,10 +408,46 @@ class Player {
 					const euler = new THREE.Euler(data.pb, data.h, data.pb);
 					this.object.quaternion.setFromEuler( euler );
 					this.action = data.action;
+					// // 检查用户之间的距离，但是这里不太灵
+					// const distance = this.object.position.distanceTo(this.game.player.object.position);
+					// console.log(distance);
+					const distance = 3;
+					if (distance < 10) {
+						// console.log("我们距离很近诶");
+						this.showChatButton(data.userId);
+					} else {
+						// console.log("我们距离很远诶");
+						this.hideChatButton();
+					}
 				}
 				found = true;
 			}
 			if (!found) this.game.removePlayer(this);
+		}
+	}
+	showChatButton(remotePlayerId) {
+		let chatButton = document.getElementById('chat-button');
+		if (!chatButton) {
+			chatButton = document.createElement('button');
+			chatButton.id = 'chat-button';
+			chatButton.style.position = 'absolute';
+			chatButton.style.top = '10px';
+			chatButton.style.left = '10px';
+			chatButton.style.zIndex = 100; // 按钮位置
+			chatButton.innerText = 'Chat';
+			document.body.appendChild(chatButton);
+		}
+		chatButton.style.display = 'block';
+		chatButton.onclick = () => {
+			this.game.openChat(this.game.player.userId, remotePlayerId, this.game.player.chatWebSocketService.socket);
+		};
+	}
+
+	hideChatButton() {
+
+		const chatButton = document.getElementById('chat-button');
+		if (chatButton) {
+			chatButton.style.display = 'none';
 		}
 	}
 }
@@ -408,6 +459,7 @@ class PlayerLocal extends Player {
 	}
 
 	initWebSocket(){
+		//初始化GameWebSocket
 		this.gameWebSocketService = new GameWebSocketService();
 		this.gameWebSocketService.connect(this.userId);
 		this.gameWebSocketService.onMessage(GAME_WS_MSG_TYPES.REMOTE_DATA, (message) => {
@@ -417,6 +469,11 @@ class PlayerLocal extends Player {
 			const deletedUserId = message.userId;
 			this.game.removePlayers(deletedUserId);
 		});
+		//初始化ChatWebSocket
+		this.chatWebSocketService = new ChatWebSocketService(this.userId);
+		console.log(this.chatWebSocketService);
+		this.chatWebSocketService.connect();
+
 	}
 
 	socketOnLocalUpdate(){

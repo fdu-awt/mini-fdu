@@ -120,19 +120,28 @@ export default class PlayerController {
 			// this.playerControl((this.keyStates.W ? 1 : 0) - (this.keyStates.S ? 1 : 0), (this.keyStates.A ? 1 : 0) - (this.keyStates.D ? 1 : 0));
 		});
 	}
-
 	addMouseListeners() {
-		if (this.controllerElement) {
-			if (document.body.contains(this.controllerElement)){
-				this.controllerElement.addEventListener('click', () => {
-					if (this.controllerElement) {
-						if (document.body.contains(this.controllerElement)) {
-							this.controllerElement.requestPointerLock();//指针锁定
-						}
+		// if (this.controllerElement) {
+		// 	if (document.body.contains(this.controllerElement)){
+		// 		this.controllerElement.addEventListener('click', () => {
+		// 			if (this.controllerElement) {
+		// 				if (document.body.contains(this.controllerElement)) {
+		// 					this.controllerElement.requestPointerLock();//指针锁定
+		// 				}
+		// 			}
+		// 		});
+		// 	}
+		// }
+		//方便聊天功能调试，按F键进入世界
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'f') {
+				if (this.controllerElement) {
+					if (document.body.contains(this.controllerElement)) {
+						this.controllerElement.requestPointerLock();
 					}
-				});
+				}
 			}
-		}
+		});
 		document.addEventListener('mousemove', (event) => {
 			// 进入指针模式后，才能根据鼠标位置控制人旋转
 			if (document.pointerLockElement !== this.controllerElement) return;
