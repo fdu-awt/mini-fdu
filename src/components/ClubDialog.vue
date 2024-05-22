@@ -5,6 +5,7 @@ import {
 	ElText
 } from 'element-plus';
 import {getAllClubData} from "@/api/study.js";
+import ButtonHover1 from './common/ButtonHover1.vue';
 
 export default {
 	name: "PostDialog",
@@ -12,6 +13,7 @@ export default {
 		ElDialog,
 		ElImage,
 		ElText,
+		ButtonHover1,
 	},
 	data() {
 		return {
@@ -28,7 +30,6 @@ export default {
 			if(res.code==200){
 				this.club_data = res.object;
 			}
-
 		}).catch(e => {
 			console.error(e);
 		});
@@ -41,6 +42,11 @@ export default {
 			this.clubDialogVisible = true;
 			this.clubId = event.key;
 			this.current_club_data = this.club_data[this.clubId];
+		},
+		
+		handleAskForAI(){
+			this.$emit("askAI");
+			this.postDialogVisible = false;
 		}
 	}
 };
@@ -52,6 +58,8 @@ export default {
 			<el-image style="width: 300px; height: 200px" :src="'./club/images/' + current_club_data.profile" :fit="contain" />
 			<h3>{{ current_club_data.name }}</h3>
 			<el-text size="default">{{ current_club_data.intro }}</el-text>
+			<br/>
+			<ButtonHover1 msg="点击询问AI" @click="handleAskForAI"/>
 		</div>
     </el-dialog>
 </template>

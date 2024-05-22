@@ -8,12 +8,15 @@ import gameEventEmitter, {GAME_EVENTS}  from "@/event/GameEventEmitter";
 import PostDialog from "@/components/PostDialog.vue";
 import ClubDialog from "@/components/ClubDialog.vue";
 import eventBus from '@/eventbus/eventBus.js';
+import AIChatDialog from '@/components/AIChatDialog.vue';
 
 export default {
 	name: "ControlDemo",
 	components: {
 		PostDialog,
 		ClubDialog,
+		AIChatDialog,
+
 		ChatBox,
 		SettingDialog,
 	},
@@ -26,6 +29,8 @@ export default {
 			socket: null,
 			canvasContainer: null,
 			showSettingDialog: false,
+
+			AIChatDialogVisible: false,
 			newMessageNotification: false, // 新消息通知的标记
 		};
 	},
@@ -67,6 +72,13 @@ export default {
 		closeChatBox() {
 			this.isChatBoxVisible = false; // 关闭ChatBox的方法
 		},
+		handleAskAI() {
+			this.AIChatDialogVisible = true;
+		},
+		handleAIChatClose() {
+			this.AIChatDialogVisible = false;
+		},
+
 		handleNewMessage(message, localId, remoteId, socket) {
 			// 如果ChatBox未显示，则设置新消息通知标志为true
 			if (!this.isChatBoxVisible) {
@@ -91,8 +103,9 @@ export default {
 <template>
 	<div id="canvas-container"></div>
 
-	<PostDialog/>	
-	<ClubDialog/>
+	<PostDialog @askAI="handleAskAI"/>
+	<ClubDialog @askAI="handleAskAI"/>
+	<AIChatDialog :dialogVisible="this.AIChatDialogVisible" @close="handleAIChatClose"/>
 	
 	<SettingDialog :show="showSettingDialog" @close="onSettingDialogClose"/>
 	<ChatBox v-if="isChatBoxVisible" :socket="socket" :remote-id="remoteId" :local-id="localId" @close="closeChatBox" />
