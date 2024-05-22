@@ -19,6 +19,7 @@ class EventEmitter {
 		this.events[event] = this.events[event].filter(
 			({listener: eventListener}) => eventListener !== listener
 		);
+		return this;
 	}
 
 	emit(event, ...args) {
