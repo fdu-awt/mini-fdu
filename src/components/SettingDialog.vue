@@ -77,7 +77,7 @@ export default {
 	justify-content: center;
 }
 .center-container {
-	width: 80%;
-	height: 70%;
+	width: 100%;
+	height: 100%;
 }
 </style>
