@@ -557,7 +557,9 @@ class Player {
 				if (event.action === newAction) {
 					this.mixer.removeEventListener('finished', onFinished);
 					this.action = 'Idle';
-					this.socketOnLocalUpdate(); // 通知服务器
+					if (this.local) {
+						this.socketOnLocalUpdate(); // 通知服务器
+					}
 				}
 			};
 
