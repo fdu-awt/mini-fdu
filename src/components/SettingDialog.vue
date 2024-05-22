@@ -1,6 +1,18 @@
 <script>
+import {ElDialog, ElButton, ElRow, ElCol, ElMenu, ElSubMenu, ElIcon, ElMenuItem, ElMenuItemGroup} from 'element-plus';
+import {
+	Document,
+	Menu as IconMenu,
+	Location,
+	Refresh,
+	DataLine
+} from '@element-plus/icons-vue';
+
 import PersonalInfo from "@/components/PersonalInfo.vue";
-import StudyRecord from "@/components/StudyRecord.vue";
+import QuizRecord from '@/components/QuizRecord.vue';
+import QuizReview from '@/components/QuizReview.vue';
+import QuizAnalysis from '@/components/QuizAnalysis.vue';
+
 export default {
 	name: "SettingDialog",
 	props: {
@@ -12,21 +24,38 @@ export default {
 	},
 	components: {
 		PersonalInfo,
-		StudyRecord,
+		QuizRecord,
+		QuizReview,
+		QuizAnalysis,
+		ElDialog,
+		ElButton,
+		ElRow,
+		ElCol,
+		ElMenu,
+		ElSubMenu,
+		ElIcon,
+		ElMenuItem,
+		ElMenuItemGroup,
+		Location,
+		Refresh,
+		DataLine,
+		Document,
+		IconMenu
 	},
 	data() {
 		return {
 			isVisible: this.show,
-			activeMenu: '1',
+			currentPage: 'PersonalInfo',
 		};
 	},
 	methods: {
-		handleSelect(key) {
-			this.activeMenu = key;
+		navigate(page) {
+			// 根据点击的导航项切换当前页面组件
+			this.currentPage = page;
 		},
 		handleClose() {
 			this.$emit('close', false);
-		}
+		},
 	},
 	watch: {
 		show(newVal) {
@@ -35,49 +64,65 @@ export default {
 	},
 };
 </script>
-
 <template>
-	<el-dialog v-model="isVisible" @close="handleClose">
-		<div class="container">
-			<div class="center-container">
-				<el-row span="24">
-					<el-col :span="4">
-						<el-menu
-								default-active="1"
-								class="el-menu-vertical-demo"
-								@select="handleSelect">
-							<el-menu-item index="1">
-								<span>个人信息</span>
-							</el-menu-item>
-							<el-menu-item index="2">
-								<span>学习记录</span>
-							</el-menu-item>
-						</el-menu>
-					</el-col>
-					<el-col :span="20">
-						<div v-if="activeMenu === '1'">
-							<PersonalInfo/>
-						</div>
-						<div v-if="activeMenu === '2'">
-							<StudyRecord/>
-						</div>
-					</el-col>
-				</el-row>
-			</div>
-		</div>
-	</el-dialog>
+  <div>
+    <el-dialog v-model="isVisible" title="后台管理" width="1000" height="800">
+      <el-row class="tac">
+        <el-col :span="4">
+          <el-menu default-active="2" class="el-menu-vertical-demo" @close="handleClose">
+            <el-menu-item index="1" @click="navigate('PersonalInfo')">
+              <el-icon>
+                <icon-menu/>
+              </el-icon>
+              <span>个人信息</span>
+            </el-menu-item>
+            <el-menu-item index="2" @click="navigate('QuizRecord')">
+              <el-icon>
+                <document/>
+              </el-icon>
+              <span>答题记录</span>
+            </el-menu-item>
+            <el-menu-item index="3" @click="navigate('QuizReview')">
+              <el-icon>
+                <Refresh/>
+              </el-icon>
+              <span>错题复盘</span>
+            </el-menu-item>
+            <el-menu-item index="4" @click="navigate('QuizAnalysis')">
+              <el-icon>
+                <DataLine/>
+              </el-icon>
+              <span>学习分析</span>
+            </el-menu-item>
+          </el-menu>
+        </el-col>
+        <el-col :span="20">
+          <component :is="currentPage"></component>
+        </el-col>
+      </el-row>
+    </el-dialog>
+  </div>
 </template>
 
 <style scoped>
-.container {
-	width: 100%;
-	height: 100%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
+.el-dialog {
+  max-height: 1200px;
+  overflow-y: scroll;
 }
-.center-container {
-	width: 100%;
-	height: 100%;
+
+.el-col {
+  height: 600px;
+  overflow: auto;
+}
+
+.tac {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.el-menu-item {
+  padding: 40px;
 }
 </style>
