@@ -7,6 +7,7 @@ import ChatBox from "@/components/ChatBox.vue";
 import gameEventEmitter, {GAME_EVENTS}  from "@/event/GameEventEmitter";
 import PostDialog from "@/components/PostDialog.vue";
 import ClubDialog from "@/components/ClubDialog.vue";
+import eventBus from '@/eventbus/eventBus.js';
 import AIChatDialog from '@/components/AIChatDialog.vue';
 
 export default {
@@ -30,9 +31,11 @@ export default {
 			showSettingDialog: false,
 
 			AIChatDialogVisible: false,
+			newMessageNotification: false, // 新消息通知的标记
 		};
 	},
 	mounted() {
+		eventBus.on('newMessage', this.handleNewMessage);
 		this.canvasContainer = document.getElementById('canvas-container');
 		this.game = new Game(this.canvasContainer, new GuangHuaLou() , new Lab1FbxSelfImageLoader());
 		this.listenKeyDown();
@@ -40,6 +43,10 @@ export default {
 		window.addEventListener('objectClicked', (event) => {
 			this.handleObjectClick(event.detail.localId, event.detail.remoteId, event.detail.socket);
 		});
+	},
+	unmounted() {
+		// 组件卸载前，移除事件监听
+		eventBus.off('newMessage', this.handleNewMessage);
 	},
 	methods: {
 		listenKeyDown(){
@@ -70,7 +77,25 @@ export default {
 		},
 		handleAIChatClose() {
 			this.AIChatDialogVisible = false;
-		}
+		},
+
+		handleNewMessage(message, localId, remoteId, socket) {
+			// 如果ChatBox未显示，则设置新消息通知标志为true
+			if (!this.isChatBoxVisible) {
+				this.newMessageNotification = true;
+				this.localId = localId; // 可选：如果需要在通知中使用localId
+				this.remoteId = remoteId; // 可选：如果需要在通知中使用remoteId
+				this.socket = socket; // 可选：如果需要在通知中使用socket
+			}
+			// 这里可以添加其他处理新消息的逻辑
+		},
+		// ...其他已有方法
+		viewNewMessage() {
+			// 用户点击查看新消息通知时调用的方法
+			this.isChatBoxVisible = true;
+			this.newMessageNotification = false;
+			// 这里可以添加打开ChatBox后需要执行的逻辑
+		},
 	},
 };
 </script>
@@ -78,17 +103,40 @@ export default {
 <template>
 	<div id="canvas-container"></div>
 
-	<PostDialog @askAI="handleAskAI"/>	
+	<PostDialog @askAI="handleAskAI"/>
 	<ClubDialog @askAI="handleAskAI"/>
 	<AIChatDialog :dialogVisible="this.AIChatDialogVisible" @close="handleAIChatClose"/>
 	
 	<SettingDialog :show="showSettingDialog" @close="onSettingDialogClose"/>
 	<ChatBox v-if="isChatBoxVisible" :socket="socket" :remote-id="remoteId" :local-id="localId" @close="closeChatBox" />
+  <div v-if="newMessageNotification" class="new-message-notification">
+    您有一条新消息，请点击查看。
+    <button @click="viewNewMessage">查看消息</button>
+  </div>
 </template>
 
 <style scoped>
 #canvas-container {
   width: 100%;
   height: 100%;
+}
+.new-message-notification {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #f44336; /* 红色背景 */
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.new-message-notification button {
+  margin-left: 10px;
+  background-color: #ffeb3b; /* 按钮颜色 */
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
 }
 </style>

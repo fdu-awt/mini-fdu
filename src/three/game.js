@@ -11,6 +11,7 @@ import STORAGE from "@/store";
 import gameErrorEventEmitter, {GAME_ERROR_EVENTS} from "@/event/GameErrorEventEmitter";
 import {createPlayerNameText} from "@/three/common";
 import NPC from "@/three/NPC";
+import eventBus from '@/eventbus/eventBus.js';
 
 export class Game {
 	static anims = ['Walking', 'Walking Backwards', 'Turn', 'Running', 'Pointing', 'Talking', 'Pointing Gesture'];
@@ -671,6 +672,13 @@ class PlayerLocal extends Player {
 		this.chatWebSocketService = new ChatWebSocketService(this.userId);
 		console.log(this.chatWebSocketService);
 		this.chatWebSocketService.connect();
+		this.chatWebSocketService.socket.onmessage = (message) => {
+			if (this.chatWebSocketService.socket.readyState === WebSocket.OPEN) {
+				console.log("我现在收到消息了");
+				// 使用事件总线发射事件
+				eventBus.emit('newMessage', message, this.localId, this.remoteId, this.socket);
+			}
+		};
 
 	}
 
