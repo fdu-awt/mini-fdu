@@ -378,6 +378,7 @@ class Player {
 		this.local = local;
 
 		this.mixer = null;
+		this.actions = {}; // 存储动画动作
 		this.animations = this.game.animations;
 
 		if (this.userId === undefined || this.userId === '') {
@@ -463,6 +464,14 @@ class Player {
 						game.remotePlayers.push(players[0]);
 					}
 				}
+				// 创建每个动画的动作
+				for (let animName in game.animations) {
+					const clip = game.animations[animName];
+					const action = player.mixer.clipAction(clip);
+					action.clampWhenFinished = true;
+					action.loop = THREE.LoopRepeat;
+					player.actions[animName] = action;
+				}
 				if (game.animations.Idle !== undefined) player.action = "Idle";
 				// 解析Promise，表示模型加载完成
 				resolve();
@@ -489,31 +498,21 @@ class Player {
 	}
 
 	set action(name) {
-		//Make a copy of the clip if this is a remote player
 		if (name === "Init") {
 			this.actionName = name;
 			return;
 		}
 		if (this.actionName === name) return;
-		const clip = (this.local) ? this.animations[name] : THREE.AnimationClip.parse(THREE.AnimationClip.toJSON(this.animations[name]));
-		const action = this.mixer.clipAction( clip );
-		// 一次性动画
-		if (name === 'Pointing Gesture' || name === 'Pointing') {
-			// 设置动画为只播放一次
-			action.setLoop(THREE.LoopOnce);
-			// 动画播放完成后，将动作设置为Idle
-			this.mixer.addEventListener('finished', function () {
-				this.action = 'Idle';
-				this.socketOnLocalUpdate(); // 发送动作到服务器
-			}.bind(this));
-		}
-		action.time = 0;
-		this.mixer.stopAllAction();
+		const previousAction = this.actions[this.actionName];
+		const newAction = this.actions[name];
 		this.actionName = name;
-		this.actionTime = Date.now();
-		action.fadeIn(0.5);
-		action.play();
+
+		if (previousAction) {
+			previousAction.fadeOut(0.5);
+		}
+		newAction.reset().fadeIn(0.5).play();
 	}
+
 
 	get action() {
 		return this.actionName;
