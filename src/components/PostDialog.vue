@@ -5,6 +5,7 @@ import {
 	ElText
 } from 'element-plus';
 import {getAllHistoryData} from "@/api/study.js";
+import ButtonHover1 from './common/ButtonHover1.vue';
 
 export default {
 	name: "PostDialog",
@@ -12,6 +13,7 @@ export default {
 		ElDialog,
 		ElImage,
 		ElText,
+		ButtonHover1,
 	},
 	data() {
 		return {
@@ -28,8 +30,6 @@ export default {
 			if(res.code==200){
 				this.history_data = res.object;
 			}
-
-			// console.log("data", this.history_data);
 		}).catch(e => {
 			console.error(e);
 		});
@@ -42,6 +42,11 @@ export default {
 			this.postDialogVisible = true;
 			this.postId = event.key;
 			this.current_history_data = this.history_data[this.postId];
+		},
+
+		handleAskForAI(){
+			this.$emit("askAI");
+			this.postDialogVisible = false;
 		}
 	}
 };
@@ -53,6 +58,8 @@ export default {
 			<el-image style="width: 300px; height: 200px" :src="'./history/images/' + current_history_data.image" :fit="contain" />
 			<h3>{{ current_history_data.title }}</h3>
 			<el-text size="default">{{ current_history_data.intro }}</el-text>
+			<br/>
+			<ButtonHover1 msg="点击询问AI" @click="handleAskForAI"/>
 		</div>
     </el-dialog>
 </template>
