@@ -7,6 +7,7 @@ import {Preloader} from "@/utils/preloader";
 import GameWebSocketService, {GAME_WS_EMIT_EVENTS, GAME_WS_MSG_TYPES} from "@/api/socket/GameWebSocketService";
 import gameEventEmitter, {GAME_EVENTS} from "@/event/GameEventEmitter";
 import STORAGE from "@/store";
+import { ElMessage } from "element-plus";
 
 export class Game {
 	/**
@@ -40,6 +41,8 @@ export class Game {
 
 		this.colliders = [];
 		this.remoteColliders = [];
+
+		this.post = [];
 
 		this.preload();
 	}
@@ -106,6 +109,7 @@ export class Game {
 		this.player = new PlayerLocal(this, STORAGE.getSelfImage(), STORAGE.getUserId());
 
 		this.environment.load(this, undefined);
+		this.bindEventsForPosts(this);
 
 		this.renderer = new THREE.WebGLRenderer({
 			antialias: true,  // 抗锯齿
@@ -114,6 +118,39 @@ export class Game {
 		this.renderer.setSize(window.innerWidth, window.innerHeight);
 		this.renderer.shadowMap.enabled = true;
 		this.container.appendChild(this.renderer.domElement);
+	}
+
+	bindEventsForPosts(game){
+		const raycaster = new THREE.Raycaster();
+		const mouse = new THREE.Vector2();
+
+		function onMouseClick(event) {
+			mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+			mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+			
+			if(game.playerController!=undefined){
+				raycaster.setFromCamera(mouse, game.playerController.camera);
+				const intersects = raycaster.intersectObjects(game.scene.children, true);
+
+				console.log("intersects", intersects);
+				if(intersects.length > 0){
+					ElMessage({
+						showClose: true,
+						message: intersects[0].object.name,
+						type: "success",
+					});
+					if(intersects[0].object.name.startsWith("post")){
+						const post = intersects[0].object;
+						post.material = new THREE.MeshBasicMaterial({ 
+							color: 0xff0000,
+							side: THREE.DoubleSide,
+						});
+					}
+				}
+			}
+		}
+
+		window.addEventListener("click", onMouseClick, false);
 	}
 
 	updateRemotePlayers(dt){
