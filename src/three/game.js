@@ -9,8 +9,12 @@ import ChatWebSocketService from "@/api/socket/ChatWebSocketService";
 import gameEventEmitter, {GAME_EVENTS} from "@/event/GameEventEmitter";
 import STORAGE from "@/store";
 import gameErrorEventEmitter, {GAME_ERROR_EVENTS} from "@/event/GameErrorEventEmitter";
+import {createPlayerNameText} from "@/three/common";
+import NPC from "@/three/NPC";
 
 export class Game {
+	static anims = ['Walking', 'Walking Backwards', 'Turn', 'Running', 'Pointing', 'Talking', 'Pointing Gesture'];
+
 	/**
 	 * @param {HTMLElement} container
 	 * @param {GameEnvironment} environment
@@ -33,6 +37,7 @@ export class Game {
 		this.selfImageLoader = selfImageLoader || new FbxSelfImageLoader();
 		this.player = null;
 		this.renderer = null;
+		this.animations = {};
 		this.remoteData = [];
 		this.initialisingPlayers = [];
 		this.remotePlayers = [];
@@ -42,6 +47,21 @@ export class Game {
 
 		this.colliders = [];
 		this.remoteColliders = [];
+
+		this.post = [];
+		this.clubs = [];
+
+		// 定义 npc
+		// TODO 根据需求定义NPC
+		this.npc1 = new NPC(
+			this,
+			"Doctor",
+			FBX_IMAGE.randomColour(),
+			"NPC1",
+			{x: 3122, y: 0, z: -173,},
+			{x: 0, y: 2.6, z: 0,},
+			{x: 0, y: 320, z: 0,});
+		this.npcs = [this.npc1];
 
 		this.preload();
 	}
@@ -62,6 +82,7 @@ export class Game {
 
 	preload() {
 		const game = this;
+
 		const options = {
 			assets: [
 				`${FBX_IMAGE.CUBE_TEXTURE_PATH}/nx.jpg`,
@@ -75,7 +96,7 @@ export class Game {
 				game.init();
 			}
 		};
-		Player.anims.forEach((anim) => {
+		Game.anims.forEach((anim) => {
 			options.assets.push(FBX_IMAGE.getAnimPath(anim));
 		});
 		options.assets.push(FBX_IMAGE.SCENE_PATH);
@@ -119,24 +140,161 @@ export class Game {
 		this.sun = light;
 		this.scene.add(light);
 
-		this.player = new PlayerLocal(this, STORAGE.getSelfImage(), STORAGE.getUserId(), STORAGE.getUsername());
-
 		this.environment.load(this, undefined);
-
-		this.renderer = new THREE.WebGLRenderer({
-			antialias: true,  // 抗锯齿
-		});
-		this.renderer.setPixelRatio(window.devicePixelRatio);
-		this.renderer.setSize(window.innerWidth, window.innerHeight);
-		this.renderer.shadowMap.enabled = true;
-		this.container.appendChild(this.renderer.domElement);
-
-		// 处理用户选择个人形象
-		gameEventEmitter.on(GAME_EVENTS.USER_SELF_IMAGE_CHANGE, (selfImageName) => {
-			this.player.changeModel(selfImageName, FBX_IMAGE.randomColour());
+		this.bindEventsForPostsAndClubs(this);
+		// 加载 npc 和 玩家动画
+		this.loadAnimations().then(() => {
+			// 加载玩家
+			this.player = new PlayerLocal(this, STORAGE.getSelfImage(), STORAGE.getUserId(), STORAGE.getUsername());
+			return this.player.loadModel(true);
+		}).then(() => {
+			// 加载NPC
+			const npcPromises = this.npcs.map((npc) => npc.init());
+			return Promise.all(npcPromises);
+		}).then(() => {
+			// 创建渲染器
+			this.renderer = new THREE.WebGLRenderer({
+				antialias: true,  // 抗锯齿
+			});
+			this.renderer.setPixelRatio(window.devicePixelRatio);
+			this.renderer.setSize(window.innerWidth, window.innerHeight);
+			this.renderer.shadowMap.enabled = true;
+		}).then(() => {
+			// 事件监听
+			// 处理：用户选择个人形象
+			gameEventEmitter.on(GAME_EVENTS.USER_SELF_IMAGE_CHANGE, (selfImageName) => {
+				this.player.changeModel(selfImageName, FBX_IMAGE.randomColour());
+			});
+			// 处理：键盘事件
+			this.listenKeyDown();
+			this.listenKeyUp();
+		}).then(() => {
+			this.container.appendChild(this.renderer.domElement);
+			this.animate();
+		}).catch((error) => {
+			console.error("Game.init: " + error);
 		});
 	}
 
+	/**
+	 * @return Promise
+	 */
+	loadAnimations() {
+		const loader = this.selfImageLoader.getOriginalLoader();
+		const game = this;
+
+		const animPromises = Game.anims.map((anim) => {
+			return new Promise((resolve, reject) => {
+				loader.load(FBX_IMAGE.getAnimPath(anim), function (object) {
+					game.animations[anim] = object.animations[0];
+					resolve();
+				}, undefined, function (error) {
+					reject(error);
+				});
+			});
+		});
+		return Promise.all(animPromises).then(() => {
+			game.mode = game.modes.ACTIVE;
+		});
+	}
+
+	listenKeyDown(){
+		document.addEventListener('keydown', (e) => {
+			console.log(e.key);
+			switch (e.key) {
+			case "w":
+				gameEventEmitter.emit(GAME_EVENTS.KEY_DOWN_W);
+				break;
+			case "a":
+				gameEventEmitter.emit(GAME_EVENTS.KEY_DOWN_A);
+				break;
+			case "s":
+				gameEventEmitter.emit(GAME_EVENTS.KEY_DOWN_S);
+				break;
+			case "d":
+				gameEventEmitter.emit(GAME_EVENTS.KEY_DOWN_D);
+				break;
+			case "v":
+				gameEventEmitter.emit(GAME_EVENTS.KEY_DOWN_V);
+				break;
+			case "e":
+				gameEventEmitter.emit(GAME_EVENTS.KEY_DOWN_E);
+				break;
+			case "q":
+				gameEventEmitter.emit(GAME_EVENTS.KEY_DOWN_Q);
+				break;
+			case "z":
+				gameEventEmitter.emit(GAME_EVENTS.KEY_DOWN_Z);
+				break;
+			}
+		});
+	}
+	
+	listenKeyUp() {
+		document.addEventListener('keyup', (e) => {
+			console.log(e.key);
+			switch (e.key) {
+			case "w":
+				gameEventEmitter.emit(GAME_EVENTS.KEY_UP_W);
+				break;
+			case "a":
+				gameEventEmitter.emit(GAME_EVENTS.KEY_UP_A);
+				break;
+			case "s":
+				gameEventEmitter.emit(GAME_EVENTS.KEY_UP_S);
+				break;
+			case "d":
+				gameEventEmitter.emit(GAME_EVENTS.KEY_UP_D);
+				break;
+			}
+		});
+	}
+
+	bindEventsForPostsAndClubs(game){
+		const raycaster = new THREE.Raycaster();
+		const mouse = new THREE.Vector2();
+
+		function onMouseClick(event) {
+			mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+			mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+			
+			if(game.playerController!=undefined){
+				raycaster.setFromCamera(mouse, game.playerController.camera);
+				const intersects = raycaster.intersectObjects(game.scene.children, true);
+
+				console.log("intersects", intersects);
+				if(intersects.length > 0){
+					// ElMessage({
+					// 	showClose: true,
+					// 	message: intersects[0].object.name,
+					// 	type: "success",
+					// });
+					if(intersects[0].object.name.startsWith("post")){
+						// const post = intersects[0].object;
+						// post.material = new THREE.MeshBasicMaterial({ 
+						// 	color: 0xff0000,
+						// 	side: THREE.DoubleSide,
+						// });
+						
+						const post_id = Number(intersects[0].object.name.substring(4));
+						let event = new Event("ClickPost");
+						event.key = post_id;
+						window.dispatchEvent(event);
+					}	
+					
+					if(intersects[0].object.name.startsWith("clubpost")){
+						const club_id = Number(intersects[0].object.name.substring(8));
+						let event = new Event("ClickClub");
+						event.key = club_id;
+						window.dispatchEvent(event);
+					}
+				}
+			}
+		}
+
+		window.addEventListener("click", onMouseClick, false);
+	}
+	
 	updateRemotePlayers(dt){
 		// 检查是否有远程数据、LocalPlayer 玩家对象以及 LocalPlayer 的 userId 是否存在。
 		// 如果没有，则直接返回，不做任何更新。
@@ -251,20 +409,16 @@ export class Game {
 		if (this.playerController) {
 			this.playerController.update(dt);
 		}
+		// 更新 NPC
+		this.npcs.forEach(function(npc) {
+			npc.update(dt);
+		});
 		this.renderer.render(this.scene, this.playerController.activeCamera);
 	}
 }
 
 class Player {
-	static anims = ['Walking', 'Walking Backwards', 'Turn', 'Running', 'Pointing', 'Talking', 'Pointing Gesture'];
-	static modes = Object.freeze({
-		INIT: Symbol("init"),
-		CHANGING: Symbol("changing"),
-		ACTIVE: Symbol("active"),
-	});
-
 	constructor(game, model, colour, userId, username, local) {
-		this.mode = Player.modes.INIT;
 		this.game = game;
 		this.model = model;
 		this.colour = colour;
@@ -273,42 +427,28 @@ class Player {
 		this.local = local;
 
 		this.mixer = null;
-		this.actionObjs = {};
-		this.activeAction = null;
-		this.activateActionName = null;
+		this.actions = {}; // 存储动画动作
+		this.animations = this.game.animations;
+
 		if (this.userId === undefined || this.userId === '') {
 			if (this.local) {
 				gameErrorEventEmitter.emit(GAME_ERROR_EVENTS.NO_LOCAL_USER_ID, "No user ID, maybe not logged in.");
 			} else {
 				console.error("No user ID for remote player");
 			}
-			return;
 		}
-		this.loadModel(this.model, this.colour);
+		if (!local){
+			this.loadModel().then(() => {});
+		}
 	}
 
-	loadAnimations(loader) {
-		const player = this;
-		const game = this.game;
-		Player.anims.forEach((anim) => {
-			loader.load(FBX_IMAGE.getAnimPath(anim), function (object) {
-				const clip = object.animations[0];
-				// clip生成action
-				const action = player.mixer.clipAction(clip);
-				action.name = anim;
-				action.weight = 0.0;
-				player.actionObjs[anim] = action;
-				action.play();
-			});
-		});
-		game.mode = game.modes.ACTIVE;
-		game.animate();
-	}
-
-	loadModel(modelName, colour, init= true) {
+	loadModel(init = true) {
+		const modelName = this.model;
+		const colour = this.colour;
 		const game = this.game;
 		const player = this;
 		let position;
+
 		// 位置信息
 		if (init) {
 			position = {
@@ -337,67 +477,59 @@ class Player {
 				},
 			};
 		}
-		// 加载新模型
-		game.selfImageLoader.load(modelName, colour).then((object) => {
-			player.mixer = object.mixer;
-			player.object = new THREE.Object3D();
-			player.object.position.set(position.x, position.y, position.z);
-			player.object.rotation.set(0, position.h, 0);
-			player.object.add(object);
-			game.scene.add(player.object);
-			// 在头顶显示用户名
-			const nameText = player.createNameText(player.username);
-			nameText.position.set(position.nameTextPos.x, position.nameTextPos.y, position.nameTextPos.z); // 设置名字的位置
-			player.object.add(nameText);
 
-			if (player.local) {
-				game.playerController = new PlayerController(player, game.container);
-				game.sun.target = game.player.object;
-			} else {
-				console.log("Load new remote player: " + player.userId);
-				const geometry = new THREE.BoxGeometry(100,300,100);
-				const material = new THREE.MeshBasicMaterial({visible:false});
-				const box = new THREE.Mesh(geometry, material);
-				box.name = "Collider";
-				box.position.set(0, 150, 0);
-				player.object.add(box);
-				player.collider = box;
-				player.object.userData.userId = player.userId;
-				player.object.userData.remotePlayer = true;
-				if (init){
-					const players = game.initialisingPlayers.splice(game.initialisingPlayers.indexOf(this), 1);
-					game.remotePlayers.push(players[0]);
+		// 返回一个Promise
+		return new Promise((resolve, reject) => {
+			// 加载新模型
+			game.selfImageLoader.load(modelName, colour).then((object) => {
+				player.mixer = object.mixer;
+				player.object = new THREE.Object3D();
+				player.object.position.set(position.x, position.y, position.z);
+				player.object.rotation.set(0, position.h, 0);
+				player.object.add(object);
+				game.scene.add(player.object);
+
+				// 在头顶显示用户名
+				const nameText = createPlayerNameText(player.username);
+				nameText.position.set(position.nameTextPos.x, position.nameTextPos.y, position.nameTextPos.z); // 设置名字的位置
+				player.object.add(nameText);
+
+				if (player.local) {
+					game.playerController = new PlayerController(player, game.container);
+					game.sun.target = game.player.object;
+					game.animations.Idle = object.animations[0];
+				} else {
+					const geometry = new THREE.BoxGeometry(100, 300, 100);
+					const material = new THREE.MeshBasicMaterial({ visible: false });
+					const box = new THREE.Mesh(geometry, material);
+					box.name = "Collider";
+					box.position.set(0, 150, 0);
+					player.object.add(box);
+					player.collider = box;
+					player.object.userData.userId = player.userId;
+					player.object.userData.remotePlayer = true;
+					if (init) {
+						const players = game.initialisingPlayers.splice(game.initialisingPlayers.indexOf(this), 1);
+						game.remotePlayers.push(players[0]);
+					}
 				}
-			}
-			player.loadAnimations(game.selfImageLoader.getOriginalLoader());
-			player.mode = Player.modes.ACTIVE;
-			const clip = object.animations[0];
-			const action = player.mixer.clipAction(clip);
-			action.name = "Idle";
-			action.weight = 1.0;
-			player.actionObjs.Idle = action;
-			player.activeAction = action;
-			action.play();
-			player.action = "Idle";
-		}).then(() => {
-		}).catch((error) => {
-			console.error("Player.loadModel: " + error);
+				// 创建每个动画的动作
+				for (let animName in game.animations) {
+					const clip = game.animations[animName];
+					const action = player.mixer.clipAction(clip);
+					action.clampWhenFinished = true;
+					action.loop = THREE.LoopRepeat;
+					player.actions[animName] = action;
+				}
+				if (game.animations.Idle !== undefined) player.action = "Idle";
+				// 解析Promise，表示模型加载完成
+				resolve();
+			}).catch((error) => {
+				console.error("Player.loadModel: " + error);
+				// 拒绝Promise，表示加载失败
+				reject(error);
+			});
 		});
-	}
-
-	createNameText(name) {
-		const canvas = document.createElement('canvas');
-		const context = canvas.getContext('2d');
-		context.font = 'Bold 40px Arial';
-		context.fillStyle = 'white';
-		context.fillText(name, 0, 40);
-
-		const texture = new THREE.CanvasTexture(canvas);
-		const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
-		const sprite = new THREE.Sprite(spriteMaterial);
-		sprite.scale.set(100, 50, 1); // 根据需要调整比例
-
-		return sprite;
 	}
 
 	changeModel(modelName, colour) {
@@ -405,47 +537,46 @@ class Player {
 		this.colour = colour;
 		// 移除旧模型
 		this.game.scene.remove(this.object);
+		this.actionName = undefined;
 		// 加载新模型
-		this.loadModel(modelName, colour, false);
-		if (this.local) {
-			this.socketOnLocalUpdate();
-		}
+		this.loadModel(false).then(() => {
+			if (this.local) {
+				this.socketUpdate();
+			}
+		});
 	}
 
 	set action(name) {
-		if (this.mode === Player.modes.INIT || this.mode === Player.modes.CHANGING) {
-			return;
-		}
-		if (!this.actionObjs[name]) {
-			console.error("Invalid action name: " + name);
-			return;
-		}
-		if (this.activateActionName === name) {
-			return;
-		}
-		if (this.activeAction) {
-			// 一次性动画
-			console.log("Set weight to 0.0: " + this.activeAction.name);
-			this.activeAction.weight = 0.0;
-			this.activeAction = this.actionObjs[name];
-			this.activeAction.weight = 1.0;
-			this.activateActionName = name;
-			if (name === 'Pointing Gesture' || name === 'Pointing') {
-				// 设置动画为只播放一次
-				this.activeAction.setLoop(THREE.LoopOnce);
-				// 动画播放完成后，将动作设置为Idle
-				this.mixer.addEventListener('finished', function () {
-					this.action = 'Idle';
-				}.bind(this));
-			}
-		} else {
-			console.error("this.activeAction is undefined.");
-		}
+		if (this.actionName === name) return;
+		const previousAction = this.actions[this.actionName];
+		const newAction = this.actions[name];
+		this.actionName = name;
 
+		if (previousAction) {
+			previousAction.fadeOut(0.5);
+		}
+		newAction.reset().fadeIn(0.5).play();
+		// 处理一次性动画
+		if (name === 'Pointing Gesture' || name === 'Pointing') {
+			newAction.setLoop(THREE.LoopOnce);
+			newAction.clampWhenFinished = true;
+
+			const onFinished = (event) => {
+				if (event.action === newAction) {
+					this.mixer.removeEventListener('finished', onFinished);
+					this.action = 'Idle';
+					if (this.local) {
+						this.socketUpdate(); // 通知服务器
+					}
+				}
+			};
+
+			this.mixer.addEventListener('finished', onFinished);
+		}
 	}
 
 	get action() {
-		return this.activateActionName;
+		return this.actionName;
 	}
 
 	/**
@@ -486,6 +617,12 @@ class Player {
 			if (!found) this.game.removePlayer(this);
 		}
 	}
+
+	socketUpdate(){
+		// console.log("Player.socketUpdate");
+		throw new Error("Player.socketUpdate must be overridden");
+	}
+
 	showChatButton(remotePlayerId) {
 		let chatButton = document.getElementById('chat-button');
 		if (!chatButton) {
@@ -537,7 +674,7 @@ class PlayerLocal extends Player {
 
 	}
 
-	socketOnLocalUpdate(){
+	socketUpdate(){
 		if (this.gameWebSocketService !== undefined){
 			const data = {
 				userId: this.userId,
@@ -553,81 +690,5 @@ class PlayerLocal extends Player {
 			};
 			this.gameWebSocketService.gameEmit(GAME_WS_EMIT_EVENTS.LOCAL_UPDATE, data);
 		}
-	}
-
-	move(dt) {
-		const pos = this.object.position.clone();
-		pos.y += 60;
-		let dir = new THREE.Vector3();
-		this.object.getWorldDirection(dir);
-		if (this.motion.forward < 0) dir.negate();
-		let raycaster = new THREE.Raycaster(pos, dir);
-		let blocked = false;
-		const colliders = [...this.game.colliders, ...this.game.remoteColliders];
-
-		let intersect = raycaster.intersectObjects(colliders);
-		if (intersect.length > 0) {
-			if (intersect[0].distance < 50) blocked = true;
-		}
-
-		if (!blocked) {
-			if (this.motion.forward > 0) {
-				const speed = (this.action === 'Running') ? 500 : 150;
-				this.object.translateZ(dt * speed);
-			} else {
-				this.object.translateZ(-dt * 30);
-			}
-		}
-
-		//cast left
-		dir.set(-1, 0, 0);
-		dir.applyMatrix4(this.object.matrix);
-		dir.normalize();
-		raycaster = new THREE.Raycaster(pos, dir);
-
-		intersect = raycaster.intersectObjects(colliders);
-		if (intersect.length > 0) {
-			if (intersect[0].distance < 50) this.object.translateX(100 - intersect[0].distance);
-		}
-
-		//cast right
-		dir.set(1, 0, 0);
-		dir.applyMatrix4(this.object.matrix);
-		dir.normalize();
-		raycaster = new THREE.Raycaster(pos, dir);
-
-		intersect = raycaster.intersectObjects(colliders);
-		if (intersect.length > 0) {
-			if (intersect[0].distance < 50) this.object.translateX(intersect[0].distance - 100);
-		}
-
-		//cast down
-		dir.set(0, -1, 0);
-		pos.y += 200;
-		raycaster = new THREE.Raycaster(pos, dir);
-		const gravity = 30;
-
-		intersect = raycaster.intersectObjects(colliders);
-		if (intersect.length > 0) {
-			const targetY = pos.y - intersect[0].distance;
-			if (targetY > this.object.position.y) {
-				//Going up
-				this.object.position.y = 0.8 * this.object.position.y + 0.2 * targetY;
-				this.velocityY = 0;
-			} else if (targetY < this.object.position.y) {
-				//Falling
-				if (this.velocityY === undefined) this.velocityY = 0;
-				this.velocityY += dt * gravity;
-				this.object.position.y -= this.velocityY;
-				if (this.object.position.y < targetY) {
-					this.velocityY = 0;
-					this.object.position.y = targetY;
-				}
-			}
-		}
-
-		this.object.rotateY(this.motion.turn * dt);
-
-		// this.updateSocket();
 	}
 }

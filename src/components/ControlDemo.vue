@@ -1,16 +1,20 @@
 <script>
 import {Game} from "@/three/game";
 import {Lab1FbxSelfImageLoader} from "@/three/SelfImageLoader";
-// import {Town} from "@/three/GameEnvironment";
 import {GuangHuaLou} from "@/three/GameEnvironment";
 import SettingDialog from "@/components/SettingDialog.vue";
-import ChatBox from "@/components/ChatBox.vue"; // 导入子组件
+import ChatBox from "@/components/ChatBox.vue";
+import gameEventEmitter, {GAME_EVENTS}  from "@/event/GameEventEmitter";
+import PostDialog from "@/components/PostDialog.vue";
+import ClubDialog from "@/components/ClubDialog.vue";
 
 export default {
 	name: "ControlDemo",
 	components: {
+		PostDialog,
+		ClubDialog,
 		ChatBox,
-		SettingDialog// 注册子组件
+		SettingDialog,
 	},
 	data() {
 		return {
@@ -34,12 +38,13 @@ export default {
 	},
 	methods: {
 		listenKeyDown(){
-			document.addEventListener('keydown', (e) => {
-				if (e.key === 'z') {
-					this.showSettingDialog = !this.showSettingDialog;
-					// 解除鼠标锁定
-					this.game.playerController.unlockPointer();
-				}
+			// 按下 Z 键时显示后台设置页面
+			gameEventEmitter.on(GAME_EVENTS.KEY_DOWN_Z, () => {
+				this.showSettingDialog = !this.showSettingDialog;
+				// 申请解除鼠标锁定
+				gameEventEmitter.emit(GAME_EVENTS.REQUEST_MOUSE_CONTROL);
+				// 申请接触键盘锁定
+				gameEventEmitter.emit(GAME_EVENTS.REQUEST_KEYBOARD_CONTROL);
 			});
 		},
 		onSettingDialogClose(){
@@ -60,9 +65,13 @@ export default {
 </script>
 
 <template>
-  <div id="canvas-container"></div>
-  <SettingDialog :show="showSettingDialog" @close="onSettingDialogClose"/>
-  <ChatBox v-if="isChatBoxVisible" :socket="socket" :remote-id="remoteId" :local-id="localId" @close="closeChatBox" />
+	<div id="canvas-container"></div>
+
+	<PostDialog/>	
+	<ClubDialog/>
+	
+	<SettingDialog :show="showSettingDialog" @close="onSettingDialogClose"/>
+	<ChatBox v-if="isChatBoxVisible" :socket="socket" :remote-id="remoteId" :local-id="localId" @close="closeChatBox" />
 </template>
 
 <style scoped>

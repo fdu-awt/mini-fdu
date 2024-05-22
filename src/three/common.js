@@ -86,3 +86,22 @@ export function initializeThreeScene(canvas) {
 	scene.add(dirLight);
 	return {scene, renderer, camera, controls, hemLight, dirLight};
 }
+
+export function createPlayerNameText(name) {
+	const canvas = document.createElement('canvas');
+	const context = canvas.getContext('2d');
+	context.font = 'Bold 40px Arial';
+	context.fillStyle = 'white';
+	context.fillText(name, 0, 40);
+
+	const texture = new THREE.CanvasTexture(canvas);
+	const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+	const sprite = new THREE.Sprite(spriteMaterial);
+	sprite.scale.set(100, 50, 1); // 根据需要调整比例
+
+	return sprite;
+}
+
+export function createNPCNameText(name){
+	return createPlayerNameText(name);
+}
