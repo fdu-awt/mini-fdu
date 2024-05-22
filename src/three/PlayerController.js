@@ -63,11 +63,11 @@ export default class PlayerController {
 		};
 		this.key_down_e = () => {
 			this.player.action = 'Pointing';
-			this.player.socketOnLocalUpdate();
+			this.player.socketUpdate();
 		};
 		this.key_down_q = () => {
 			this.player.action = 'Pointing Gesture';
-			this.player.socketOnLocalUpdate();
+			this.player.socketUpdate();
 		};
 
 		this.key_up_w = () => {this.keyStates.W = false;};
@@ -247,6 +247,6 @@ export default class PlayerController {
 		const deltaPos = this.v.clone().multiplyScalar(deltaTime);
 		this.player.object.position.add(deltaPos);//更新玩家角色的位置
 		// 更新 socket 信息
-		this.player.socketOnLocalUpdate();
+		this.player.socketUpdate();
 	}
 }

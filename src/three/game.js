@@ -533,7 +533,7 @@ class Player {
 		// 加载新模型
 		this.loadModel(false).then(() => {
 			if (this.local) {
-				this.socketOnLocalUpdate();
+				this.socketUpdate();
 			}
 		});
 	}
@@ -558,7 +558,7 @@ class Player {
 					this.mixer.removeEventListener('finished', onFinished);
 					this.action = 'Idle';
 					if (this.local) {
-						this.socketOnLocalUpdate(); // 通知服务器
+						this.socketUpdate(); // 通知服务器
 					}
 				}
 			};
@@ -609,6 +609,12 @@ class Player {
 			if (!found) this.game.removePlayer(this);
 		}
 	}
+
+	socketUpdate(){
+		// console.log("Player.socketUpdate");
+		throw new Error("Player.socketUpdate must be overridden");
+	}
+
 	showChatButton(remotePlayerId) {
 		let chatButton = document.getElementById('chat-button');
 		if (!chatButton) {
@@ -660,7 +666,7 @@ class PlayerLocal extends Player {
 
 	}
 
-	socketOnLocalUpdate(){
+	socketUpdate(){
 		if (this.gameWebSocketService !== undefined){
 			const data = {
 				userId: this.userId,
