@@ -1,3 +1,5 @@
+import EventEmitter from "@/event/EventEmitter";
+
 const API_ERROR_EVENTS = Object.freeze({
 	UN_AUTH: Symbol("un_authorized"),
 	VALIDATE_ERROR: Symbol("validate_error"),
@@ -7,23 +9,9 @@ const API_ERROR_EVENTS = Object.freeze({
 	OTHER_ERROR: Symbol("other_error"),
 });
 
-class ApiErrorEventEmitter {
+class ApiErrorEventEmitter extends EventEmitter {
 	constructor() {
-		this.events = {};
-	}
-
-	on(event, listener) {
-		if (!this.events[event]) {
-			this.events[event] = [];
-		}
-		this.events[event].push(listener);
-	}
-
-	emit(event, ...args) {
-		const listeners = this.events[event];
-		if (listeners) {
-			listeners.forEach(listener => listener(...args));
-		}
+		super();
 	}
 }
 
