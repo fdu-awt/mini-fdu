@@ -50,8 +50,8 @@ export default class PlayerController {
 		this.firstViewCamera = new THREE.PerspectiveCamera(
 			45, window.innerWidth / window.innerHeight, 10, 200000
 		);
-		this.firstViewCamera.position.set(0, 300, 100);
-		this.firstViewCamera.lookAt(0, 300, 120);
+		this.firstViewCamera.position.set(0, 250, 100);
+		this.firstViewCamera.lookAt(0, 250, 120);
 
 		this.thirdViewCamera = new THREE.PerspectiveCamera(
 			45, window.innerWidth / window.innerHeight, 10, 200000
