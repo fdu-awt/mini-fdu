@@ -171,16 +171,6 @@ export default class PlayerController {
 				});
 			}
 		}
-		// //方便聊天功能调试，按F键进入世界
-		// document.addEventListener('keydown', (e) => {
-		// 	if (e.key === 'f') {
-		// 		if (this.controllerElement) {
-		// 			if (document.body.contains(this.controllerElement)) {
-		// 				this.controllerElement.requestPointerLock();
-		// 			}
-		// 		}
-		// 	}
-		// });
 		document.addEventListener('mousemove', (event) => {
 			// 进入指针模式后，才能根据鼠标位置控制人旋转
 			if (document.pointerLockElement !== this.controllerElement) return;
