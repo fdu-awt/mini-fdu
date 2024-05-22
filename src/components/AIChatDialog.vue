@@ -1,58 +1,83 @@
 <template>
   <el-dialog v-model="visible" @before-close="this.$emit('close')">
     <div class="chat-box">
-      <!-- <el-scrollbar class="messages">
-        <div v-for="(group, index) in groupedMessages" :key="index" class="message-group">
-          <div class="date-divider">{{ group.date }}</div>
-          <div
-              v-for="(message, index) in group.messages"
-              :key="index"
-              :class="['message-item', { 'my-message': message.ifSelf, 'other-message': !message.ifSelf }]"
-          >
-            <el-avatar :src="message.ifSelf ? userAvatar : remoteAvatar" class="message-avatar"></el-avatar>
-            <div class="message-content">{{ message.message }}</div>
-          </div>
+      <el-scrollbar ref="scroller" class="messages">
+        <div v-for="(message, index) in messages" :key="index"
+          :class="['message-item', { 'my-message': message.ifSelf, 'ai-message': !message.ifSelf }]">
+          <el-avatar :src="message.ifSelf ? userAvatar : aiAvatar" class="message-avatar"></el-avatar>
+          <div class="message-content">{{ message.message }}</div>
         </div>
       </el-scrollbar>
       <div class="message-input">
-        <el-input
-            v-model="newMessage"
-            placeholder="Type a message..."
+        <el-input 
+          v-model="inputMessage" 
+          placeholder="Type a message..."
+          @keyup.enter="sendMessage"
         ></el-input>
         <el-button type="primary" @click="sendMessage">Send</el-button>
-        <el-button icon="el-icon-phone" @click="startVideoCall"></el-button>
-      </div> -->
-		Hello world
+      </div>
     </div>
   </el-dialog>
 </template>
 
 <script>
-
+import userAvatar from '@/assets/avatar/1.jpg';
+import aiAvatar from '@/assets/avatar/2.jpg';
+import {chatWithAI} from '@/api/ai.js';
 export default {
-	name: "AIChatDialog",
-	data() {
-		return {
-			messages: [],
-			newMessage: "",
-			groupedMessages:[],
+  name: "AIChatDialog",
+  data() {
+    return {
+      messages: [],
+      inputMessage: "",
 
-			visible: this.dialogVisible,
-		};
-	},
-	props:{
-		dialogVisible:{
-			type: Boolean,
-			required: true
-		}
-	},
-	watch:{
-		dialogVisible(newValue, old) {
-			console.log(newValue);
-			console.log(old);
-			this.visible = newValue;
-		}
-	}
+      visible: this.dialogVisible,
+    };
+  },
+  props: {
+    dialogVisible: {
+      type: Boolean,
+      required: true
+    }
+  },
+  watch: {
+    dialogVisible(newValue, old) {
+      this.visible = newValue;
+    },
+    messages:{
+      handler(newValue, oldValue) {
+        this.$nextTick(() => {
+        this.scrollToBottom();
+        // console.log("scroll", "scrolled");
+      });
+      },
+      deep: true,
+    },
+  },
+  methods: {
+    getAIResponse(question) {
+      this.messages.push({
+        ifSelf: false,
+        message: chatWithAI(question),
+      })
+    },
+    sendMessage() {
+      this.messages.push({
+        ifSelf: true,
+        message: this.inputMessage,
+      })
+      this.getAIResponse(this.inputMessage);
+      this.inputMessage = "";
+    },
+    scrollToBottom() {
+      const scroller = this.$refs.scroller;
+      if (scroller) {
+        scroller.scrollTop = scroller.scrollHeight;
+        // console.log("scroll", "here");
+        // TODO 
+      }
+    },
+  }
 };
 </script>
 
@@ -60,9 +85,9 @@ export default {
 .chat-box {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  width: 50vw;
-  max-height: 500px; /* Adjust the height as needed */
+  /* height: 100%; */
+  height: 400px;
+  /* Adjust the height as needed */
 }
 
 .messages {
@@ -90,7 +115,8 @@ export default {
   margin-bottom: 10px;
   max-width: 70%;
   word-wrap: break-word;
-  overflow-wrap: break-word; /* Ensures words break properly */
+  overflow-wrap: break-word;
+  /* Ensures words break properly */
 }
 
 .my-message {
@@ -108,18 +134,22 @@ export default {
   color: #333;
   font-size: 14px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  background-color: #dcf8c6; /* Default background color */
-  max-width: calc(100% - 90px); /* Ensures the message content stays within the container */
+  background-color: #dcf8c6;
+  /* Default background color */
+  max-width: calc(100% - 90px);
+  /* Ensures the message content stays within the container */
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
 
 .my-message .message-content {
-  background-color: #dcf8c6; /* User's message background color */
+  background-color: #dcf8c6;
+  /* User's message background color */
 }
 
 .other-message .message-content {
-  background-color: #f0f0f0; /* Other user's message background color */
+  background-color: #f0f0f0;
+  /* Other user's message background color */
 }
 
 .message-avatar {
