@@ -10,13 +10,14 @@ export default {
 	components: {SettingDialog},
 	data() {
 		return {
+			canvasContainer: null,
 			game: null,
 			showSettingDialog: false,
 		};
 	},
 	mounted() {
-		const container = document.getElementById('canvas-container');
-		this.game = new Game(container, new GuangHuaLou() , new Lab1FbxSelfImageLoader());
+		this.canvasContainer = document.getElementById('canvas-container');
+		this.game = new Game(this.canvasContainer, new GuangHuaLou() , new Lab1FbxSelfImageLoader());
 		this.listenKeyDown();
 	},
 	methods: {
@@ -24,6 +25,8 @@ export default {
 			document.addEventListener('keydown', (e) => {
 				if (e.key === 'z') {
 					this.showSettingDialog = !this.showSettingDialog;
+					// 解除鼠标锁定
+					this.game.playerController.unlockPointer();
 				}
 			});
 		},

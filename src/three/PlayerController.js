@@ -130,6 +130,16 @@ export default class PlayerController {
 		});
 	}
 
+	unlockPointer() {
+		if (this.controllerElement) {
+			if (document.body.contains(this.controllerElement)){
+				if (document.pointerLockElement === this.controllerElement) {
+					document.exitPointerLock();
+				}
+			}
+		}
+	}
+
 	addMouseListeners() {
 		if (this.controllerElement) {
 			if (document.body.contains(this.controllerElement)){
