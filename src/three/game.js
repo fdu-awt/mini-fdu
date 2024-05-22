@@ -9,6 +9,7 @@ import ChatWebSocketService from "@/api/socket/ChatWebSocketService";
 import gameEventEmitter, {GAME_EVENTS} from "@/event/GameEventEmitter";
 import STORAGE from "@/store";
 import gameErrorEventEmitter, {GAME_ERROR_EVENTS} from "@/event/GameErrorEventEmitter";
+import {createPlayerNameText} from "@/three/common";
 
 export class Game {
 	/**
@@ -402,7 +403,7 @@ class Player {
 			player.object.add(object);
 			game.scene.add(player.object);
 			// 在头顶显示用户名
-			const nameText = player.createNameText(player.username);
+			const nameText = createPlayerNameText(player.username);
 			nameText.position.set(position.nameTextPos.x, position.nameTextPos.y, position.nameTextPos.z); // 设置名字的位置
 			player.object.add(nameText);
 
@@ -439,21 +440,6 @@ class Player {
 		}).catch((error) => {
 			console.error("Player.loadModel: " + error);
 		});
-	}
-
-	createNameText(name) {
-		const canvas = document.createElement('canvas');
-		const context = canvas.getContext('2d');
-		context.font = 'Bold 40px Arial';
-		context.fillStyle = 'white';
-		context.fillText(name, 0, 40);
-
-		const texture = new THREE.CanvasTexture(canvas);
-		const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
-		const sprite = new THREE.Sprite(spriteMaterial);
-		sprite.scale.set(100, 50, 1); // 根据需要调整比例
-
-		return sprite;
 	}
 
 	changeModel(modelName, colour) {
