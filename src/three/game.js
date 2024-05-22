@@ -605,7 +605,7 @@ class Player {
 					// // 检查用户之间的距离，但是这里不太灵
 					// const distance = this.object.position.distanceTo(this.game.player.object.position);
 					// console.log(distance);
-					//这里后面需要改逻辑直接用点击用户头顶名字开启聊天
+					// TODO 这里后面需要改逻辑直接用点击用户头顶名字开启聊天
 					const distance = 3;
 					if (distance < 10) {
 						this.showChatButton(data.userId);
