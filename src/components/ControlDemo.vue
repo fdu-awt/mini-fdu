@@ -62,7 +62,7 @@ export default {
 <template>
   <div id="canvas-container"></div>
   <SettingDialog :show="showSettingDialog" @close="onSettingDialogClose"/>
-  <ChatBox socket="socket" remote-id="remoteId" local-id="localId"></ChatBox>
+  <ChatBox v-if="isChatBoxVisible" :socket="socket" :remote-id="remoteId" :local-id="localId" @close="closeChatBox" />
 </template>
 
 <style scoped>
