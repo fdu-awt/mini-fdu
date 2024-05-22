@@ -12,6 +12,7 @@ class NPC {
 		this.model = model;
 		this.colour = colour;
 		this.name = name || "NPC";
+		this.animations = this.game.animations;
 
 		this.position = position;
 		this.rotation = rotation;
@@ -43,11 +44,25 @@ class NPC {
 			this.object.add(box);
 			// TODO 加入game的碰撞检测
 
-			// TODO idle动画
+			// idle动画
+			this.action = "Idle";
 		});
 	}
 
 	// TODO NPC 的交互
+
+	set action(name) {
+		if (this.actionName === name) return;
+
+		const clip = this.animations[name];
+		const action = this.mixer.clipAction(clip);
+		action.time = 0;
+		this.mixer.stopAllAction();
+		this.actionName = name;
+		action.fadeIn(0.5);
+		action.play();
+	}
+
 
 	update(dt) {
 		if (this.mixer) {

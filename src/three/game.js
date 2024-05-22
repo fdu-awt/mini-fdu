@@ -360,6 +360,10 @@ export class Game {
 		if (this.playerController) {
 			this.playerController.update(dt);
 		}
+		// 更新 NPC
+		this.npcs.forEach(function(npc) {
+			npc.update(dt);
+		});
 		this.renderer.render(this.scene, this.playerController.activeCamera);
 	}
 }
