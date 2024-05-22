@@ -80,12 +80,12 @@ export default class PlayerController {
 		this.addMouseListeners();
 		// 处理：请求解锁鼠标锁定
 		gameEventEmitter.on(
-			GAME_EVENTS.REQUEST_POINTER_UNLOCK,
+			GAME_EVENTS.REQUEST_MOUSE_CONTROL,
 			this.unlockPointer.bind(this)
 		);
 		// 处理：申请打字控制
 		gameEventEmitter.on(
-			GAME_EVENTS.REQUEST_CHAT_CONTROL,
+			GAME_EVENTS.REQUEST_KEYBOARD_CONTROL,
 			this.cancelKeyListeners.bind(this)
 		);
 	}
