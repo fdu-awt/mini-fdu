@@ -49,6 +49,7 @@ export class Game {
 		this.remoteColliders = [];
 
 		this.post = [];
+		this.clubs = [];
 
 		// 定义 npc
 		// TODO 根据需求定义NPC
@@ -140,7 +141,7 @@ export class Game {
 		this.scene.add(light);
 
 		this.environment.load(this, undefined);
-		this.bindEventsForPosts(this);
+		this.bindEventsForPostsAndClubs(this);
 		// 加载 npc 和 玩家动画
 		this.loadAnimations().then(() => {
 			// 加载玩家
@@ -249,7 +250,7 @@ export class Game {
 		});
 	}
 
-	bindEventsForPosts(game){
+	bindEventsForPostsAndClubs(game){
 		const raycaster = new THREE.Raycaster();
 		const mouse = new THREE.Vector2();
 
@@ -279,7 +280,14 @@ export class Game {
 						let event = new Event("ClickPost");
 						event.key = post_id;
 						window.dispatchEvent(event);
-					}					
+					}	
+					
+					if(intersects[0].object.name.startsWith("clubpost")){
+						const club_id = Number(intersects[0].object.name.substring(8));
+						let event = new Event("ClickClub");
+						event.key = club_id;
+						window.dispatchEvent(event);
+					}
 				}
 			}
 		}

@@ -6,11 +6,13 @@ import SettingDialog from "@/components/SettingDialog.vue";
 import ChatBox from "@/components/ChatBox.vue";
 import gameEventEmitter, {GAME_EVENTS}  from "@/event/GameEventEmitter";
 import PostDialog from "@/components/PostDialog.vue";
+import ClubDialog from "@/components/ClubDialog.vue";
 
 export default {
 	name: "ControlDemo",
 	components: {
 		PostDialog,
+		ClubDialog,
 		ChatBox,
 		SettingDialog,
 	},
@@ -64,6 +66,7 @@ export default {
 	<div id="canvas-container"></div>
 
 	<PostDialog/>	
+	<ClubDialog/>
 	
 	<SettingDialog :show="showSettingDialog" @close="onSettingDialogClose"/>
 	<ChatBox v-if="isChatBoxVisible" :socket="socket" :remote-id="remoteId" :local-id="localId" @close="closeChatBox" />

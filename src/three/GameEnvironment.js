@@ -62,6 +62,10 @@ class GuangHuaLou extends GameEnvironment{
 						// 处理光华路海报
 						game.post.push(child);
 					}
+
+					if (child.name.startsWith("clubpost")){
+						game.clubs.push(child);
+					}
 				}
 			});
 		});
