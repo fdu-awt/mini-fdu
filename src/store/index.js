@@ -20,6 +20,9 @@ const STORAGE = {
 	getUserId() {
 		return STORAGE.getUser().id;
 	},
+	getUsername() {
+		return STORAGE.getUser().username;
+	},
 	setUserId(userId){
 		const user = STORAGE.getUser();
 		user.id = userId;

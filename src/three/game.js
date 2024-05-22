@@ -104,7 +104,7 @@ export class Game {
 		this.sun = light;
 		this.scene.add(light);
 
-		this.player = new PlayerLocal(this, STORAGE.getSelfImage(), STORAGE.getUserId());
+		this.player = new PlayerLocal(this, STORAGE.getSelfImage(), STORAGE.getUserId(), STORAGE.getUsername());
 
 		this.environment.load(this, undefined);
 
@@ -157,7 +157,7 @@ export class Game {
 			if (rPlayer===undefined){
 				console.log("远程玩家不存在，初始化远程玩家");
 				console.log(data);
-				game.initialisingPlayers.push( new Player(game, data.model, data.colour, data.userId, false));
+				game.initialisingPlayers.push( new Player(game, data.model, data.colour, data.userId, data.username, false));
 			} else {
 				// 远程玩家已经存在，则加入到 remotePlayers 数组中，之后进行更新
 				remotePlayers.push(rPlayer);
@@ -248,12 +248,13 @@ class Player {
 		ACTIVE: Symbol("active"),
 	});
 
-	constructor(game, model, colour, userId, local) {
+	constructor(game, model, colour, userId, username, local) {
 		this.mode = Player.modes.INIT;
 		this.game = game;
 		this.model = model;
 		this.colour = colour;
 		this.userId = userId;
+		this.username = username || `Player ${userId}`;
 		this.local = local;
 
 		this.mixer = null;
@@ -301,6 +302,11 @@ class Player {
 				z: -173,
 				h: 2.6,
 				pb: 0,
+				nameTextPos: {
+					x: 0,
+					y: 320, // 需要根据模型大小调整
+					z: 0,
+				},
 			};
 		} else {
 			position = {
@@ -309,6 +315,11 @@ class Player {
 				z: this.object.position.z,
 				h: this.object.rotation.y,
 				pb: this.object.rotation.x,
+				nameTextPos: {
+					x: 0,
+					y: 310, // 需要根据模型大小调整
+					z: 0,
+				},
 			};
 		}
 		// 加载新模型
@@ -319,6 +330,11 @@ class Player {
 			player.object.rotation.set(0, position.h, 0);
 			player.object.add(object);
 			game.scene.add(player.object);
+			// 在头顶显示用户名
+			const nameText = player.createNameText(player.username);
+			nameText.position.set(position.nameTextPos.x, position.nameTextPos.y, position.nameTextPos.z); // 设置名字的位置
+			player.object.add(nameText);
+
 			if (player.local) {
 				game.playerController = new PlayerController(player, game.container);
 				game.sun.target = game.player.object;
@@ -352,6 +368,21 @@ class Player {
 		}).catch((error) => {
 			console.error("Player.loadModel: " + error);
 		});
+	}
+
+	createNameText(name) {
+		const canvas = document.createElement('canvas');
+		const context = canvas.getContext('2d');
+		context.font = 'Bold 40px Arial';
+		context.fillStyle = 'white';
+		context.fillText(name, 0, 40);
+
+		const texture = new THREE.CanvasTexture(canvas);
+		const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+		const sprite = new THREE.Sprite(spriteMaterial);
+		sprite.scale.set(100, 50, 1); // 根据需要调整比例
+
+		return sprite;
 	}
 
 	changeModel(modelName, colour) {
@@ -433,8 +464,8 @@ class Player {
 }
 
 class PlayerLocal extends Player {
-	constructor(game, model, userId) {
-		super(game, model, FBX_IMAGE.randomColour(), userId, true);
+	constructor(game, model, userId, username) {
+		super(game, model, FBX_IMAGE.randomColour(), userId, username, true);
 		this.initWebSocket();
 	}
 
@@ -454,6 +485,7 @@ class PlayerLocal extends Player {
 		if (this.gameWebSocketService !== undefined){
 			const data = {
 				userId: this.userId,
+				username: this.username,
 				model: this.model,
 				colour: this.colour,
 				x: this.object.position.x,
