@@ -15,8 +15,7 @@ import {deepCopy} from "@/utils/copy";
 import {getUserInfo, modifyPassword, modifyUserInfo} from "@/api/user";
 import SELF_IMAGE from "@/three/self-image/self-image";
 import STORAGE from "@/store";
-import {GAME_EVENTS} from "@/event/GameEventEmitter";
-import gameEventEmitter from "@/event/GameEventEmitter";
+import gameEventEmitter, {GAME_EVENTS}  from "@/event/GameEventEmitter";
 
 export default {
 	name: "PersonalInfo",
