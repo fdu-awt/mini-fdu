@@ -15,6 +15,8 @@ import {deepCopy} from "@/utils/copy";
 import {getUserInfo, modifyPassword, modifyUserInfo} from "@/api/user";
 import SELF_IMAGE from "@/three/self-image/self-image";
 import STORAGE from "@/store";
+import {GAME_EVENTS} from "@/event/GameEventEmitter";
+import gameEventEmitter from "@/event/GameEventEmitter";
 
 export default {
 	name: "PersonalInfo",
@@ -141,7 +143,8 @@ export default {
 			this.passwordModifyDialogVisible = true;
 		},
 		onSelfImageChange() {
-			// TODO : 订阅与通知
+			// console.log("选择了虚拟形象", this.form.selfImage);
+			gameEventEmitter.emit(GAME_EVENTS.USER_SELF_IMAGE_CHANGE, this.form.selfImage);
 		},
 		matchPassword(rule, value, callback) {
 			if (value === '') {
