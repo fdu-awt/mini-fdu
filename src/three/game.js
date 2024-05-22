@@ -532,25 +532,21 @@ class Player {
 		});
 	}
 
-
 	changeModel(modelName, colour) {
 		this.model = modelName;
 		this.colour = colour;
 		// 移除旧模型
 		this.game.scene.remove(this.object);
+		this.actionName = undefined;
 		// 加载新模型
 		this.loadModel(false).then(() => {
 			if (this.local) {
-				this.socketOnLocalUpdate();
+				this.socketUpdate();
 			}
 		});
 	}
 
 	set action(name) {
-		if (name === "Init") {
-			this.actionName = name;
-			return;
-		}
 		if (this.actionName === name) return;
 		const previousAction = this.actions[this.actionName];
 		const newAction = this.actions[name];
@@ -560,8 +556,24 @@ class Player {
 			previousAction.fadeOut(0.5);
 		}
 		newAction.reset().fadeIn(0.5).play();
-	}
+		// 处理一次性动画
+		if (name === 'Pointing Gesture' || name === 'Pointing') {
+			newAction.setLoop(THREE.LoopOnce);
+			newAction.clampWhenFinished = true;
 
+			const onFinished = (event) => {
+				if (event.action === newAction) {
+					this.mixer.removeEventListener('finished', onFinished);
+					this.action = 'Idle';
+					if (this.local) {
+						this.socketUpdate(); // 通知服务器
+					}
+				}
+			};
+
+			this.mixer.addEventListener('finished', onFinished);
+		}
+	}
 
 	get action() {
 		return this.actionName;
@@ -605,6 +617,12 @@ class Player {
 			if (!found) this.game.removePlayer(this);
 		}
 	}
+
+	socketUpdate(){
+		// console.log("Player.socketUpdate");
+		throw new Error("Player.socketUpdate must be overridden");
+	}
+
 	showChatButton(remotePlayerId) {
 		let chatButton = document.getElementById('chat-button');
 		if (!chatButton) {
@@ -656,7 +674,7 @@ class PlayerLocal extends Player {
 
 	}
 
-	socketOnLocalUpdate(){
+	socketUpdate(){
 		if (this.gameWebSocketService !== undefined){
 			const data = {
 				userId: this.userId,

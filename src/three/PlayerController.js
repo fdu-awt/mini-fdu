@@ -63,11 +63,11 @@ export default class PlayerController {
 		};
 		this.key_down_e = () => {
 			this.player.action = 'Pointing';
-			this.player.socketOnLocalUpdate();
+			this.player.socketUpdate();
 		};
 		this.key_down_q = () => {
 			this.player.action = 'Pointing Gesture';
-			this.player.socketOnLocalUpdate();
+			this.player.socketUpdate();
 		};
 
 		this.key_up_w = () => {this.keyStates.W = false;};
@@ -80,12 +80,12 @@ export default class PlayerController {
 		this.addMouseListeners();
 		// 处理：请求解锁鼠标锁定
 		gameEventEmitter.on(
-			GAME_EVENTS.REQUEST_POINTER_UNLOCK,
+			GAME_EVENTS.REQUEST_MOUSE_CONTROL,
 			this.unlockPointer.bind(this)
 		);
 		// 处理：申请打字控制
 		gameEventEmitter.on(
-			GAME_EVENTS.REQUEST_CHAT_CONTROL,
+			GAME_EVENTS.REQUEST_KEYBOARD_CONTROL,
 			this.cancelKeyListeners.bind(this)
 		);
 	}
@@ -234,7 +234,9 @@ export default class PlayerController {
 		}
 		const vl = this.v.length();
 		if (this.speedThresholds.idle(vl)) {
-			this.player.action = "Idle";
+			if (this.player.action === "Walking" || this.player.action === "Running"){
+				this.player.action = "Idle";
+			}
 		} else if (this.speedThresholds.walking(vl)) {
 			this.player.action = "Walking";
 		} else {
@@ -245,6 +247,6 @@ export default class PlayerController {
 		const deltaPos = this.v.clone().multiplyScalar(deltaTime);
 		this.player.object.position.add(deltaPos);//更新玩家角色的位置
 		// 更新 socket 信息
-		this.player.socketOnLocalUpdate();
+		this.player.socketUpdate();
 	}
 }

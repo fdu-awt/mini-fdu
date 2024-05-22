@@ -42,7 +42,9 @@ export default {
 			gameEventEmitter.on(GAME_EVENTS.KEY_DOWN_Z, () => {
 				this.showSettingDialog = !this.showSettingDialog;
 				// 申请解除鼠标锁定
-				gameEventEmitter.emit(GAME_EVENTS.REQUEST_POINTER_UNLOCK);
+				gameEventEmitter.emit(GAME_EVENTS.REQUEST_MOUSE_CONTROL);
+				// 申请接触键盘锁定
+				gameEventEmitter.emit(GAME_EVENTS.REQUEST_KEYBOARD_CONTROL);
 			});
 		},
 		onSettingDialogClose(){
