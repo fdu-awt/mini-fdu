@@ -5,7 +5,7 @@ import {Town} from "@/three/GameEnvironment";
 import {FbxSelfImageLoader} from "@/three/SelfImageLoader";
 import {Preloader} from "@/utils/preloader";
 import GameWebSocketService, {GAME_WS_EMIT_EVENTS, GAME_WS_MSG_TYPES} from "@/api/socket/GameWebSocketService";
-import gameEventEmitter, {GAME_EVENTS} from "@/event/GameEventEmitter";
+import gameErrorEventEmitter, {GAME_ERROR_EVENTS} from "@/event/GameErrorEventEmitter";
 import STORAGE from "@/store";
 
 export class Game {
@@ -256,7 +256,7 @@ class Player {
 		this.activateActionName = null;
 		if (this.userId === undefined || this.userId === '') {
 			if (this.local) {
-				gameEventEmitter.emit(GAME_EVENTS.NO_LOCAL_USER_ID, "No user ID, maybe not logged in.");
+				gameErrorEventEmitter.emit(GAME_ERROR_EVENTS.NO_LOCAL_USER_ID, "No user ID, maybe not logged in.");
 			} else {
 				console.error("No user ID for remote player");
 			}

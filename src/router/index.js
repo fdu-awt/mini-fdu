@@ -9,7 +9,7 @@ import VideoChatDemo from "@/components/VideoChatDemo.vue";
 import STORAGE from "../store";
 import {ElMessageBox, ElNotification} from 'element-plus';
 import apiEmitter, {API_EVENTS} from "@/event/ApiEventEmitter";
-import gameEventEmitter, {GAME_EVENTS} from "@/event/GameEventEmitter";
+import gameErrorEventEmitter, {GAME_ERROR_EVENTS} from "@/event/GameErrorEventEmitter";
 
 // 定义路由
 const routes = [
@@ -75,7 +75,7 @@ apiEmitter.on(API_EVENTS.UN_AUTH, (msg) => {
 
 // 监听游戏错误事件
 // 事实上，这个事件的触发晚于 路由守卫 的检查
-gameEventEmitter.on(GAME_EVENTS.NO_LOCAL_USER_ID, (msg) => {
+gameErrorEventEmitter.on(GAME_ERROR_EVENTS.NO_LOCAL_USER_ID, (msg) => {
 	console.error("游戏事件，NO_LOCAL_USER_ID：", msg);
 	STORAGE.logOut();
 	router.replace({

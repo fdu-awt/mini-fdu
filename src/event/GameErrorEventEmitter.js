@@ -1,10 +1,10 @@
-const GAME_EVENTS = Object.freeze({
+const GAME_ERROR_EVENTS = Object.freeze({
 	NO_LOCAL_USER_ID: Symbol("no_local_user_id"),
 	// 其他错误
 	OTHER_ERROR: Symbol("other_error"),
 });
 
-class GameEventEmitter {
+class GameErrorEventEmitter {
 	constructor() {
 		this.events = {};
 	}
@@ -24,5 +24,5 @@ class GameEventEmitter {
 	}
 }
 
-export { GAME_EVENTS };
-export default new GameEventEmitter();
+export { GAME_ERROR_EVENTS };
+export default new GameErrorEventEmitter();
