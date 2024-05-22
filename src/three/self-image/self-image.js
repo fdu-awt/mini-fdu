@@ -93,6 +93,7 @@ const GLTF_IMAGE = {
 
 const FBX_IMAGE = {
 	SCENE_PATH: "/fbx_models/fbx/town.fbx",
+	GUANGHUALOU_PATH : "/fbx_models/fbx/guanghualou.fbx",
 	CUBE_TEXTURE_PATH: "/fbx_models/images/",
 	ANIMATION_PATH_PREFIX: "/fbx_models/fbx/anims/",
 	MODEL_PATH_PREFIX: "/fbx_models/fbx/people",
