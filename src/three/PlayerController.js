@@ -65,6 +65,16 @@ export default class PlayerController {
 		this.createCameras();
 		this.addKeyListeners();
 		this.addMouseListeners();
+		// 处理：请求解锁鼠标锁定
+		gameEventEmitter.on(
+			GAME_EVENTS.REQUEST_POINTER_UNLOCK,
+			this.unlockPointer.bind(this)
+		);
+		// 处理：申请打字控制
+		gameEventEmitter.on(
+			GAME_EVENTS.REQUEST_CHAT_CONTROL,
+			this.cancelKeyListeners.bind(this)
+		);
 	}
 
 	createCameras() {
@@ -154,6 +164,8 @@ export default class PlayerController {
 					if (this.controllerElement) {
 						if (document.body.contains(this.controllerElement)) {
 							this.controllerElement.requestPointerLock();//指针锁定
+							// 恢复游戏控制
+							this.addKeyListeners();
 						}
 					}
 				});
