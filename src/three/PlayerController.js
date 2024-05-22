@@ -234,7 +234,9 @@ export default class PlayerController {
 		}
 		const vl = this.v.length();
 		if (this.speedThresholds.idle(vl)) {
-			this.player.action = "Idle";
+			if (this.player.action === "Walking" || this.player.action === "Running"){
+				this.player.action = "Idle";
+			}
 		} else if (this.speedThresholds.walking(vl)) {
 			this.player.action = "Walking";
 		} else {

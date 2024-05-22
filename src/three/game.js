@@ -507,8 +507,22 @@ class Player {
 			previousAction.fadeOut(0.5);
 		}
 		newAction.reset().fadeIn(0.5).play();
-	}
+		// 处理一次性动画
+		if (name === 'Pointing Gesture' || name === 'Pointing') {
+			newAction.setLoop(THREE.LoopOnce);
+			newAction.clampWhenFinished = true;
 
+			const onFinished = (event) => {
+				if (event.action === newAction) {
+					this.mixer.removeEventListener('finished', onFinished);
+					this.action = 'Idle';
+					this.socketOnLocalUpdate(); // 通知服务器
+				}
+			};
+
+			this.mixer.addEventListener('finished', onFinished);
+		}
+	}
 
 	get action() {
 		return this.actionName;
