@@ -289,15 +289,34 @@ class Player {
 		game.animate();
 	}
 
-	loadModel(modelName, colour) {
+	loadModel(modelName, colour, init= true) {
 		const game = this.game;
 		const player = this;
+		let position;
+		// 位置信息
+		if (init) {
+			position = {
+				x: 3122,
+				y: 0,
+				z: -173,
+				h: 2.6,
+				pb: 0,
+			};
+		} else {
+			position = {
+				x: this.object.position.x,
+				y: this.object.position.y,
+				z: this.object.position.z,
+				h: this.object.rotation.y,
+				pb: this.object.rotation.x,
+			};
+		}
 		// 加载新模型
 		game.selfImageLoader.load(modelName, colour).then((object) => {
 			player.mixer = object.mixer;
 			player.object = new THREE.Object3D();
-			player.object.position.set(3122, 0, -173);
-			player.object.rotation.set(0, 2.6, 0);
+			player.object.position.set(position.x, position.y, position.z);
+			player.object.rotation.set(0, position.h, 0);
 			player.object.add(object);
 			game.scene.add(player.object);
 			if (player.local) {
@@ -314,8 +333,10 @@ class Player {
 				player.collider = box;
 				player.object.userData.userId = player.userId;
 				player.object.userData.remotePlayer = true;
-				const players = game.initialisingPlayers.splice(game.initialisingPlayers.indexOf(this), 1);
-				game.remotePlayers.push(players[0]);
+				if (init){
+					const players = game.initialisingPlayers.splice(game.initialisingPlayers.indexOf(this), 1);
+					game.remotePlayers.push(players[0]);
+				}
 			}
 			player.loadAnimations(game.selfImageLoader.getOriginalLoader());
 			player.mode = Player.modes.ACTIVE;
@@ -338,7 +359,8 @@ class Player {
 		this.colour = colour;
 		// 移除旧模型
 		this.game.scene.remove(this.object);
-		this.loadModel(modelName, colour);
+		// 加载新模型
+		this.loadModel(modelName, colour, false);
 		if (this.local) {
 			this.socketOnLocalUpdate();
 		}
