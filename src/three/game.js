@@ -672,11 +672,22 @@ class PlayerLocal extends Player {
 		this.chatWebSocketService = new ChatWebSocketService(this.userId);
 		console.log(this.chatWebSocketService);
 		this.chatWebSocketService.connect();
-		this.chatWebSocketService.socket.onmessage = (message) => {
+
+		this.chatWebSocketService.socket.onmessage = (event) => {
 			if (this.chatWebSocketService.socket.readyState === WebSocket.OPEN) {
-				console.log("我现在收到消息了");
+				const data = JSON.parse(event.data);
+				console.log(data);
+				if(data.ifSelf==="false"){
+					console.log("已经发送");
+					eventBus.emit('newMessage', {
+						localId: data.localId,
+						remoteId: data.remoteId,
+						socket: this.chatWebSocketService.socket
+					});
+				}
 				// 使用事件总线发射事件
-				eventBus.emit('newMessage', message, this.localId, this.remoteId, this.socket);
+				//这里不对
+
 			}
 		};
 

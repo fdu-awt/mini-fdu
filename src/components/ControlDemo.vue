@@ -35,7 +35,7 @@ export default {
 		};
 	},
 	mounted() {
-		eventBus.on('newMessage', this.handleNewMessage);
+		eventBus.on('newMessage', this.handleNewMessage.bind(this));
 		this.canvasContainer = document.getElementById('canvas-container');
 		this.game = new Game(this.canvasContainer, new GuangHuaLou() , new Lab1FbxSelfImageLoader());
 		this.listenKeyDown();
@@ -79,17 +79,17 @@ export default {
 			this.AIChatDialogVisible = false;
 		},
 
-		handleNewMessage(message, localId, remoteId, socket) {
+		handleNewMessage({ localId, remoteId, socket }) {
+			console.log("我在处理查看消息的点击");
+			console.log(socket);
 			// 如果ChatBox未显示，则设置新消息通知标志为true
-			if (!this.isChatBoxVisible) {
+			if (!this.isChatBoxVisible && !this.newMessageNotification) {
 				this.newMessageNotification = true;
 				this.localId = localId; // 可选：如果需要在通知中使用localId
 				this.remoteId = remoteId; // 可选：如果需要在通知中使用remoteId
 				this.socket = socket; // 可选：如果需要在通知中使用socket
 			}
-			// 这里可以添加其他处理新消息的逻辑
 		},
-		// ...其他已有方法
 		viewNewMessage() {
 			// 用户点击查看新消息通知时调用的方法
 			this.isChatBoxVisible = true;
