@@ -483,12 +483,12 @@ class Player {
 		});
 	}
 
-
 	changeModel(modelName, colour) {
 		this.model = modelName;
 		this.colour = colour;
 		// 移除旧模型
 		this.game.scene.remove(this.object);
+		this.actionName = undefined;
 		// 加载新模型
 		this.loadModel(false).then(() => {
 			if (this.local) {
@@ -498,10 +498,6 @@ class Player {
 	}
 
 	set action(name) {
-		if (name === "Init") {
-			this.actionName = name;
-			return;
-		}
 		if (this.actionName === name) return;
 		const previousAction = this.actions[this.actionName];
 		const newAction = this.actions[name];
