@@ -10,7 +10,15 @@
               :class="['message-item', { 'my-message': message.ifSelf, 'other-message': !message.ifSelf }]"
           >
             <el-avatar :src="message.ifSelf ? userAvatar : remoteAvatar" class="message-avatar"></el-avatar>
-            <div class="message-content">{{ message.message }}</div>
+            <div class="message-content">
+              <template v-if="message.type == 'text'">
+                {{ message.message }}
+              </template>
+              <template v-else-if="message.type == 'video'">
+                通话时长: {{ message.message }}
+              </template>
+            </div>
+<!--            <div class="message-content">{{ message.message }}</div>-->
           </div>
         </div>
       </el-scrollbar>
@@ -88,7 +96,8 @@ export default {
 			const messageShow = {
 				ifSelf: ifSelf,
 				message: message,
-				timestamp: new Date().toISOString()
+				timestamp: new Date().toISOString(),
+				type: "text"
 			};
 
 			// 将消息添加到 messages 数组
@@ -122,6 +131,12 @@ export default {
 		startVideoCall() {
 			// Handle video call initiation logic here
 			console.log("Video call button clicked");
+		},
+		formatDuration(seconds) {
+			console.log(seconds);
+			const minutes = Math.floor(seconds / 60);
+			const secs = seconds % 60;
+			return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 		}
 	}
 };
