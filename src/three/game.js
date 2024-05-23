@@ -685,8 +685,6 @@ class PlayerLocal extends Player {
 						socket: this.chatWebSocketService.socket
 					});
 				}
-				// 使用事件总线发射事件
-				//这里不对
 
 			}
 		};

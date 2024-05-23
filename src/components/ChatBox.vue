@@ -85,11 +85,11 @@ export default {
 
 			// 从解析后的对象中获取消息内容和ifSelf字段
 			const message = data.message;
-			const ifSelf = data.ifSelf; // 直接从JSON对象中获取ifSelf字段
+			
 
 			// 构建 messageShow 对象
 			const messageShow = {
-				ifSelf: ifSelf,
+				ifSelf: data.ifSelf!=="false",
 				message: message,
 				timestamp: new Date().toISOString(),
 				type: "text"

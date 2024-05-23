@@ -71,6 +71,7 @@ export default {
 		},
 		closeChatBox() {
 			this.isChatBoxVisible = false; // 关闭ChatBox的方法
+			this.newMessageNotification = false;
 		},
 		handleAskAI() {
 			this.AIChatDialogVisible = true;
