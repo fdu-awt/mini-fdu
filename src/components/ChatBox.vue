@@ -10,15 +10,7 @@
               :class="['message-item', { 'my-message': message.ifSelf, 'other-message': !message.ifSelf }]"
           >
             <el-avatar :src="message.ifSelf ? userAvatar : remoteAvatar" class="message-avatar"></el-avatar>
-            <div class="message-content">
-              <template v-if="message.type == 'text'">
-                {{ message.message }}
-              </template>
-              <template v-else-if="message.type == 'video'">
-                通话时长: {{ message.message }}
-              </template>
-            </div>
-<!--            <div class="message-content">{{ message.message }}</div>-->
+            <div class="message-content">{{ message.message }}</div>
           </div>
         </div>
       </el-scrollbar>
@@ -87,14 +79,15 @@ export default {
 		this.socketInstance = this.socket;
 		console.log(this.socketInstance);
 		this.socketInstance.onmessage = (event) => {
-			// 假设 ifSelf 的值是 "true" 或 "false"（长度为 4 或 5）
-			const data = event.data;
-			const ifSelf = data.endsWith("true") ? true : false;
-			const message = data.slice(0, ifSelf ? -4 : -5);
+			console.log(event);
 
+			const data = JSON.parse(event.data);
+
+			// 从解析后的对象中获取消息内容和ifSelf字段
+			const message = data.message;
 			// 构建 messageShow 对象
 			const messageShow = {
-				ifSelf: ifSelf,
+				ifSelf: data.ifSelf!=="false",
 				message: message,
 				timestamp: new Date().toISOString(),
 				type: "text"
@@ -132,12 +125,6 @@ export default {
 			// Handle video call initiation logic here
 			console.log("Video call button clicked");
 		},
-		formatDuration(seconds) {
-			console.log(seconds);
-			const minutes = Math.floor(seconds / 60);
-			const secs = seconds % 60;
-			return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-		}
 	}
 };
 </script>

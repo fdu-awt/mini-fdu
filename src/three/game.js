@@ -605,7 +605,7 @@ class Player {
 					// // 检查用户之间的距离，但是这里不太灵
 					// const distance = this.object.position.distanceTo(this.game.player.object.position);
 					// console.log(distance);
-					//这里后面需要改逻辑直接用点击用户头顶名字开启聊天
+					// TODO 这里后面需要改逻辑直接用点击用户头顶名字开启聊天
 					const distance = 3;
 					if (distance < 10) {
 						this.showChatButton(data.userId);
@@ -672,11 +672,20 @@ class PlayerLocal extends Player {
 		this.chatWebSocketService = new ChatWebSocketService(this.userId);
 		console.log(this.chatWebSocketService);
 		this.chatWebSocketService.connect();
-		this.chatWebSocketService.socket.onmessage = (message) => {
+
+		this.chatWebSocketService.socket.onmessage = (event) => {
 			if (this.chatWebSocketService.socket.readyState === WebSocket.OPEN) {
-				console.log("我现在收到消息了");
-				// 使用事件总线发射事件
-				eventBus.emit('newMessage', message, this.localId, this.remoteId, this.socket);
+				const data = JSON.parse(event.data);
+				console.log(data);
+				if(data.ifSelf==="false"){
+					console.log("已经发送");
+					eventBus.emit('newMessage', {
+						localId: data.remoteId,
+						remoteId: data.localId,
+						socket: this.chatWebSocketService.socket
+					});
+				}
+
 			}
 		};
 
