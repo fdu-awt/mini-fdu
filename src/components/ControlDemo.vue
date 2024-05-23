@@ -70,8 +70,12 @@ export default {
 			this.isChatBoxVisible = true; // 点击对象时显示ChatBox
 		},
 		closeChatBox() {
+			console.log("正在关闭对话框");
 			this.isChatBoxVisible = false; // 关闭ChatBox的方法
 			this.newMessageNotification = false;
+			this.localId = null; // 可选：如果需要在通知中使用localId
+			this.remoteId = null; // 可选：如果需要在通知中使用remoteId
+			this.socket = null; // 可选：如果需要在通知中使用socket
 		},
 		handleAskAI() {
 			this.AIChatDialogVisible = true;

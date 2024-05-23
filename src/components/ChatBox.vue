@@ -85,8 +85,6 @@ export default {
 
 			// 从解析后的对象中获取消息内容和ifSelf字段
 			const message = data.message;
-			
-
 			// 构建 messageShow 对象
 			const messageShow = {
 				ifSelf: data.ifSelf!=="false",

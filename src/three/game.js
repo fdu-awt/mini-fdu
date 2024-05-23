@@ -680,8 +680,8 @@ class PlayerLocal extends Player {
 				if(data.ifSelf==="false"){
 					console.log("已经发送");
 					eventBus.emit('newMessage', {
-						localId: data.localId,
-						remoteId: data.remoteId,
+						localId: data.remoteId,
+						remoteId: data.localId,
 						socket: this.chatWebSocketService.socket
 					});
 				}
