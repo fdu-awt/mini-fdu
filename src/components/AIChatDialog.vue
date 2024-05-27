@@ -53,6 +53,12 @@ export default {
 			deep: true,
 		},
 	},
+	mounted() {
+		this.messages.push({
+			ifSelf: false,
+			message: "你好，我是你环游复旦的智能助手。请问你想了解哪些关于复旦的问题？",
+		});
+	},
 	methods: {
 		getAIResponse(question) {
 			this.messages.push({
