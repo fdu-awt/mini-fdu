@@ -8,7 +8,7 @@ import {getAllClubData} from "@/api/study.js";
 import ButtonHover1 from './common/ButtonHover1.vue';
 
 export default {
-	name: "PostDialog",
+	name: "ClubDialog",
 	components: {
 		ElDialog,
 		ElImage,
