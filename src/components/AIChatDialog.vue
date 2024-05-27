@@ -18,7 +18,7 @@
 
 <script>
 import userAvatar from '@/assets/avatar/1.jpg';
-import aiAvatar from '@/assets/avatar/2.jpg';
+import aiAvatar from '@/assets/avatar/AI.jpg';
 import { chatWithAI } from '@/api/ai.js';
 export default {
 	name: "AIChatDialog",
@@ -28,7 +28,7 @@ export default {
 			inputMessage: "",
 
 			userAvatar: userAvatar,
-			aiAvator: aiAvatar,
+			aiAvatar: aiAvatar,
 
 			visible: this.dialogVisible,
 		};
@@ -56,7 +56,7 @@ export default {
 	mounted() {
 		this.messages.push({
 			ifSelf: false,
-			message: "你好，我是你环游复旦的智能助手。请问你想了解哪些关于复旦的问题？",
+			message: "你好，我是复旦校园智能助手。请问你想了解哪些关于复旦的问题？",
 		});
 	},
 	methods: {
