@@ -1,25 +1,9 @@
-<template>
-	<el-dialog v-model="visible" @before-close="this.$emit('close')">
-		<div class="chat-box">
-			<el-scrollbar ref="scroller" class="messages">
-				<div v-for="(message, index) in messages" :key="index"
-					:class="['message-item', { 'my-message': message.ifSelf, 'ai-message': !message.ifSelf }]">
-					<el-avatar :src="message.ifSelf ? userAvatar : aiAvatar" class="message-avatar"></el-avatar>
-					<div class="message-content">{{ message.message }}</div>
-				</div>
-			</el-scrollbar>
-			<div class="message-input">
-				<el-input v-model="inputMessage" placeholder="Type a message..." @keyup.enter="sendMessage"></el-input>
-				<el-button type="primary" @click="sendMessage">Send</el-button>
-			</div>
-		</div>
-	</el-dialog>
-</template>
-
 <script>
 import userAvatar from '@/assets/avatar/1.jpg';
 import aiAvatar from '@/assets/avatar/AI.jpg';
 import { chatWithAI } from '@/api/ai.js';
+import STORAGE from "@/store";
+
 export default {
 	name: "AIChatDialog",
 	data() {
@@ -61,12 +45,31 @@ export default {
 	},
 	methods: {
 		getAIResponse(question) {
-			this.messages.push({
-				ifSelf: false,
-				message: chatWithAI(question),
+			// 支持多轮对话（同时发送历史聊天记录）
+			chatWithAI(question, STORAGE.getAIHistory()).then((data) => {
+				if (data.status === 200) {
+					this.messages.push({
+						ifSelf: false,
+						message: data.data.answer,
+					});
+					// 存储历史聊天记录，用于多轮对话
+					STORAGE.addAIHistoryMessage({
+						"role": "user",
+						"content": question
+					});
+					STORAGE.addAIHistoryMessage({
+						"role": "assistant",
+						"content": data.data.answer
+					});
+					console.log('接收到当前回答后的历史消息记录：', STORAGE.getAIHistory());
+					// STORAGE.clearAIHistory();
+				}
+			}).catch((err) => {
+				console.error(err);
 			});
 		},
 		sendMessage() {
+			console.log('发送消息前的历史消息记录：', STORAGE.getAIHistory());
 			this.messages.push({
 				ifSelf: true,
 				message: this.inputMessage,
@@ -85,6 +88,24 @@ export default {
 	}
 };
 </script>
+
+<template>
+  <el-dialog v-model="visible" @before-close="this.$emit('close')">
+    <div class="chat-box">
+      <el-scrollbar ref="scroller" class="messages">
+        <div v-for="(message, index) in messages" :key="index"
+             :class="['message-item', { 'my-message': message.ifSelf, 'ai-message': !message.ifSelf }]">
+          <el-avatar :src="message.ifSelf ? userAvatar : aiAvatar" class="message-avatar"></el-avatar>
+          <div class="message-content">{{ message.message }}</div>
+        </div>
+      </el-scrollbar>
+      <div class="message-input">
+        <el-input v-model="inputMessage" placeholder="Type a message..." @keyup.enter="sendMessage"></el-input>
+        <el-button type="primary" @click="sendMessage">Send</el-button>
+      </div>
+    </div>
+  </el-dialog>
+</template>
 
 <style scoped>
 .chat-box {
