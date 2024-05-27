@@ -9,6 +9,7 @@ import PostDialog from "@/components/PostDialog.vue";
 import ClubDialog from "@/components/ClubDialog.vue";
 import eventBus from '@/eventbus/eventBus.js';
 import AIChatDialog from '@/components/AIChatDialog.vue';
+import QuizDialog from '@/components/QuizDialog.vue';
 
 export default {
 	name: "ControlDemo",
@@ -16,6 +17,7 @@ export default {
 		PostDialog,
 		ClubDialog,
 		AIChatDialog,
+		QuizDialog,
 
 		ChatBox,
 		SettingDialog,
@@ -112,6 +114,7 @@ export default {
 	<ClubDialog @askAI="handleAskAI"/>
 	<AIChatDialog :dialogVisible="this.AIChatDialogVisible" @close="handleAIChatClose"/>
 	
+  <QuizDialog/>
 	<SettingDialog :show="showSettingDialog" @close="onSettingDialogClose"/>
 	<ChatBox v-if="isChatBoxVisible" :socket="socket" :remote-id="remoteId" :local-id="localId" @close="closeChatBox" />
   <div v-if="newMessageNotification" class="new-message-notification">

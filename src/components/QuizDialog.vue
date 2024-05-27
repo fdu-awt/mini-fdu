@@ -1,19 +1,21 @@
 <script>
-import { ElCard, ElRow, ElCol, ElMessage } from 'element-plus';
+import { ElCard, ElRow, ElCol, ElMessage, ElDialog } from 'element-plus';
 import { Select, CloseBold } from '@element-plus/icons-vue';
 import { getRandomQuizQuestion, submitAnswer } from '@/api/quiz';
 
 export default {
-	name: 'QuizQuestion',
+	name: 'QuizDialog',
 	components: {
 		ElCard,
 		ElRow,
 		ElCol,
 		Select,
-		CloseBold
+		CloseBold,
+		ElDialog
 	},
 	data() {
 		return {
+			quizDialogVisible: false,
 			quizId: null,
 			question: '',
 			options: [],
@@ -23,8 +25,13 @@ export default {
 	},
 	mounted() {
 		this.getRandomQuizQuestion();
+		window.addEventListener('ShowQuizDialog', this.handleNPCClicked);
 	},
 	methods: {
+		// 处理 NPC 被点击的逻辑
+		handleNPCClicked() {
+			this.quizDialogVisible = true;
+		},
 		getRandomQuizQuestion() {
 			getRandomQuizQuestion().then((data) => {
 				if (data.code === 200) {
@@ -65,7 +72,7 @@ export default {
 </script>
 
 <template>
-  <div class="quiz-question">
+  <el-dialog v-model="quizDialogVisible" v-close-on-click-modal="false" class="quiz-question">
     <div class="question-card card-header">
       <h2>问题：{{ question }}</h2>
     </div>
@@ -90,7 +97,7 @@ export default {
     <div>
       <button @click="getNextQuestion()" class="next-button">下一题</button>
     </div>
-  </div>
+  </el-dialog>
 </template>
 
 
