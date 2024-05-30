@@ -76,7 +76,9 @@ class GuangHuaLou extends GameEnvironment{
 							map: postImageLoader,
 							side: THREE.DoubleSide
 						});
-			
+						
+						material.color.set(0x888888);
+
 						child.material = material;
 					}
 				}).catch(e => {
@@ -107,6 +109,8 @@ class GuangHuaLou extends GameEnvironment{
 							map: postImageLoader,
 							side: THREE.DoubleSide
 						});
+
+						material.color.set(0x888888);
 			
 						child.material = material;
 					}
