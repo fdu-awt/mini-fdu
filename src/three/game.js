@@ -278,6 +278,7 @@ export class Game {
 
 					// 点击历史展板
 					if(object.name.startsWith("post")){
+						console.log((object.name));
 						// const post = intersects[0].object;
 						// post.material = new THREE.MeshBasicMaterial({ 
 						// 	color: 0xff0000,
