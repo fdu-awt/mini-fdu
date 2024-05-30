@@ -58,7 +58,7 @@ export class Game {
 			this,
 			"Doctor",
 			FBX_IMAGE.randomColour(),
-			"NPC1",
+			"知识自测NPC",
 			{x: 3122, y: 0, z: -173,},
 			{x: 0, y: 2.6, z: 0,},
 			{x: 0, y: 320, z: 0,});
@@ -142,7 +142,7 @@ export class Game {
 		this.scene.add(light);
 
 		this.environment.load(this, undefined);
-		this.bindEventsForPostsAndClubs(this);
+		this.handleMouseClick(this);
 		// 加载 npc 和 玩家动画
 		this.loadAnimations().then(() => {
 			// 加载玩家
@@ -251,7 +251,8 @@ export class Game {
 		});
 	}
 
-	bindEventsForPostsAndClubs(game){
+	// 检测鼠标点击行为
+	handleMouseClick(game){
 		const raycaster = new THREE.Raycaster();
 		const mouse = new THREE.Vector2();
 
@@ -265,12 +266,16 @@ export class Game {
 
 				console.log("intersects", intersects);
 				if(intersects.length > 0){
+					const object = intersects[0].object;
+
 					// ElMessage({
 					// 	showClose: true,
 					// 	message: intersects[0].object.name,
 					// 	type: "success",
 					// });
-					if(intersects[0].object.name.startsWith("post")){
+
+					// 点击历史展板
+					if(object.name.startsWith("post")){
 						// const post = intersects[0].object;
 						// post.material = new THREE.MeshBasicMaterial({ 
 						// 	color: 0xff0000,
@@ -282,13 +287,22 @@ export class Game {
 						event.key = post_id;
 						window.dispatchEvent(event);
 					}	
-					
-					if(intersects[0].object.name.startsWith("clubpost")){
+
+					// 点击社团展板
+					if(object.name.startsWith("clubpost")){
 						const club_id = Number(intersects[0].object.name.substring(8));
 						let event = new Event("ClickClub");
 						event.key = club_id;
 						window.dispatchEvent(event);
 					}
+
+					// 点击 NPC
+					game.npcs.forEach((npc) => {
+						if (npc.collider === object) {
+							npc.interact();
+						}
+					});
+
 				}
 			}
 		}

@@ -61,7 +61,6 @@ export default {
 </script>
 
 <template>
-	<div id="root-container">
 		<div id="root-container">
 			<form class="form_main" @submit.prevent="handleSubmit">
 				<p class="heading">注 册</p>
@@ -90,28 +89,47 @@ export default {
 				</div>
 			</form>
 		</div>
-	</div>
 </template>
 
 <style scoped>
 #root-container {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	height: 100vh;
-	background-color: #f5f5f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  position: relative; /* 添加相对定位 */
+}
+
+#root-container::after {
+  content: ""; /* 创建一个伪元素 */
+  position: absolute; /* 绝对定位 */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('../assets/login/mini-fdu.png'); /* 背景图片设置在伪元素上 */
+  z-index: -1; /* 确保伪元素在容器下方 */
+  background-size: cover; /* 覆盖整个元素 */
+  background-position: center; /* 居中显示 */
+  background-repeat: no-repeat; /* 防止图片平铺 */
+  opacity: 0.7;
 }
 
 .form_main {
-	width: 280px;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	background-color: rgb(255, 255, 255);
-	padding: 30px 30px 30px 30px;
-	border-radius: 30px;
-	box-shadow: 0 0 40px rgba(0, 0, 0, 0.062);
+  position: relative;
+  top:10px;
+  width: 450px;
+  right:40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 20px 20px 20px;
+  border-radius: 30px;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.062);
+  background-position: center; /* 将背景图片居中 */
+  background-color: rgba(255, 255, 255,0.2);
+
 }
 
 .heading {
