@@ -114,10 +114,10 @@ export class Game {
 
 		// 添加雾效
 		// 设置指数雾的参数
-		const fogColor = 0xecbd67;  // 雾的颜色，与天空盒子的颜色相同
-		const fogDensity = 0.00025; // 雾的密度
-		// 创建指数雾并添加到场景
-		this.scene.fog = new THREE.FogExp2(fogColor, fogDensity);
+		// const fogColor = 0xecbd67;  // 雾的颜色，与天空盒子的颜色相同
+		// const fogDensity = 0.00025; // 雾的密度
+		// // 创建指数雾并添加到场景
+		// this.scene.fog = new THREE.FogExp2(fogColor, fogDensity);
 
 		const ambient = new THREE.AmbientLight(0xaaaaaa);
 		this.scene.add(ambient);
