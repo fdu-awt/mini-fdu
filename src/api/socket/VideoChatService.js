@@ -164,10 +164,10 @@ class VideoChatService {
 	 * 处理 自己 结束视频聊天
 	 * */
 	hangup() {
-		return this.endChat().then(() => {
+		return this.endChat().then((peerId) => {
 			this.ws.send(JSON.stringify({
 				type: 'video-end',
-				toId: this.peerId,
+				toId: peerId,
 			}));
 			videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.END);
 		});
@@ -179,8 +179,10 @@ class VideoChatService {
 				return this.closeLocalVideo();
 			})
 			.then(() => {
+				const id = this.peerId;
 				this.peerId = null;
 				this.inChat = false;
+				return id;
 			});
 	}
 
