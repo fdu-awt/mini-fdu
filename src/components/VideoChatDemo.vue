@@ -32,8 +32,10 @@ export default {
 	<div class="video-container">
 		<video id="remoteVideo" autoplay playsinline></video>
 		<video id="localVideo" autoplay playsinline></video>
-		<button id="startButton">开始视频聊天</button>
-		<button id="hangupButton">挂断</button>
+		<div class="button-container">
+			<el-button id="startButton" type="primary">开始视频聊天</el-button>
+			<el-button id="hangupButton" type="danger">挂断</el-button>
+		</div>
 	</div>
 </template>
 
@@ -41,26 +43,37 @@ export default {
 .video-container {
 	position: relative;
 	width: 100%;
-	height: 100vh;
+	height: 90%;
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	background-color: white;
-	z-index: 999;
+}
+
+#remoteVideo {
+	width: 100%;
+	height: 100%;
 }
 
 #localVideo {
 	position: absolute;
-	top: 10px;
-	right: 10px;
-	width: 200px;
+	width: 20%;
 	height: auto;
+	bottom: 10px;
+	right: 10px;
 	border: 2px solid #ccc;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+	background-color: white;
 }
 
-#remoteVideo {
-	width: 80%;
-	height: auto;
-	border: 2px solid #ccc;
+.button-container {
+	position: absolute;
+	bottom: 10px;
+	left: 50%;
+	transform: translateX(-50%);
+}
+
+#startButton {
+	margin-right: 10px;
 }
 </style>
