@@ -59,7 +59,7 @@ export default {
 			// 按下 KEY_DOWN_T 时显示视频聊天demo
 			gameEventEmitter.on(GAME_EVENTS.KEY_DOWN_T, () => {
 				// TODO 真实的 toId
-				const toId = 2;
+				const toId = 1;
 				videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.START, toId);
 			});
 		},
