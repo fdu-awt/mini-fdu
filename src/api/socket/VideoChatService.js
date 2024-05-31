@@ -1,13 +1,15 @@
 import getUserMedia from "@/utils/UserMedia";
 import {ElMessageBox} from "element-plus";
 import videoChatEventEmitter, { VIDEO_CHAT_EVENTS } from "@/event/VideoChatEventEmitter";
+import store from "@/store";
 
 class VideoChatService {
-	constructor(localVideo, remoteVideo, signalingServerUrl, userId) {
-		this.localVideo = localVideo;
-		this.remoteVideo = remoteVideo;
-		this.signalingServerUrl = signalingServerUrl;
-		this.userId = userId;
+	constructor() {
+		this.localVideo = null;
+		this.remoteVideo = null;
+
+		this.signalingServerUrl = process.env.VUE_APP_VIDEO_CHAT_WEBSOCKET_BASE_URL;
+		this.userId = store.getUserId();
 		this.rtcPeerConnection = null;
 		this.ws = null;
 		this.localStream = null;
@@ -49,7 +51,58 @@ class VideoChatService {
 	}
 
 	/**
-	 * @description 开始视频聊天
+	 * @description 邀请对方进行视频聊天
+	 * */
+	invite(toId, localVideo, remoteVideo){
+		if (this.peerId) {
+			console.error('Already in a video chat');
+			return;
+		}
+		if (!toId) {
+			console.error('toId is not provided');
+			return;
+		}
+		if (!localVideo) {
+			console.error('localVideo is not provided');
+			return;
+		}
+		if (!remoteVideo) {
+			console.error('remoteVideo is not provided');
+			return;
+		}
+		this.localVideo = localVideo;
+		this.remoteVideo = remoteVideo;
+		this.startLocalVideo()
+			.then(() => {
+				return this.startRtc(toId);
+			}).then(() => {
+				this.ws.send(JSON.stringify({
+					type: 'video-invite',
+					toId: toId,
+				}));
+				this.peerId = toId;
+			})
+			.catch((err) => {
+				console.error(err.name + ': ' + err.message);
+				// todo 通知用户
+			});
+	}
+
+	/**
+	 * 处理 自己 结束视频聊天
+	 * */
+	hangup() {
+		return this.endChat().then((peerId) => {
+			this.ws.send(JSON.stringify({
+				type: 'video-end',
+				toId: peerId,
+			}));
+			videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.END);
+		});
+	}
+	
+	/**
+	 * @description 开启本地视频
 	 * @return Promise
 	 * */
 	startLocalVideo(){
@@ -69,7 +122,6 @@ class VideoChatService {
 					resolve();
 				})
 				.catch((err) => {
-					console.error(err.name + ': ' + err.message);
 					reject(err);
 				});
 		});
@@ -136,39 +188,6 @@ class VideoChatService {
 			} catch (error) {
 				reject(error);
 			}
-		});
-	}
-
-	/**
-	 * @description 邀请对方进行视频聊天
-	 * */
-	invite(toId){
-		this.startLocalVideo()
-			.then(() => {
-				return this.startRtc(toId);
-			}).then(() => {
-				this.ws.send(JSON.stringify({
-					type: 'video-invite',
-					toId: toId,
-				}));
-				this.peerId = toId;
-			})
-			.catch((err) => {
-				console.error(err.name + ': ' + err.message);
-				// todo 通知用户
-			});
-	}
-
-	/**
-	 * 处理 自己 结束视频聊天
-	 * */
-	hangup() {
-		return this.endChat().then((peerId) => {
-			this.ws.send(JSON.stringify({
-				type: 'video-end',
-				toId: peerId,
-			}));
-			videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.END);
 		});
 	}
 
@@ -363,4 +382,4 @@ class VideoChatService {
 	}
 }
 
-export default VideoChatService;
+export default new VideoChatService();

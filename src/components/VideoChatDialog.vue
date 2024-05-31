@@ -1,36 +1,32 @@
 <script>
-import VideoChatService from "@/api/socket/VideoChatService";
+import videoChatService from "@/api/socket/VideoChatService";
 import videoChatEventEmitter, { VIDEO_CHAT_EVENTS } from "@/event/VideoChatEventEmitter";
-import store from "@/store";
+import gameEventEmitter from "@/event/GameEventEmitter";
 
 export default {
 	name: "VideoChatDialog",
 	data() {
 		return {
 			userId: null,
-			toId: null,
 			visible: false,
-			videoChatService: null,
 		};
 	},
 	mounted() {
-		const localVideo = document.getElementById('localVideo');
-		const remoteVideo = document.getElementById('remoteVideo');
-		const signalingServerUrl = process.env.VUE_APP_VIDEO_CHAT_WEBSOCKET_BASE_URL;
-		// TODO 如果本机演示，需要使用不同的 userId
-		this.userId = store.getUserId();
-		this.toId = this.userId + 1;
-		store.setUserId(this.toId);
-		this.videoChatService = new VideoChatService(localVideo, remoteVideo, signalingServerUrl, this.userId);
 		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.START, this.onChatStart.bind(this));
 	},
 	methods: {
-		onChatStart() {
+		onChatStart(toId) {
+			gameEventEmitter.requestAllControl();
 			this.visible = true;
-			this.videoChatService.invite(this.toId);
+			this.$nextTick(() => {
+				const localVideo = document.getElementById('localVideo');
+				console.log("localVideo", localVideo);
+				const remoteVideo = document.getElementById('remoteVideo');
+				videoChatService.invite(toId, localVideo, remoteVideo);
+			});
 		},
 		onHangUp() {
-			this.videoChatService.hangup().then(() => {
+			videoChatService.hangup().then(() => {
 				this.visible = false;
 			});
 		},

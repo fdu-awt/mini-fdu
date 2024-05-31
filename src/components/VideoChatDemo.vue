@@ -1,5 +1,5 @@
 <script>
-import VideoChatService from "@/api/socket/VideoChatService";
+import videoChatService from "@/api/socket/VideoChatService";
 import store from "@/store";
 
 export default {
@@ -11,18 +11,15 @@ export default {
 		init() {
 			const startButton = document.getElementById('startButton');
 			const hangupButton = document.getElementById('hangupButton');
-			const localVideo = document.getElementById('localVideo');
-			const remoteVideo = document.getElementById('remoteVideo');
-			const signalingServerUrl = process.env.VUE_APP_VIDEO_CHAT_WEBSOCKET_BASE_URL;
+			// 本机演示，需要使用不同的 userId 以在一个浏览器中模拟不同的用户
 			const userId = store.getUserId();
-			// TODO 如果本机演示，需要使用不同的 userId
 			let toId = userId + 1;
 			store.setUserId(userId + 1);
-			const videoChatService = new VideoChatService(localVideo, remoteVideo, signalingServerUrl, userId);
+			const localVideo = document.getElementById('localVideo');
+			const remoteVideo = document.getElementById('remoteVideo');
 			startButton.addEventListener('click', () => {
-				videoChatService.invite(toId);
+				videoChatService.invite(toId, localVideo, remoteVideo);
 			});
-			// TODO 挂断
 			hangupButton.addEventListener('click', () => {
 				videoChatService.hangup();
 			});
