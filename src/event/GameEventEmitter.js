@@ -24,6 +24,16 @@ class GameEventEmitter extends EventEmitter {
 	constructor() {
 		super();
 	}
+
+	/**
+	 * @description 申请所有控制（解锁鼠标，解锁键盘）
+	 * */
+	requestAllControl() {
+		// 申请解除鼠标锁定
+		this.emit(GAME_EVENTS.REQUEST_MOUSE_CONTROL);
+		// 申请接触键盘锁定
+		this.emit(GAME_EVENTS.REQUEST_KEYBOARD_CONTROL);
+	}
 }
 
 export { GAME_EVENTS };
