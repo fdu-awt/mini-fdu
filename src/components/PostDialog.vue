@@ -66,8 +66,8 @@ export default {
 
 <style scoped>
 #dialog-container{
-	height: 65vh;
-	width: 65vw;
+	height: 500px;
+	width: 800px;
 
 	display: flex;
 	justify-content: center;

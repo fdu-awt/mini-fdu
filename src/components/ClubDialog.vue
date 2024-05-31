@@ -8,7 +8,7 @@ import {getAllClubData} from "@/api/study.js";
 import ButtonHover1 from './common/ButtonHover1.vue';
 
 export default {
-	name: "PostDialog",
+	name: "ClubDialog",
 	components: {
 		ElDialog,
 		ElImage,
@@ -46,7 +46,7 @@ export default {
 		
 		handleAskForAI(){
 			this.$emit("askAI");
-			this.postDialogVisible = false;
+			this.clubDialogVisible = false;
 		}
 	}
 };
@@ -57,7 +57,8 @@ export default {
         <div id="dialog-container">
 			<el-image style="width: 300px; height: 200px" :src="'./club/images/' + current_club_data.profile" :fit="contain" />
 			<h3>{{ current_club_data.name }}</h3>
-			<el-text size="default">{{ current_club_data.intro }}</el-text>
+      <h4>{{ current_club_data.slogan }}</h4>
+			<el-text size="default" class="intro">{{ current_club_data.intro }}</el-text>
 			<br/>
 			<ButtonHover1 msg="点击询问AI" @click="handleAskForAI"/>
 		</div>
@@ -66,8 +67,8 @@ export default {
 
 <style scoped>
 #dialog-container{
-	height: 65vh;
-	width: 65vw;
+	height: 500px;
+	width: 800px;
 
 	display: flex;
 	justify-content: center;
@@ -79,6 +80,11 @@ export default {
 h3{
 	display:block;
 	padding: 25px
+}
+
+h4{
+  display:block;
+  padding-bottom: 20px
 }
 
 .el-dialog, .el-dialog--center,.el-overlay-dialog {

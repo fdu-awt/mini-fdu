@@ -58,6 +58,7 @@ export default {
 
 <template>
 	<div id="root-container">
+    <div class="container">
 		<form class="form_main" @submit.prevent="handleSubmit">
 			<p class="heading">登 陆</p>
 			<div class="inputContainer">
@@ -78,29 +79,49 @@ export default {
 				<a href="/signup">去注册</a>
 			</div>
 		</form>
+    </div>
 	</div>
 </template>
 
 <style scoped>
 #root-container {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	height: 100vh;
-	background-color: #f5f5f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+#root-container::after {
+  content: ""; /* 创建一个伪元素 */
+  position: absolute; /* 绝对定位 */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('../assets/login/mini-fdu.png'); /* 背景图片设置在伪元素上 */
+  z-index: -1; /* 确保伪元素在容器下方 */
+  background-size: cover; /* 覆盖整个元素 */
+  background-position: center; /* 居中显示 */
+  background-repeat: no-repeat; /* 防止图片平铺 */
+  opacity: 0.7;
+}
+.form_main {
+  position: relative;
+  top:10px;
+  width: 430px;
+  right:35px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 30px 30px 30px;
+  border-radius: 30px;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.062);
+  background-position: center; /* 将背景图片居中 */
+  /* 设置背景图片透明度为 0.5 */
+  background-color: rgba(255, 255, 255,0.2); /* 白色背景颜色透明度为 0.5 */
+
 }
 
-.form_main {
-	width: 280px;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	background-color: rgb(255, 255, 255);
-	padding: 30px 30px 30px 30px;
-	border-radius: 30px;
-	box-shadow: 0 0 40px rgba(0, 0, 0, 0.062);
-}
 
 .heading {
 	font-size: 2.5em;

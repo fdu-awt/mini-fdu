@@ -6,6 +6,7 @@ import SELF_IMAGE from "@/three/self-image/self-image";
 
 const USER_KEY = 'user';
 const SELF_IMAGE_KEY = 'selfImage';
+const AI_HISTORY_KEY = 'history_message';
 
 const STORAGE = {
 	getUser() {
@@ -55,6 +56,7 @@ const STORAGE = {
 	logOut() {
 		window.localStorage.removeItem(USER_KEY);
 		window.localStorage.removeItem(SELF_IMAGE_KEY);
+		window.localStorage.removeItem(AI_HISTORY_KEY);
 	},
 	getSelfImage() {
 		let selfImage = window.localStorage.getItem(SELF_IMAGE_KEY);
@@ -66,7 +68,22 @@ const STORAGE = {
 	},
 	setSelfImage(selfImage) {
 		window.localStorage.setItem(SELF_IMAGE_KEY, selfImage);
-	}
+	},
+	// 获取历史聊天数据
+	getAIHistory() {
+		const history = window.localStorage.getItem(AI_HISTORY_KEY);
+		return history ? JSON.parse(history) : [];
+	},
+	// 添加一条新的聊天数据到历史记录
+	addAIHistoryMessage(message) {
+		let currentHistory = this.getAIHistory();
+		currentHistory.push(message); // 添加新消息到历史记录数组
+		window.localStorage.setItem(AI_HISTORY_KEY, JSON.stringify(currentHistory));
+	},
+	// 清除所有历史聊天数据
+	clearAIHistory() {
+		window.localStorage.removeItem(AI_HISTORY_KEY);
+	},
 };
 
 // 实现二：使用sessionStorage

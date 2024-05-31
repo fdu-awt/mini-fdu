@@ -9,6 +9,7 @@ import PostDialog from "@/components/PostDialog.vue";
 import ClubDialog from "@/components/ClubDialog.vue";
 import eventBus from '@/eventbus/eventBus.js';
 import AIChatDialog from '@/components/AIChatDialog.vue';
+import QuizDialog from '@/components/QuizDialog.vue';
 
 export default {
 	name: "ControlDemo",
@@ -16,6 +17,7 @@ export default {
 		PostDialog,
 		ClubDialog,
 		AIChatDialog,
+		QuizDialog,
 
 		ChatBox,
 		SettingDialog,
@@ -43,10 +45,6 @@ export default {
 		window.addEventListener('objectClicked', (event) => {
 			this.handleObjectClick(event.detail.localId, event.detail.remoteId, event.detail.socket);
 		});
-	},
-	unmounted() {
-		// 组件卸载前，移除事件监听
-		eventBus.off('newMessage', this.handleNewMessage);
 	},
 	methods: {
 		listenKeyDown(){
@@ -112,6 +110,7 @@ export default {
 	<ClubDialog @askAI="handleAskAI"/>
 	<AIChatDialog :dialogVisible="this.AIChatDialogVisible" @close="handleAIChatClose"/>
 	
+  <QuizDialog/>
 	<SettingDialog :show="showSettingDialog" @close="onSettingDialogClose"/>
 	<ChatBox v-if="isChatBoxVisible" :socket="socket" :remote-id="remoteId" :local-id="localId" @close="closeChatBox" />
   <div v-if="newMessageNotification" class="new-message-notification">

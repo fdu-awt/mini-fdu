@@ -25,6 +25,7 @@ class NPC {
 		NPC.LOADER.load(this.model).then((object) => {
 			this.mixer = object.mixer;
 			this.object = object;
+			// this.object.name = "NPC_" + this.name;
 			this.object.position.copy(this.position);
 			this.object.rotation.copy(this.rotation);
 			// 在头顶显示 npc 名字
@@ -42,6 +43,10 @@ class NPC {
 			box.name = "Collider";
 			box.position.set(0, 150, 0);
 			this.object.add(box);
+
+			// 保存对 collider 的引用
+			this.collider = box;
+
 			// TODO 加入game的碰撞检测
 
 			// idle动画
@@ -49,7 +54,13 @@ class NPC {
 		});
 	}
 
-	// TODO NPC 的交互
+	// NPC 的交互
+	interact() {
+		console.log("Interacting with NPC:", this.name);
+		let event = new Event("ShowQuizDialog");
+		event.npcName = this.name;
+		window.dispatchEvent(event);
+	}
 
 	set action(name) {
 		if (this.actionName === name) return;
