@@ -219,6 +219,8 @@ class VideoChatService {
 			toId: toId,
 		}));
 		this.peerId = toId;
+		this.localVideo = localVideo;
+		this.remoteVideo = remoteVideo;
 		this.startLocalVideo()
 			.then(() => {
 				// 开启 WebRTC 连接
@@ -293,7 +295,6 @@ class VideoChatService {
 
 	handleProcessing(data) {
 		try {
-			console.log('handleProcessing' + " fromId:" + data.fromId + " toId:" + data.toId);
 			const parsedData = data.forwardData;
 			const fromId = data.fromId;
 			if (fromId === null || fromId === undefined) {
