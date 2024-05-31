@@ -239,8 +239,14 @@ class VideoChatService {
 	 * */
 	handleReject(data) {
 		console.log('对方拒绝了视频聊天邀请' + data.fromId);
-		// TODO reason
-		ElMessageBox.alert('对方拒绝了视频聊天邀请', '提示', {
+		const reason = data.reason;
+		let msg= '对方拒绝了视频聊天邀请';
+		if(reason === 'busy'){
+			msg = '对方正忙，请稍后再试';
+		} else if(reason === 'offline'){
+			msg = '对方不在线';
+		}
+		ElMessageBox.alert(msg, '提示', {
 			confirmButtonText: '确定',
 			type: 'warning',
 		}).then(this.endChat.bind(this)).catch(this.endChat.bind(this));
