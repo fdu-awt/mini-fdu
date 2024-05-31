@@ -96,7 +96,7 @@ export default {
 .video-container {
 	position: relative;
 	width: 100vw;
-	height: 90vh;
+	height: 100vh;
 	display: flex;
 	justify-content: center;
 	align-items: center;
