@@ -274,8 +274,10 @@ export class Game {
 				const intersects = raycaster.intersectObjects(game.scene.children, true);
 
 				console.log("intersects", intersects);
+				let clickNPC = false;
 				if(intersects.length > 0){
 					const object = intersects[0].object;
+					console.log(object.name);
 
 					// ElMessage({
 					// 	showClose: true,
@@ -285,6 +287,7 @@ export class Game {
 
 					// 点击历史展板
 					if(object.name.startsWith("post")){
+						console.log((object.name));
 						// const post = intersects[0].object;
 						// post.material = new THREE.MeshBasicMaterial({ 
 						// 	color: 0xff0000,
@@ -305,12 +308,46 @@ export class Game {
 						window.dispatchEvent(event);
 					}
 
+
 					// 点击 NPC
 					game.npcs.forEach((npc) => {
 						if (npc.collider === object) {
+							clickNPC = true;
 							npc.interact();
 						}
 					});
+
+					// 检查是否为点击的玩家
+					if (game.remotePlayers.some(player => player.collider === object) && !clickNPC) {
+						// 获取被点击玩家的用户ID
+						const clickedPlayer = game.remotePlayers.find(player => player.collider === object);
+						const clickedPlayerId = clickedPlayer.userId;
+						console.log(clickedPlayerId);
+
+						// 检查是否是自己
+						if (clickedPlayerId === game.player.userId) {
+							return;
+						}
+
+						console.log(game.player.userId);
+						// 打开聊天界面
+						game.openChat(game.player.userId, clickedPlayerId, game.player.chatWebSocketService.socket);
+					}
+
+					// //点击玩家聊天
+					// if (object.name.startsWith('player-')) {
+					// 	// 获取被点击玩家的用户ID
+					// 	const clickedPlayerId = object.name.substring(6);
+					// 	console.log(clickedPlayerId);
+					// 	// 检查是否是NPC或者自己
+					// 	if (game.npcs.some(npc => npc.collider === object) || clickedPlayerId === game.player.userId) {
+					// 		return;
+					// 	}
+					// 	console.log(game.player.userId);
+					// 	// 打开聊天界面
+					// 	game.openChat(game.player.userId, clickedPlayerId, game.player.chatWebSocketService.socket);
+					// }
+
 
 				}
 			}
@@ -462,7 +499,8 @@ class Player {
 			}
 		}
 		if (!local){
-			this.loadModel().then(() => {});
+			this.loadModel().then(() => {
+			});
 		}
 	}
 
@@ -526,7 +564,7 @@ class Player {
 					const geometry = new THREE.BoxGeometry(100, 300, 100);
 					const material = new THREE.MeshBasicMaterial({ visible: false });
 					const box = new THREE.Mesh(geometry, material);
-					box.name = "Collider";
+					box.name = "player-" + player.userId; // 使用用户ID作为名称的一部分
 					box.position.set(0, 150, 0);
 					player.object.add(box);
 					player.collider = box;
@@ -625,16 +663,6 @@ class Player {
 					const euler = new THREE.Euler(data.pb, data.h, data.pb);
 					this.object.quaternion.setFromEuler( euler );
 					this.action = data.action;
-					// // 检查用户之间的距离，但是这里不太灵
-					// const distance = this.object.position.distanceTo(this.game.player.object.position);
-					// console.log(distance);
-					// TODO 这里后面需要改逻辑直接用点击用户头顶名字开启聊天
-					const distance = 3;
-					if (distance < 10) {
-						this.showChatButton(data.userId);
-					} else {
-						this.hideChatButton();
-					}
 				}
 				found = true;
 			}
@@ -645,32 +673,6 @@ class Player {
 	socketUpdate(){
 		// console.log("Player.socketUpdate");
 		throw new Error("Player.socketUpdate must be overridden");
-	}
-
-	showChatButton(remotePlayerId) {
-		let chatButton = document.getElementById('chat-button');
-		if (!chatButton) {
-			chatButton = document.createElement('button');
-			chatButton.id = 'chat-button';
-			chatButton.style.position = 'absolute';
-			chatButton.style.top = '10px';
-			chatButton.style.left = '10px';
-			chatButton.style.zIndex = 100; // 按钮位置
-			chatButton.innerText = 'Chat';
-			document.body.appendChild(chatButton);
-		}
-		chatButton.style.display = 'block';
-		chatButton.onclick = () => {
-			this.game.openChat(this.game.player.userId, remotePlayerId, this.game.player.chatWebSocketService.socket);
-		};
-	}
-
-	hideChatButton() {
-
-		const chatButton = document.getElementById('chat-button');
-		if (chatButton) {
-			chatButton.style.display = 'none';
-		}
 	}
 }
 

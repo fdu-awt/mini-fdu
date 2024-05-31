@@ -46,10 +46,6 @@ export default {
 			this.handleObjectClick(event.detail.localId, event.detail.remoteId, event.detail.socket);
 		});
 	},
-	unmounted() {
-		// 组件卸载前，移除事件监听
-		eventBus.off('newMessage', this.handleNewMessage);
-	},
 	methods: {
 		listenKeyDown(){
 			// 按下 Z 键时显示后台设置页面

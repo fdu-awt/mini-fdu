@@ -32,6 +32,7 @@ import { getMessageInfo } from "@/api/chat";
 import moment from "moment";
 import userAvatar from '@/assets/avatar/1.jpg';
 import remoteAvatar from '@/assets/avatar/2.jpg';
+import eventBus from "@/eventbus/eventBus";
 
 export default {
 	name: "ChatBox",
@@ -81,6 +82,11 @@ export default {
 		this.socketInstance.onmessage = (event) => {
 			console.log(event);
 
+			eventBus.emit('newMessage', {
+				localId: this.localId,
+				remoteId: this.remoteId,
+				socket: this.socket
+			});
 			const data = JSON.parse(event.data);
 
 			// 从解析后的对象中获取消息内容和ifSelf字段
