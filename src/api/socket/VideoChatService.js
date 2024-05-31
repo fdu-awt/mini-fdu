@@ -76,11 +76,24 @@ class VideoChatService {
 	}
 
 	closeLocalVideo() {
-		if (this.localStream) {
-			this.localStream.getTracks().forEach(track => {
-				track.stop();
-			});
-		}
+		return new Promise((resolve, reject) => {
+			try {
+				if (this.localStream) {
+					console.log('closeLocalVideo');
+					this.localStream.getTracks().forEach(track => {
+						track.stop();
+					});
+					this.localStream = null;
+				}
+				if (this.localVideo) {
+					console.log('closeLocalVideo');
+					this.localVideo.srcObject = null;
+				}
+				resolve();
+			} catch (error) {
+				reject(error);
+			}
+		});
 	}
 
 	/**
@@ -113,9 +126,17 @@ class VideoChatService {
 	}
 
 	closeRtc() {
-		if (this.rtcPeerConnection) {
-			this.rtcPeerConnection.close();
-		}
+		return new Promise((resolve, reject) => {
+			try {
+				if (this.rtcPeerConnection) {
+					this.rtcPeerConnection.close();
+					this.rtcPeerConnection = null;
+				}
+				resolve();
+			} catch (error) {
+				reject(error);
+			}
+		});
 	}
 
 	/**
@@ -139,21 +160,23 @@ class VideoChatService {
 	}
 
 	hangup() {
-		if(!this.inChat){
-			return;
-		}
-		this.ws.send(JSON.stringify({
-			type: 'video-end',
-			toId: this.peerId,
-		}));
-		this.endChat();
+		return this.endChat().then(() => {
+			this.ws.send(JSON.stringify({
+				type: 'video-end',
+				toId: this.peerId,
+			}));
+		});
 	}
 
 	endChat(){
-		this.peerId = null;
-		this.inChat = false;
-		this.closeRtc();
-		this.closeLocalVideo();
+		return this.closeRtc()
+			.then(() => {
+				return this.closeLocalVideo();
+			})
+			.then(() => {
+				this.peerId = null;
+				this.inChat = false;
+			});
 	}
 
 	/**
@@ -308,7 +331,7 @@ class VideoChatService {
 	 * */
 	handleEnd(data) {
 		console.log('对方结束了视频聊天' + data.fromId);
-		this.endChat();
+		this.endChat().then();
 	}
 
 	handleIceCandidate(toId, event) {
