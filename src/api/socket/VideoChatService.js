@@ -1,5 +1,4 @@
 import getUserMedia from "@/utils/UserMedia";
-import {ElMessageBox} from "element-plus";
 import videoChatEventEmitter, { VIDEO_CHAT_EVENTS } from "@/event/VideoChatEventEmitter";
 import store from "@/store";
 
@@ -284,15 +283,12 @@ class VideoChatService {
 		} else if(reason === 'offline'){
 			msg = '对方不在线';
 		}
-		const endChatInner = () => {
-			this.endChat().then(() => {
-				videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.REJECTED);
-			});
-		};
-		ElMessageBox.alert(msg, '提示', {
-			confirmButtonText: '确定',
-			type: 'warning',
-		}).then(endChatInner).catch(endChatInner);
+		this.endChat().then(() => {
+			videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.REJECTED, msg);
+		}).catch((error) => {
+			console.error(error);
+			videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.REJECTED, msg);
+		});
 	}
 
 	handleProcessing(data) {
@@ -351,7 +347,12 @@ class VideoChatService {
 	 * */
 	handleEnd(data) {
 		console.log('对方结束了视频聊天' + data.fromId);
-		this.endChat().then();
+		this.endChat().then(() => {
+			videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.END);
+		}).catch((error) => {
+			console.error(error);
+			videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.END);
+		});
 	}
 
 	handleIceCandidate(toId, event) {

@@ -15,6 +15,26 @@ export default {
 	mounted() {
 		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.START, this.onChatStart.bind(this));
 		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.INVITE, this.onChatInvite.bind(this));
+		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.END, () => {
+			ElMessageBox.alert('对方已挂断', '视频聊天结束', {
+				confirmButtonText: '确定',
+				type: 'warning',
+			}).then(() => {
+				this.visible = false;
+			}).catch(() => {
+				this.visible = false;
+			});
+		});
+		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.REJECTED, (msg) => {
+			ElMessageBox.alert(msg, '视频聊天被拒绝', {
+				confirmButtonText: '确定',
+				type: 'warning',
+			}).then(() => {
+				this.visible = false;
+			}).catch(() => {
+				this.visible = false;
+			});
+		});
 	},
 	methods: {
 		onChatStart(toId) {
