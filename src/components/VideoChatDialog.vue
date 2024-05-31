@@ -25,6 +25,9 @@ export default {
 				this.visible = false;
 			});
 		});
+		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.SELF_END, () => {
+			this.visible = false;
+		});
 		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.REJECTED, (msg) => {
 			ElMessageBox.alert(msg, '视频聊天被拒绝', {
 				confirmButtonText: '确定',

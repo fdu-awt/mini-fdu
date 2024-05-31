@@ -96,7 +96,7 @@ class VideoChatService {
 			toId: this.peerId,
 		}));
 		return this.endChat().then(() => {
-			videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.END);
+			videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.SELF_END);
 		});
 	}
 	
