@@ -6,6 +6,7 @@ import {
 } from 'element-plus';
 import {getAllHistoryData} from "@/api/study.js";
 import ButtonHover1 from './common/ButtonHover1.vue';
+import gameEventEmitter from "@/event/GameEventEmitter";
 
 export default {
 	name: "PostDialog",
@@ -24,12 +25,8 @@ export default {
 		};
 	},
 	mounted(){
-		window.addEventListener('ClickPost', this.handleStorageChange);
-
-		this.history_data = getAllHistoryData().then((res)=>{
-			if(res.code==200){
-				this.history_data = res.object;
-			}
+		this.getAllHistoryData().then(()=>{
+			window.addEventListener('ClickPost', this.handleStorageChange);
 		}).catch(e => {
 			console.error(e);
 		});
@@ -39,11 +36,25 @@ export default {
 	},
 	methods: {
 		handleStorageChange(event) {
+			gameEventEmitter.requestAllControl();
 			this.postDialogVisible = true;
 			this.postId = event.key;
 			this.current_history_data = this.history_data[this.postId];
 		},
-
+		getAllHistoryData(){
+			return new Promise((resolve, reject) => {
+				getAllHistoryData().then((res)=>{
+					if(res.code===200){
+						this.history_data = res.object;
+						resolve(res.object);
+					} else {
+						reject(new Error(`Unexpected response code: ${res.code}`));
+					}
+				}).catch(e => {
+					reject(e);
+				});
+			});
+		},
 		handleAskForAI(){
 			this.$emit("askAI");
 			this.postDialogVisible = false;
