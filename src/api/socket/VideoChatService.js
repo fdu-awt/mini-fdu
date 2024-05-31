@@ -84,24 +84,29 @@ class VideoChatService {
 	 * @description 开始WecRTC连接
 	 * @param peerId 对方的用户ID
 	 * */
-	startRtc(peerId){
-		// 开始视频聊天
-		this.rtcPeerConnection = new RTCPeerConnection();
-		this.localStream.getTracks().forEach(track => this.rtcPeerConnection.addTrack(track, this.localStream));
+	startRtc(peerId) {
+		return new Promise((resolve, reject) => {
+			this.rtcPeerConnection = new RTCPeerConnection();
+			this.localStream.getTracks().forEach(track => this.rtcPeerConnection.addTrack(track, this.localStream));
 
-		this.rtcPeerConnection.onicecandidate = (event) => {
-			this.handleIceCandidate(peerId, event);
-		};
-		this.rtcPeerConnection.ontrack = this.handleRemoteStream;
+			this.rtcPeerConnection.onicecandidate = (event) => {
+				this.handleIceCandidate(peerId, event);
+			};
+			this.rtcPeerConnection.ontrack = this.handleRemoteStream;
 
-		this.rtcPeerConnection.createOffer()
-			.then(offer => {
-				return this.rtcPeerConnection.setLocalDescription(offer);
-			})
-			.then(() => {
-				// 发送 offer 给信令服务器
-				this.processing(peerId, { offer: this.rtcPeerConnection.localDescription });
-			});
+			this.rtcPeerConnection.createOffer()
+				.then(offer => {
+					return this.rtcPeerConnection.setLocalDescription(offer);
+				})
+				.then(() => {
+					// 发送 offer 给信令服务器
+					this.processing(peerId, { offer: this.rtcPeerConnection.localDescription });
+					resolve(); // 操作成功时调用 resolve
+				})
+				.catch(error => {
+					reject(error); // 发生错误时调用 reject
+				});
+		});
 	}
 
 	closeRtc() {
@@ -116,6 +121,8 @@ class VideoChatService {
 	invite(toId){
 		this.startLocalVideo()
 			.then(() => {
+				return this.startRtc(toId);
+			}).then(() => {
 				this.ws.send(JSON.stringify({
 					type: 'video-invite',
 					toId: toId,
@@ -133,12 +140,15 @@ class VideoChatService {
 	accept(toId){
 		this.startLocalVideo()
 			.then(() => {
+				// 开启 WebRTC 连接
+				return this.startRtc(toId);
+			})
+			.then(() => {
+				// 发送 accept 给信令服务器
 				this.ws.send(JSON.stringify({
 					type: 'video-accept',
 					toId: toId,
 				}));
-				// 开启 WebRTC 连接
-				this.startRtc(toId);
 			})
 			.catch((err) => {
 				console.error(err.name + ': ' + err.message);
@@ -213,7 +223,6 @@ class VideoChatService {
 	handleProcessing(data) {
 		try {
 			console.log('handleProcessing' + " fromId:" + data.fromId + " toId:" + data.toId);
-			console.log(data.forwardData);
 			const parsedData = data.forwardData;
 			const fromId = data.fromId;
 			if (fromId === null || fromId === undefined) {
