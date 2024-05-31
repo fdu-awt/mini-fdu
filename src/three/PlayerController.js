@@ -48,8 +48,10 @@ export default class PlayerController {
 		// 旋转灵敏度
 		this.sensitivity = 600;
 		// 上下俯仰角度范围
-		this.angleMin = THREE.MathUtils.degToRad(-25);//角度转弧度
-		this.angleMax = THREE.MathUtils.degToRad(25);
+		this.thirdViewAngleMin = THREE.MathUtils.degToRad(-15); //角度转弧度
+		this.thirdViewAngleMax = THREE.MathUtils.degToRad(30);
+		this.firstViewAngleMin = THREE.MathUtils.degToRad(-45);
+		this.firstViewAngleMax = THREE.MathUtils.degToRad(45);
 
 		// 按键事件监听
 		this.key_down_w = () => {this.keyStates.W = true;};
@@ -98,8 +100,8 @@ export default class PlayerController {
 		this.firstViewCamera = new THREE.PerspectiveCamera(
 			45, window.innerWidth / window.innerHeight, 10, 200000
 		);
-		this.firstViewCamera.position.set(0, 250, 100);
-		this.firstViewCamera.lookAt(0, 250, 120);
+		this.firstViewCamera.position.set(20, 270, 100);
+		this.firstViewCamera.lookAt(20, 270, 120);
 
 		this.thirdViewCamera = new THREE.PerspectiveCamera(
 			45, window.innerWidth / window.innerHeight, 10, 200000
@@ -193,13 +195,15 @@ export default class PlayerController {
 			// 相机父对象cameraGroup绕着x轴旋转,camera跟着转动
 			this.cameraGroup.rotation.x += event.movementY / this.sensitivity;
 			// 如果 .rotation.x 小于angleMin，就设置为angleMin
-			if (this.cameraGroup.rotation.x < this.angleMin) {
-				this.cameraGroup.rotation.x = this.angleMin;
+			const angleMin = this.firstView ? this.firstViewAngleMin : this.thirdViewAngleMin;
+			const angleMax = this.firstView ? this.firstViewAngleMax : this.thirdViewAngleMax;
+			if (this.cameraGroup.rotation.x < angleMin) {
+				this.cameraGroup.rotation.x = angleMin;
 			}
-			// 如果 .rotation.x 大于angleMax，就设置为angleMax
-			if (this.cameraGroup.rotation.x > this.angleMax) {
-				this.cameraGroup.rotation.x = this.angleMax;
+			if (this.cameraGroup.rotation.x > angleMax) {
+				this.cameraGroup.rotation.x = angleMax;
 			}
+			console.log(this.cameraGroup.rotation.x);
 		});
 	}
 
