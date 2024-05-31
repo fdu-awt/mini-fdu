@@ -33,6 +33,7 @@ import moment from "moment";
 import userAvatar from '@/assets/avatar/1.jpg';
 import remoteAvatar from '@/assets/avatar/2.jpg';
 import eventBus from "@/eventbus/eventBus";
+import videoChatEventEmitter, { VIDEO_CHAT_EVENTS } from "@/event/VideoChatEventEmitter";
 
 export default {
 	name: "ChatBox",
@@ -56,7 +57,7 @@ export default {
 			newMessage: "",
 			dialogVisible: true,
 			userAvatar: userAvatar,
-			remoteAvatar: remoteAvatar
+			remoteAvatar: remoteAvatar,
 		};
 	},
 	computed: {
@@ -102,6 +103,12 @@ export default {
 			// 将消息添加到 messages 数组
 			this.messages.push(messageShow);
 		};
+		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.END, () => {
+			this.fetchMessages();
+		});
+		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.REJECTED, () => {
+			this.fetchMessages();
+		});
 	},
 	methods: {
 		async fetchMessages() {
@@ -128,8 +135,10 @@ export default {
 			}
 		},
 		startVideoCall() {
-			// Handle video call initiation logic here
-			console.log("Video call button clicked");
+			videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.START, {
+				localId: this.localId,
+				remoteId: this.remoteId
+			});
 		},
 	}
 };
