@@ -63,6 +63,7 @@ export default class PlayerController {
 		this.key_down_v = _.debounce(() => {
 			this.firstView = !this.firstView;
 			this.activeCamera = this.firstView ? this.firstViewCamera : this.thirdViewCamera;
+			this.toggleCrosshair(this.firstView); // 切换视角时，显示或隐藏准星
 		}, 300); // 300ms 的防抖时间
 
 		this.key_down_e = _.debounce(() => {
@@ -83,16 +84,34 @@ export default class PlayerController {
 		this.createCameras();
 		this.addKeyListeners();
 		this.addMouseListeners();
+		this.createCrosshair();
 		// 处理：请求解锁鼠标锁定
 		gameEventEmitter.on(
 			GAME_EVENTS.REQUEST_MOUSE_CONTROL,
-			this.unlockPointer.bind(this)
+			this.handleMouseControlRequest.bind(this)
 		);
 		// 处理：申请打字控制
 		gameEventEmitter.on(
 			GAME_EVENTS.REQUEST_KEYBOARD_CONTROL,
-			this.cancelKeyListeners.bind(this)
+			this.handleKeyboardControlRequest.bind(this)
 		);
+	}
+
+	createCrosshair() {
+		const crosshair = document.createElement('div');
+		crosshair.id = 'crosshair';
+		crosshair.style.position = 'fixed';
+		crosshair.style.top = '50%';
+		crosshair.style.left = '50%';
+		crosshair.style.width = '10px';
+		crosshair.style.height = '10px';
+		crosshair.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
+		crosshair.style.borderRadius = '50%';
+		crosshair.style.transform = 'translate(-50%, -50%)';
+		crosshair.style.zIndex = '1000';
+		crosshair.style.pointerEvents = 'none';
+		crosshair.style.display = 'none';
+		document.body.appendChild(crosshair);
 	}
 
 	createCameras() {
@@ -150,7 +169,9 @@ export default class PlayerController {
 			.on(GAME_EVENTS.KEY_UP_D, this.key_up_d);
 	}
 
-	cancelKeyListeners() {
+	handleKeyboardControlRequest() {
+		this.toggleCrosshair(false);
+		// cancelKeyListeners
 		gameEventEmitter
 			.off(GAME_EVENTS.KEY_DOWN_W, this.key_down_w)
 			.off(GAME_EVENTS.KEY_DOWN_A, this.key_down_a)
@@ -165,7 +186,9 @@ export default class PlayerController {
 			.off(GAME_EVENTS.KEY_UP_D, this.key_up_d);
 	}
 
-	unlockPointer() {
+	handleMouseControlRequest() {
+		this.toggleCrosshair(false);
+		// unlockPointer
 		if (this.controllerElement) {
 			if (document.body.contains(this.controllerElement)){
 				if (document.pointerLockElement === this.controllerElement) {
@@ -182,6 +205,8 @@ export default class PlayerController {
 					if (this.controllerElement) {
 						if (document.body.contains(this.controllerElement)) {
 							this.controllerElement.requestPointerLock();//指针锁定
+							// 恢复准星
+							this.toggleCrosshair(this.firstView);
 							// 恢复游戏控制
 							this.addKeyListeners();
 						}
@@ -254,5 +279,12 @@ export default class PlayerController {
 		this.player.object.position.add(deltaPos);//更新玩家角色的位置
 		// 更新 socket 信息
 		this.player.socketUpdate();
+	}
+
+	toggleCrosshair(show) {
+		const crosshair = document.getElementById('crosshair');
+		if (crosshair) {
+			crosshair.style.display = show ? 'block' : 'none';
+		}
 	}
 }
