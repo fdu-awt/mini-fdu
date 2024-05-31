@@ -81,6 +81,8 @@ export default class PlayerController {
 		this.key_up_s = () => {this.keyStates.S = false;};
 		this.key_up_d = () => {this.keyStates.D = false;};
 
+		this.mouseClickedOnObject = this.player.game.onMouseClick.bind(this.player.game);
+
 		this.createCameras();
 		this.addKeyListeners();
 		this.addMouseListeners();
@@ -196,9 +198,12 @@ export default class PlayerController {
 				}
 			}
 		}
+		// 解除鼠标事件监听
+		document.removeEventListener('click', this.mouseClickedOnObject, false);
 	}
 
 	addMouseListeners() {
+		// 指针锁定事件
 		if (this.controllerElement) {
 			if (document.body.contains(this.controllerElement)){
 				this.controllerElement.addEventListener('click', () => {
@@ -209,11 +214,14 @@ export default class PlayerController {
 							this.toggleCrosshair(this.firstView);
 							// 恢复游戏控制
 							this.addKeyListeners();
+							// 恢复，鼠标点击场景中的物体
+							document.addEventListener("click", this.mouseClickedOnObject, false);
 						}
 					}
 				});
 			}
 		}
+		// 鼠标移动事件
 		document.addEventListener('mousemove', (event) => {
 			// 进入指针模式后，才能根据鼠标位置控制人旋转
 			if (document.pointerLockElement !== this.controllerElement) return;
@@ -232,6 +240,8 @@ export default class PlayerController {
 				this.cameraGroup.rotation.x = angleMax;
 			}
 		});
+		// 鼠标点击场景中的物体
+		document.addEventListener("click", this.mouseClickedOnObject, false);
 	}
 
 	update(deltaTime) {
