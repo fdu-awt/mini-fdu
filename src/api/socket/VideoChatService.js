@@ -92,11 +92,11 @@ class VideoChatService {
 	 * 处理 自己 结束视频聊天
 	 * */
 	hangup() {
-		return this.endChat().then((peerId) => {
-			this.ws.send(JSON.stringify({
-				type: 'video-end',
-				toId: peerId,
-			}));
+		this.ws.send(JSON.stringify({
+			type: 'video-end',
+			toId: this.peerId,
+		}));
+		return this.endChat().then(() => {
 			videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.END);
 		});
 	}
@@ -195,11 +195,6 @@ class VideoChatService {
 		return this.closeRtc()
 			.then(() => {
 				return this.closeLocalVideo();
-			})
-			.then(() => {
-				const id = this.peerId;
-				this.peerId = null;
-				return id;
 			});
 	}
 
@@ -219,22 +214,19 @@ class VideoChatService {
 			console.error('remoteVideo is not provided');
 			return;
 		}
+		// 发送 accept 给信令服务器
+		this.ws.send(JSON.stringify({
+			type: 'video-accept',
+			toId: toId,
+		}));
+		this.peerId = toId;
 		this.startLocalVideo()
 			.then(() => {
 				// 开启 WebRTC 连接
 				return this.startRtc(toId);
 			})
-			.then(() => {
-				// 发送 accept 给信令服务器
-				this.ws.send(JSON.stringify({
-					type: 'video-accept',
-					toId: toId,
-				}));
-				this.peerId = toId;
-			})
 			.catch((err) => {
 				console.error(err.name + ': ' + err.message);
-				// todo 通知用户
 			});
 	}
 
