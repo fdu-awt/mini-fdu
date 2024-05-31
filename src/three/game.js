@@ -141,6 +141,15 @@ export class Game {
 		this.sun = light;
 		this.scene.add(light);
 
+		// 创建半球光
+		const skyColor = 0x87ceeb; // 天空颜色 (浅蓝色)
+		const groundColor = 0x555555; // 地面颜色 (深灰色)
+		const intensity = 2; // 光的强度
+		const hemiLight = new THREE.HemisphereLight(skyColor, groundColor, intensity);
+
+		// 将半球光添加到场景中
+		this.scene.add(hemiLight);
+
 		this.environment.load(this, undefined);
 		this.handleMouseClick(this);
 		// 加载 npc 和 玩家动画
