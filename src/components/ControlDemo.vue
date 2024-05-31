@@ -41,9 +41,8 @@ export default {
 		this.canvasContainer = document.getElementById('canvas-container');
 		this.game = new Game(this.canvasContainer, new GuangHuaLou() , new Lab1FbxSelfImageLoader());
 		this.listenKeyDown();
-		// 假设Game有一个方法可以添加点击事件监听
-		window.addEventListener('objectClicked', (event) => {
-			this.handleObjectClick(event.detail.localId, event.detail.remoteId, event.detail.socket);
+		window.addEventListener('ClickPlayer', (event) => {
+			this.openChatBox(event.detail.localId, event.detail.remoteId, event.detail.socket);
 		});
 	},
 	methods: {
@@ -51,20 +50,20 @@ export default {
 			// 按下 Z 键时显示后台设置页面
 			gameEventEmitter.on(GAME_EVENTS.KEY_DOWN_Z, () => {
 				this.showSettingDialog = !this.showSettingDialog;
-				// 申请解除鼠标锁定
-				gameEventEmitter.emit(GAME_EVENTS.REQUEST_MOUSE_CONTROL);
-				// 申请接触键盘锁定
-				gameEventEmitter.emit(GAME_EVENTS.REQUEST_KEYBOARD_CONTROL);
+				// 申请解除鼠标和键盘锁定
+				gameEventEmitter.requestAllControl();
 			});
 		},
 		onSettingDialogClose(){
 			console.log('onSettingDialogClose');
 			this.showSettingDialog = false;
 		},
-		handleObjectClick(localId, remoteId, socket) {
+		openChatBox(localId, remoteId, socket) {
 			this.localId = localId;
 			this.remoteId = remoteId;
 			this.socket = socket;
+			// 申请解除鼠标和键盘锁定
+			gameEventEmitter.requestAllControl();
 			this.isChatBoxVisible = true; // 点击对象时显示ChatBox
 		},
 		closeChatBox() {

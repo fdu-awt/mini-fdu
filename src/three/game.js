@@ -66,18 +66,14 @@ export class Game {
 
 		this.preload();
 	}
-	openChat(localId, remoteId, socket) {
+
+	handlePlayerClicked(localId, remoteId, socket) {
 		const chatEventData = {
 			localId: localId,
 			remoteId: remoteId,
 			socket: socket
 		};
-		// document.exitPointerLock();
-		// //如果有对话框，就退出世界 逻辑在哪里写的
-		// if (document.pointerLockElement === this.playerController.controllerElement) {
-		// 	document.exitPointerLock();
-		// }
-		const event = new CustomEvent('objectClicked', { detail: chatEventData });
+		const event = new CustomEvent('ClickPlayer', { detail: chatEventData });
 		window.dispatchEvent(event);
 	}
 
@@ -281,12 +277,6 @@ export class Game {
 					const object = intersects[0].object;
 					console.log(object.name);
 
-					// ElMessage({
-					// 	showClose: true,
-					// 	message: intersects[0].object.name,
-					// 	type: "success",
-					// });
-
 					// 点击历史展板
 					if(object.name.startsWith("post")){
 						console.log((object.name));
@@ -332,22 +322,8 @@ export class Game {
 
 						console.log(game.player.userId);
 						// 打开聊天界面
-						game.openChat(game.player.userId, clickedPlayerId, game.player.chatWebSocketService.socket);
+						game.handlePlayerClicked(game.player.userId, clickedPlayerId, game.player.chatWebSocketService.socket);
 					}
-
-					// //点击玩家聊天
-					// if (object.name.startsWith('player-')) {
-					// 	// 获取被点击玩家的用户ID
-					// 	const clickedPlayerId = object.name.substring(6);
-					// 	console.log(clickedPlayerId);
-					// 	// 检查是否是NPC或者自己
-					// 	if (game.npcs.some(npc => npc.collider === object) || clickedPlayerId === game.player.userId) {
-					// 		return;
-					// 	}
-					// 	console.log(game.player.userId);
-					// 	// 打开聊天界面
-					// 	game.openChat(game.player.userId, clickedPlayerId, game.player.chatWebSocketService.socket);
-					// }
 				}
 			}
 		}
