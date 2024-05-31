@@ -260,7 +260,7 @@ export class Game {
 			mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
 			mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 			
-			if(game.playerController!=undefined){
+			if(game.playerController!==undefined){
 				raycaster.setFromCamera(mouse, game.playerController.camera);
 				const intersects = raycaster.intersectObjects(game.scene.children, true);
 
