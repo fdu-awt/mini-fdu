@@ -15,11 +15,13 @@ export default {
 			const signalingServerUrl = process.env.VUE_APP_VIDEO_CHAT_WEBSOCKET_BASE_URL;
 			const userId = store.getUserId();
 			// TODO 如果本机演示，需要使用不同的 userId
-			// store.setUserId(userId+1);
+			let toId = userId + 1;
+			store.setUserId(userId + 1);
 			const videoChatService = new VideoChatService(localVideo, remoteVideo, signalingServerUrl, userId);
 			startButton.addEventListener('click', () => {
-				videoChatService.start();
+				videoChatService.invite(toId);
 			});
+			// TODO 挂断
 		},
 	},
 };

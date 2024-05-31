@@ -1,4 +1,5 @@
 import getUserMedia from "@/utils/UserMedia";
+import {ElMessageBox} from "element-plus";
 
 class VideoChatService {
 	constructor(localVideo, remoteVideo, signalingServerUrl, userId) {
@@ -8,75 +9,220 @@ class VideoChatService {
 		this.userId = userId;
 		this.rtcPeerConnection = null;
 		this.ws = null;
+		this.localStream = null;
 
+		this.messageHandlers = {
+			'video-invite': this.handleInvite.bind(this),
+			'video-accept': this.handleAccept.bind(this),
+			'video-reject': this.handleReject.bind(this),
+			'video-processing': this.handleProcessing.bind(this),
+			'video-end': this.handleEnd.bind(this),
+		};
+
+		this.onMessage = this.onMessage.bind(this);
 		this.handleIceCandidate = this.handleIceCandidate.bind(this);
 		this.handleRemoteStream = this.handleRemoteStream.bind(this);
-		this.handleSignalingData = this.handleSignalingData.bind(this);
+
+		this.webSocketInit();
 	}
 
-	start() {
-		getUserMedia({ video: true, audio: true })
-			.then(stream => {
-				// 处理成功获取用户媒体流的逻辑
-				if ('srcObject' in this.localVideo) {
-					console.log('srcObject in localVideo');
-					this.localVideo.srcObject = stream;
-				} else {
-					console.log('srcObject not in localVideo');
-					this.localVideo.src = window.URL.createObjectURL(stream);
-				}
-				this.localVideo.play();
+	webSocketInit(){
+		const url = `${this.signalingServerUrl}/${this.userId}`;
+		// const url = 'ws://localhost:3000';
+		this.ws = new WebSocket(url);
 
-				this.rtcPeerConnection = new RTCPeerConnection();
-				stream.getTracks().forEach(track => this.rtcPeerConnection.addTrack(track, stream));
+		this.ws.addEventListener('open', () => {
+			console.log('Connected to the signaling server');
+			this.ws.addEventListener('message', this.onMessage);
+		});
 
-				this.rtcPeerConnection.onicecandidate = this.handleIceCandidate;
-				this.rtcPeerConnection.ontrack = this.handleRemoteStream;
+		this.ws.addEventListener('close', () => {
+			console.log('Disconnected from the signaling server');
+		});
 
-				const url = `${this.signalingServerUrl}/${this.userId}`;
-				// const url = 'ws://localhost:3000';
-				this.ws = new WebSocket(url);
+		this.ws.addEventListener('error', (err) => {
+			console.error(err.name + ': ' + err.message);
+		});
+	}
 
-				this.ws.addEventListener('open', () => {
-					console.log('Connected to the signaling server');
-					this.ws.addEventListener('message', this.handleSignalingData);
-
-					this.rtcPeerConnection.createOffer()
-						.then(offer => {
-							this.rtcPeerConnection.setLocalDescription(offer).then();
-							// 发送 offer 给信令服务器
-							this.ws.send(JSON.stringify({ offer: offer }));
-						});
-				});
-
-				this.ws.addEventListener('close', () => {
-					console.log('Disconnected from the signaling server');
-				});
-
-				this.ws.addEventListener('error', (err) => {
+	/**
+	 * @description 开始视频聊天
+	 * @return Promise
+	 * */
+	startLocalVideo(){
+		return new Promise((resolve, reject) => {
+			getUserMedia({ video: true, audio: true })
+				.then(stream => {
+					this.localStream = stream;
+					// 处理成功获取用户媒体流的逻辑
+					if ('srcObject' in this.localVideo) {
+						console.log('srcObject in localVideo');
+						this.localVideo.srcObject = stream;
+					} else {
+						console.warn('srcObject not in localVideo');
+						this.localVideo.src = window.URL.createObjectURL(stream);
+					}
+					this.localVideo.play();
+					resolve();
+				})
+				.catch((err) => {
 					console.error(err.name + ': ' + err.message);
+					reject(err);
 				});
-			})
-			.catch((err) => {
-				console.error(err.name + ': ' + err.message);
-			});
+		});
 	}
 
-	handleIceCandidate(event) {
-		if (event.candidate) {
-			// 发送 ICE candidate 给信令服务器
-			this.ws.send(JSON.stringify({ iceCandidate: event.candidate }));
+	closeLocalVideo() {
+		if (this.localStream) {
+			this.localStream.getTracks().forEach(track => {
+				track.stop();
+			});
 		}
 	}
 
-	handleRemoteStream(event) {
-		this.remoteVideo.srcObject = event.streams[0];
+	/**
+	 * @description 开始WecRTC连接
+	 * @param peerId 对方的用户ID
+	 * */
+	startRtc(peerId){
+		// 开始视频聊天
+		this.rtcPeerConnection = new RTCPeerConnection();
+		this.localStream.getTracks().forEach(track => this.rtcPeerConnection.addTrack(track, this.localStream));
+
+		this.rtcPeerConnection.onicecandidate = (event) => {
+			this.handleIceCandidate(peerId, event);
+		};
+		this.rtcPeerConnection.ontrack = this.handleRemoteStream;
+
+		this.rtcPeerConnection.createOffer()
+			.then(offer => {
+				return this.rtcPeerConnection.setLocalDescription(offer);
+			})
+			.then(() => {
+				// 发送 offer 给信令服务器
+				this.processing(peerId, { offer: this.rtcPeerConnection.localDescription });
+			});
 	}
 
-	handleSignalingData(event) {
-		try {
-			const parsedData = JSON.parse(event.data);
+	closeRtc() {
+		if (this.rtcPeerConnection) {
+			this.rtcPeerConnection.close();
+		}
+	}
 
+	/**
+	 * @description 邀请对方进行视频聊天
+	 * */
+	invite(toId){
+		this.startLocalVideo()
+			.then(() => {
+				this.ws.send(JSON.stringify({
+					type: 'video-invite',
+					toId: toId,
+				}));
+			})
+			.catch((err) => {
+				console.error(err.name + ': ' + err.message);
+				// todo 通知用户
+			});
+	}
+
+	/**
+	 * @description 接受对方的视频聊天邀请
+	 * */
+	accept(toId){
+		this.startLocalVideo()
+			.then(() => {
+				this.ws.send(JSON.stringify({
+					type: 'video-accept',
+					toId: toId,
+				}));
+				// 开启 WebRTC 连接
+				this.startRtc(toId);
+			})
+			.catch((err) => {
+				console.error(err.name + ': ' + err.message);
+				// todo 通知用户
+			});
+	}
+
+	/**
+	 * @description 拒绝对方的视频聊天邀请
+	 * */
+	reject(toId){
+		this.ws.send(JSON.stringify({
+			type: 'video-reject',
+			toId: toId,
+		}));
+	}
+
+	processing(toId, forwardData){
+		const msg = JSON.stringify({
+			type: 'video-processing',
+			toId: toId,
+			forwardData: forwardData,
+		});
+		this.ws.send(msg);
+	}
+
+	/**
+	 * 处理来自他人的视频聊天邀请
+	 * */
+	handleInvite(data){
+		const fromId = data.fromId;
+		if (fromId) {
+			const onAccept = () => {
+				this.accept(fromId);
+			};
+			const onReject = () => {
+				this.reject(fromId);
+			};
+			// TODO 加入用户名的显示
+			ElMessageBox.confirm('收到视频聊天邀请，是否接受？', '视频聊天邀请', {
+				confirmButtonText: '接受',
+				cancelButtonText: '拒绝',
+				type: 'warning',
+			}).then(onAccept).catch(onReject);
+		} else {
+			console.error('fromId is not provided');
+		}
+	}
+
+	/**
+	 * @description 对方接受了视频聊天，我方进行处理
+	 * */
+	handleAccept(data) {
+		const fromId = data.fromId;
+		if (fromId) {
+			// 开启 WebRTC 连接
+			this.startRtc(fromId);
+		} else {
+			console.error('fromId is not provided');
+		}
+	}
+
+	/**
+	 * @description 对方拒绝了视频聊天邀请
+	 * */
+	handleReject(data) {
+		// TODO 关闭视频聊天
+		this.closeLocalVideo();
+		console.log('对方拒绝了视频聊天邀请' + data.fromId);
+	}
+
+	handleProcessing(data) {
+		try {
+			console.log('handleProcessing' + " fromId:" + data.fromId + " toId:" + data.toId);
+			console.log(data.forwardData);
+			const parsedData = data.forwardData;
+			const fromId = data.fromId;
+			if (fromId === null || fromId === undefined) {
+				console.error('fromId is not provided');
+				return;
+			}
+			if (fromId === this.userId){
+				return;
+			}
 			if (parsedData.offer) {
 				// 处理来自另一端的 offer
 				this.rtcPeerConnection.setRemoteDescription(new RTCSessionDescription(parsedData.offer))
@@ -88,17 +234,22 @@ class VideoChatService {
 					})
 					.then(() => {
 						// 发送 answer 给信令服务器
-						this.ws.send(JSON.stringify({ answer: this.rtcPeerConnection.localDescription }));
+						this.processing(fromId, { answer: this.rtcPeerConnection.localDescription });
 					})
 					.catch(error => {
 						console.error('Failed to handle offer: ', error);
 					});
 			} else if (parsedData.answer) {
-				// 处理来自另一端的 answer
-				this.rtcPeerConnection.setRemoteDescription(new RTCSessionDescription(parsedData.answer))
-					.catch(error => {
-						console.error('Failed to handle answer: ', error);
-					});
+				// 检查信令状态是否为 have-local-offer
+				if (this.rtcPeerConnection.signalingState === 'have-local-offer') {
+					// 处理来自另一端的 answer
+					this.rtcPeerConnection.setRemoteDescription(new RTCSessionDescription(parsedData.answer))
+						.catch(error => {
+							console.error('Failed to handle answer: ', error);
+						});
+				} else {
+					console.error('Invalid signaling state for setting remote answer: ', this.rtcPeerConnection.signalingState);
+				}
 			} else if (parsedData.iceCandidate) {
 				// 处理来自另一端的 ICE candidates
 				this.rtcPeerConnection.addIceCandidate(new RTCIceCandidate(parsedData.iceCandidate))
@@ -108,6 +259,35 @@ class VideoChatService {
 			}
 		} catch (error) {
 			console.error('Failed to parse signaling data: ', error);
+		}
+	}
+
+	/**
+	 * @description 对方结束了视频聊天
+	 * */
+	handleEnd(data) {
+		console.log('对方结束了视频聊天' + data.fromId);
+		this.closeRtc();
+		this.closeLocalVideo();
+	}
+
+	handleIceCandidate(toId, event) {
+		if (event.candidate) {
+			// 发送 ICE candidate 给信令服务器
+			this.processing(toId,{ iceCandidate: event.candidate });
+		}
+	}
+
+	handleRemoteStream(event) {
+		this.remoteVideo.srcObject = event.streams[0];
+	}
+
+	onMessage(event) {
+		const data = JSON.parse(event.data);
+		const type = data.type;
+		const handler = this.messageHandlers[type];
+		if (handler) {
+			handler(data);
 		}
 	}
 }
