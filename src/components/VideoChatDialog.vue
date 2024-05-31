@@ -61,18 +61,26 @@ export default {
 	background-color: white;
 }
 
-#localVideo {
-	position: absolute;
-	top: 10px;
-	right: 10px;
-	width: 200px;
-	height: auto;
-	border: 2px solid #ccc;
+#remoteVideo {
+	width: 100%;
+	height: 100%;
 }
 
-#remoteVideo {
-	width: 80%;
+#localVideo {
+	position: absolute;
+	width: 20%;
 	height: auto;
+	bottom: 10px;
+	right: 10px;
 	border: 2px solid #ccc;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+	background-color: white;
+}
+
+#hangupButton {
+	position: absolute;
+	bottom: 10px;
+	left: 50%;
+	transform: translateX(-50%);
 }
 </style>
