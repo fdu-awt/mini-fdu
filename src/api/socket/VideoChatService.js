@@ -1,5 +1,6 @@
 import getUserMedia from "@/utils/UserMedia";
 import {ElMessageBox} from "element-plus";
+import videoChatEventEmitter, { VIDEO_CHAT_EVENTS } from "@/event/VideoChatEventEmitter";
 
 class VideoChatService {
 	constructor(localVideo, remoteVideo, signalingServerUrl, userId) {
@@ -159,12 +160,16 @@ class VideoChatService {
 			});
 	}
 
+	/**
+	 * 处理 自己 结束视频聊天
+	 * */
 	hangup() {
 		return this.endChat().then(() => {
 			this.ws.send(JSON.stringify({
 				type: 'video-end',
 				toId: this.peerId,
 			}));
+			videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.END);
 		});
 	}
 
@@ -211,6 +216,7 @@ class VideoChatService {
 			type: 'video-reject',
 			toId: toId,
 		}));
+		videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.REJECTED);
 	}
 
 	processing(toId, forwardData){
@@ -269,10 +275,15 @@ class VideoChatService {
 		} else if(reason === 'offline'){
 			msg = '对方不在线';
 		}
+		const endChatInner = () => {
+			this.endChat().then(() => {
+				videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.REJECTED);
+			});
+		};
 		ElMessageBox.alert(msg, '提示', {
 			confirmButtonText: '确定',
 			type: 'warning',
-		}).then(this.endChat.bind(this)).catch(this.endChat.bind(this));
+		}).then(endChatInner).catch(endChatInner);
 	}
 
 	handleProcessing(data) {
