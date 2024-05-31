@@ -59,7 +59,7 @@ export class Game {
 			"Doctor",
 			FBX_IMAGE.randomColour(),
 			"知识自测NPC",
-			{x: 3122, y: 0, z: -173,},
+			{x: 2500, y: 0, z: -173,},
 			{x: 0, y: 2.6, z: 0,},
 			{x: 0, y: 320, z: 0,});
 		this.npcs = [this.npc1];
