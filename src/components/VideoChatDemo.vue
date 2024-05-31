@@ -95,8 +95,8 @@ export default {
 <style scoped>
 .video-container {
 	position: relative;
-	width: 100%;
-	height: 90%;
+	width: 100vw;
+	height: 90vh;
 	display: flex;
 	justify-content: center;
 	align-items: center;
