@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import gameEventEmitter, {GAME_EVENTS}  from "@/event/GameEventEmitter";
+import _ from 'lodash';
 
 export default class PlayerController {
 	constructor(player, controllerElement) {
@@ -59,18 +60,20 @@ export default class PlayerController {
 		this.key_down_s = () => {this.keyStates.S = true;};
 		this.key_down_d = () => {this.keyStates.D = true;};
 
-		this.key_down_v = () => {
+		this.key_down_v = _.debounce(() => {
 			this.firstView = !this.firstView;
 			this.activeCamera = this.firstView ? this.firstViewCamera : this.thirdViewCamera;
-		};
-		this.key_down_e = () => {
+		}, 300); // 300ms 的防抖时间
+
+		this.key_down_e = _.debounce(() => {
 			this.player.action = 'Pointing';
 			this.player.socketUpdate();
-		};
-		this.key_down_q = () => {
+		}, 300);
+
+		this.key_down_q = _.debounce(() => {
 			this.player.action = 'Pointing Gesture';
 			this.player.socketUpdate();
-		};
+		}, 300);
 
 		this.key_up_w = () => {this.keyStates.W = false;};
 		this.key_up_a = () => {this.keyStates.A = false;};
@@ -203,7 +206,6 @@ export default class PlayerController {
 			if (this.cameraGroup.rotation.x > angleMax) {
 				this.cameraGroup.rotation.x = angleMax;
 			}
-			console.log(this.cameraGroup.rotation.x);
 		});
 	}
 
