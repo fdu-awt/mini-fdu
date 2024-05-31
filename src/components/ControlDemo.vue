@@ -11,6 +11,7 @@ import eventBus from '@/eventbus/eventBus.js';
 import AIChatDialog from '@/components/AIChatDialog.vue';
 import QuizDialog from '@/components/QuizDialog.vue';
 import VideoChatDialog from "@/components/VideoChatDialog.vue";
+import videoChatEventEmitter, { VIDEO_CHAT_EVENTS } from "@/event/VideoChatEventEmitter";
 
 export default {
 	name: "ControlDemo",
@@ -54,6 +55,12 @@ export default {
 				this.showSettingDialog = !this.showSettingDialog;
 				// 申请解除鼠标和键盘锁定
 				gameEventEmitter.requestAllControl();
+			});
+			// 按下 KEY_DOWN_T 时显示视频聊天demo
+			gameEventEmitter.on(GAME_EVENTS.KEY_DOWN_T, () => {
+				// TODO 真实的 toId
+				const toId = 2;
+				videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.START, toId);
 			});
 		},
 		onSettingDialogClose(){
@@ -113,7 +120,7 @@ export default {
   <QuizDialog/>
 	<SettingDialog :show="showSettingDialog" @close="onSettingDialogClose"/>
 	<ChatBox v-if="isChatBoxVisible" :socket="socket" :remote-id="remoteId" :local-id="localId" @close="closeChatBox" />
-	<VideoChatDialog :to-id="localId" :local-id="remoteId"/>
+	<VideoChatDialog/>
   <div v-if="newMessageNotification" class="new-message-notification">
     您有一条新消息，请点击查看。
     <button @click="viewNewMessage">查看消息</button>

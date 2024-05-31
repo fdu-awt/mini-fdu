@@ -10,6 +10,7 @@ const GAME_EVENTS = Object.freeze({
 	KEY_DOWN_E: Symbol("key_down_e"),
 	KEY_DOWN_Q: Symbol("key_down_q"),
 	KEY_DOWN_Z: Symbol("key_down_z"),
+	KEY_DOWN_T: Symbol("key_down_t"),
 	KEY_UP_W: Symbol("key_up_w"),
 	KEY_UP_A: Symbol("key_up_a"),
 	KEY_UP_S: Symbol("key_up_s"),

@@ -231,6 +231,9 @@ export class Game {
 			case "z":
 				gameEventEmitter.emit(GAME_EVENTS.KEY_DOWN_Z);
 				break;
+			case "t":
+				gameEventEmitter.emit(GAME_EVENTS.KEY_DOWN_T);
+				break;
 			}
 		});
 	}
