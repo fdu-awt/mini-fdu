@@ -203,10 +203,7 @@ class VideoChatService {
 	 * */
 	handleAccept(data) {
 		const fromId = data.fromId;
-		if (fromId) {
-			// 开启 WebRTC 连接
-			this.startRtc(fromId);
-		} else {
+		if (!fromId) {
 			console.error('fromId is not provided');
 		}
 	}
@@ -215,9 +212,13 @@ class VideoChatService {
 	 * @description 对方拒绝了视频聊天邀请
 	 * */
 	handleReject(data) {
-		// TODO 关闭视频聊天
+		this.closeRtc();
 		this.closeLocalVideo();
 		console.log('对方拒绝了视频聊天邀请' + data.fromId);
+		ElMessageBox.alert('对方拒绝了视频聊天邀请', '提示', {
+			confirmButtonText: '确定',
+			type: 'warning',
+		}).then();
 	}
 
 	handleProcessing(data) {
