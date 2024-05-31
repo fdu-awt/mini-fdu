@@ -206,7 +206,19 @@ class VideoChatService {
 	/**
 	 * @description 接受对方的视频聊天邀请
 	 * */
-	accept(toId){
+	accept(toId, localVideo, remoteVideo){
+		if (!toId) {
+			console.error('Already in a video chat');
+			return;
+		}
+		if (!localVideo) {
+			console.error('localVideo is not provided');
+			return;
+		}
+		if (!remoteVideo) {
+			console.error('remoteVideo is not provided');
+			return;
+		}
 		this.startLocalVideo()
 			.then(() => {
 				// 开启 WebRTC 连接
@@ -252,18 +264,7 @@ class VideoChatService {
 	handleInvite(data){
 		const fromId = data.fromId;
 		if (fromId) {
-			const onAccept = () => {
-				this.accept(fromId);
-			};
-			const onReject = () => {
-				this.reject(fromId);
-			};
-			// TODO 加入用户名的显示
-			ElMessageBox.confirm('收到视频聊天邀请，是否接受？', '视频聊天邀请', {
-				confirmButtonText: '接受',
-				cancelButtonText: '拒绝',
-				type: 'warning',
-			}).then(onAccept).catch(onReject);
+			videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.INVITE, fromId);
 		} else {
 			console.error('fromId is not provided');
 		}

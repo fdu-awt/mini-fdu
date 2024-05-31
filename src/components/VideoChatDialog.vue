@@ -2,6 +2,7 @@
 import videoChatService from "@/api/socket/VideoChatService";
 import videoChatEventEmitter, { VIDEO_CHAT_EVENTS } from "@/event/VideoChatEventEmitter";
 import gameEventEmitter from "@/event/GameEventEmitter";
+import {ElMessageBox} from "element-plus";
 
 export default {
 	name: "VideoChatDialog",
@@ -13,6 +14,7 @@ export default {
 	},
 	mounted() {
 		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.START, this.onChatStart.bind(this));
+		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.INVITE, this.onChatInvite.bind(this));
 	},
 	methods: {
 		onChatStart(toId) {
@@ -24,6 +26,25 @@ export default {
 				const remoteVideo = document.getElementById('remoteVideo');
 				videoChatService.invite(toId, localVideo, remoteVideo);
 			});
+		},
+		onChatInvite(fromId){
+			const onAccept = () => {
+				this.visible = true;
+				this.$nextTick(() => {
+					const localVideo = document.getElementById('localVideo');
+					const remoteVideo = document.getElementById('remoteVideo');
+					videoChatService.accept(fromId, localVideo, remoteVideo);
+				});
+			};
+			const onReject = () => {
+				videoChatService.reject(fromId);
+			};
+			// TODO 加入用户名的显示
+			ElMessageBox.confirm('收到视频聊天邀请，是否接受？', '视频聊天邀请', {
+				confirmButtonText: '接受',
+				cancelButtonText: '拒绝',
+				type: 'warning',
+			}).then(onAccept).catch(onReject);
 		},
 		onHangUp() {
 			videoChatService.hangup().then(() => {
