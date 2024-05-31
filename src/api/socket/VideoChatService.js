@@ -11,6 +11,9 @@ class VideoChatService {
 		this.ws = null;
 		this.localStream = null;
 
+		this.peerId = null;
+		this.inChat = false;
+
 		this.messageHandlers = {
 			'video-invite': this.handleInvite.bind(this),
 			'video-accept': this.handleAccept.bind(this),
@@ -127,11 +130,30 @@ class VideoChatService {
 					type: 'video-invite',
 					toId: toId,
 				}));
+				this.peerId = toId;
 			})
 			.catch((err) => {
 				console.error(err.name + ': ' + err.message);
 				// todo 通知用户
 			});
+	}
+
+	hangup() {
+		if(!this.inChat){
+			return;
+		}
+		this.ws.send(JSON.stringify({
+			type: 'video-end',
+			toId: this.peerId,
+		}));
+		this.endChat();
+	}
+
+	endChat(){
+		this.peerId = null;
+		this.inChat = false;
+		this.closeRtc();
+		this.closeLocalVideo();
 	}
 
 	/**
@@ -149,6 +171,8 @@ class VideoChatService {
 					type: 'video-accept',
 					toId: toId,
 				}));
+				this.peerId = toId;
+				this.inChat = true;
 			})
 			.catch((err) => {
 				console.error(err.name + ': ' + err.message);
@@ -205,6 +229,8 @@ class VideoChatService {
 		const fromId = data.fromId;
 		if (!fromId) {
 			console.error('fromId is not provided');
+		} else {
+			this.inChat = true;
 		}
 	}
 
@@ -212,13 +238,12 @@ class VideoChatService {
 	 * @description 对方拒绝了视频聊天邀请
 	 * */
 	handleReject(data) {
-		this.closeRtc();
-		this.closeLocalVideo();
 		console.log('对方拒绝了视频聊天邀请' + data.fromId);
+		// TODO reason
 		ElMessageBox.alert('对方拒绝了视频聊天邀请', '提示', {
 			confirmButtonText: '确定',
 			type: 'warning',
-		}).then();
+		}).then(this.endChat.bind(this)).catch(this.endChat.bind(this));
 	}
 
 	handleProcessing(data) {
@@ -277,8 +302,7 @@ class VideoChatService {
 	 * */
 	handleEnd(data) {
 		console.log('对方结束了视频聊天' + data.fromId);
-		this.closeRtc();
-		this.closeLocalVideo();
+		this.endChat();
 	}
 
 	handleIceCandidate(toId, event) {

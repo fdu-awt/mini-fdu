@@ -10,6 +10,7 @@ export default {
 	methods: {
 		init() {
 			const startButton = document.getElementById('startButton');
+			const hangupButton = document.getElementById('hangupButton');
 			const localVideo = document.getElementById('localVideo');
 			const remoteVideo = document.getElementById('remoteVideo');
 			const signalingServerUrl = process.env.VUE_APP_VIDEO_CHAT_WEBSOCKET_BASE_URL;
@@ -22,6 +23,9 @@ export default {
 				videoChatService.invite(toId);
 			});
 			// TODO 挂断
+			hangupButton.addEventListener('click', () => {
+				videoChatService.hangup();
+			});
 		},
 	},
 };
@@ -32,6 +36,7 @@ export default {
 		<video id="remoteVideo" autoplay playsinline></video>
 		<video id="localVideo" autoplay playsinline></video>
 		<button id="startButton">开始视频聊天</button>
+		<button id="hangupButton">挂断</button>
 	</div>
 </template>
 
