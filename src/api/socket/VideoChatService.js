@@ -13,7 +13,6 @@ class VideoChatService {
 		this.localStream = null;
 
 		this.peerId = null;
-		this.inChat = false;
 
 		this.messageHandlers = {
 			'video-invite': this.handleInvite.bind(this),
@@ -181,7 +180,6 @@ class VideoChatService {
 			.then(() => {
 				const id = this.peerId;
 				this.peerId = null;
-				this.inChat = false;
 				return id;
 			});
 	}
@@ -202,7 +200,6 @@ class VideoChatService {
 					toId: toId,
 				}));
 				this.peerId = toId;
-				this.inChat = true;
 			})
 			.catch((err) => {
 				console.error(err.name + ': ' + err.message);
@@ -260,8 +257,6 @@ class VideoChatService {
 		const fromId = data.fromId;
 		if (!fromId) {
 			console.error('fromId is not provided');
-		} else {
-			this.inChat = true;
 		}
 	}
 
