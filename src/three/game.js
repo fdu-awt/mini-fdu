@@ -151,7 +151,6 @@ export class Game {
 		this.scene.add(hemiLight);
 
 		this.environment.load(this, undefined);
-		this.handleMouseClick(this);
 		// 加载 npc 和 玩家动画
 		this.loadAnimations().then(() => {
 			// 加载玩家
@@ -178,6 +177,8 @@ export class Game {
 			// 处理：键盘事件
 			this.listenKeyDown();
 			this.listenKeyUp();
+			// 处理：鼠标点击事件
+			this.listenMouseClick(this);
 		}).then(() => {
 			this.container.appendChild(this.renderer.domElement);
 			this.animate();
@@ -261,7 +262,8 @@ export class Game {
 	}
 
 	// 检测鼠标点击行为
-	handleMouseClick(game){
+	listenMouseClick(){
+		const game = this;
 		const raycaster = new THREE.Raycaster();
 		const mouse = new THREE.Vector2();
 
@@ -295,19 +297,18 @@ export class Game {
 						// });
 						
 						const post_id = Number(intersects[0].object.name.substring(4));
-						let event = new Event("ClickPost");
-						event.key = post_id;
-						window.dispatchEvent(event);
+						let clickEvent = new Event("ClickPost");
+						clickEvent.key = post_id;
+						window.dispatchEvent(clickEvent);
 					}	
 
 					// 点击社团展板
 					if(object.name.startsWith("clubpost")){
 						const club_id = Number(intersects[0].object.name.substring(8));
-						let event = new Event("ClickClub");
-						event.key = club_id;
-						window.dispatchEvent(event);
+						let clickEvent = new Event("ClickClub");
+						clickEvent.key = club_id;
+						window.dispatchEvent(clickEvent);
 					}
-
 
 					// 点击 NPC
 					game.npcs.forEach((npc) => {
@@ -347,12 +348,9 @@ export class Game {
 					// 	// 打开聊天界面
 					// 	game.openChat(game.player.userId, clickedPlayerId, game.player.chatWebSocketService.socket);
 					// }
-
-
 				}
 			}
 		}
-
 		window.addEventListener("click", onMouseClick, false);
 	}
 	
