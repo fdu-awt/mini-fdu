@@ -237,7 +237,7 @@ class VideoChatService {
 			type: 'video-reject',
 			toId: toId,
 		}));
-		videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.REJECTED);
+		videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.REJECT);
 	}
 
 	processing(toId, forwardData){
