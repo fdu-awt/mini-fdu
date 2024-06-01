@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import gameEventEmitter, {GAME_EVENTS}  from "@/event/GameEventEmitter";
+import _ from 'lodash';
 
 export default class PlayerController {
 	constructor(player, controllerElement) {
@@ -48,8 +49,10 @@ export default class PlayerController {
 		// 旋转灵敏度
 		this.sensitivity = 600;
 		// 上下俯仰角度范围
-		this.angleMin = THREE.MathUtils.degToRad(-25);//角度转弧度
-		this.angleMax = THREE.MathUtils.degToRad(25);
+		this.thirdViewAngleMin = THREE.MathUtils.degToRad(-15); //角度转弧度
+		this.thirdViewAngleMax = THREE.MathUtils.degToRad(30);
+		this.firstViewAngleMin = THREE.MathUtils.degToRad(-45);
+		this.firstViewAngleMax = THREE.MathUtils.degToRad(45);
 
 		// 按键事件监听
 		this.key_down_w = () => {this.keyStates.W = true;};
@@ -57,37 +60,60 @@ export default class PlayerController {
 		this.key_down_s = () => {this.keyStates.S = true;};
 		this.key_down_d = () => {this.keyStates.D = true;};
 
-		this.key_down_v = () => {
+		this.key_down_v = _.debounce(() => {
 			this.firstView = !this.firstView;
 			this.activeCamera = this.firstView ? this.firstViewCamera : this.thirdViewCamera;
-		};
-		this.key_down_e = () => {
+			this.toggleCrosshair(this.firstView); // 切换视角时，显示或隐藏准星
+		}, 300); // 300ms 的防抖时间
+
+		this.key_down_e = _.debounce(() => {
 			this.player.action = 'Pointing';
 			this.player.socketUpdate();
-		};
-		this.key_down_q = () => {
+		}, 300);
+
+		this.key_down_q = _.debounce(() => {
 			this.player.action = 'Pointing Gesture';
 			this.player.socketUpdate();
-		};
+		}, 300);
 
 		this.key_up_w = () => {this.keyStates.W = false;};
 		this.key_up_a = () => {this.keyStates.A = false;};
 		this.key_up_s = () => {this.keyStates.S = false;};
 		this.key_up_d = () => {this.keyStates.D = false;};
 
+		this.mouseClickedOnObject = this.player.game.onMouseClick.bind(this.player.game);
+
 		this.createCameras();
 		this.addKeyListeners();
 		this.addMouseListeners();
+		this.createCrosshair();
 		// 处理：请求解锁鼠标锁定
 		gameEventEmitter.on(
 			GAME_EVENTS.REQUEST_MOUSE_CONTROL,
-			this.unlockPointer.bind(this)
+			this.handleMouseControlRequest.bind(this)
 		);
 		// 处理：申请打字控制
 		gameEventEmitter.on(
 			GAME_EVENTS.REQUEST_KEYBOARD_CONTROL,
-			this.cancelKeyListeners.bind(this)
+			this.handleKeyboardControlRequest.bind(this)
 		);
+	}
+
+	createCrosshair() {
+		const crosshair = document.createElement('div');
+		crosshair.id = 'crosshair';
+		crosshair.style.position = 'fixed';
+		crosshair.style.top = '50%';
+		crosshair.style.left = '50%';
+		crosshair.style.width = '10px';
+		crosshair.style.height = '10px';
+		crosshair.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
+		crosshair.style.borderRadius = '50%';
+		crosshair.style.transform = 'translate(-50%, -50%)';
+		crosshair.style.zIndex = '1000';
+		crosshair.style.pointerEvents = 'none';
+		crosshair.style.display = 'none';
+		document.body.appendChild(crosshair);
 	}
 
 	createCameras() {
@@ -98,8 +124,8 @@ export default class PlayerController {
 		this.firstViewCamera = new THREE.PerspectiveCamera(
 			45, window.innerWidth / window.innerHeight, 10, 200000
 		);
-		this.firstViewCamera.position.set(0, 250, 100);
-		this.firstViewCamera.lookAt(0, 250, 120);
+		this.firstViewCamera.position.set(20, 270, 100);
+		this.firstViewCamera.lookAt(20, 270, 120);
 
 		this.thirdViewCamera = new THREE.PerspectiveCamera(
 			45, window.innerWidth / window.innerHeight, 10, 200000
@@ -145,7 +171,9 @@ export default class PlayerController {
 			.on(GAME_EVENTS.KEY_UP_D, this.key_up_d);
 	}
 
-	cancelKeyListeners() {
+	handleKeyboardControlRequest() {
+		this.toggleCrosshair(false);
+		// cancelKeyListeners
 		gameEventEmitter
 			.off(GAME_EVENTS.KEY_DOWN_W, this.key_down_w)
 			.off(GAME_EVENTS.KEY_DOWN_A, this.key_down_a)
@@ -160,7 +188,9 @@ export default class PlayerController {
 			.off(GAME_EVENTS.KEY_UP_D, this.key_up_d);
 	}
 
-	unlockPointer() {
+	handleMouseControlRequest() {
+		this.toggleCrosshair(false);
+		// unlockPointer
 		if (this.controllerElement) {
 			if (document.body.contains(this.controllerElement)){
 				if (document.pointerLockElement === this.controllerElement) {
@@ -168,22 +198,30 @@ export default class PlayerController {
 				}
 			}
 		}
+		// 解除鼠标事件监听
+		document.removeEventListener('click', this.mouseClickedOnObject, false);
 	}
 
 	addMouseListeners() {
+		// 指针锁定事件
 		if (this.controllerElement) {
 			if (document.body.contains(this.controllerElement)){
 				this.controllerElement.addEventListener('click', () => {
 					if (this.controllerElement) {
 						if (document.body.contains(this.controllerElement)) {
 							this.controllerElement.requestPointerLock();//指针锁定
+							// 恢复准星
+							this.toggleCrosshair(this.firstView);
 							// 恢复游戏控制
 							this.addKeyListeners();
+							// 恢复，鼠标点击场景中的物体
+							document.addEventListener("click", this.mouseClickedOnObject, false);
 						}
 					}
 				});
 			}
 		}
+		// 鼠标移动事件
 		document.addEventListener('mousemove', (event) => {
 			// 进入指针模式后，才能根据鼠标位置控制人旋转
 			if (document.pointerLockElement !== this.controllerElement) return;
@@ -193,14 +231,17 @@ export default class PlayerController {
 			// 相机父对象cameraGroup绕着x轴旋转,camera跟着转动
 			this.cameraGroup.rotation.x += event.movementY / this.sensitivity;
 			// 如果 .rotation.x 小于angleMin，就设置为angleMin
-			if (this.cameraGroup.rotation.x < this.angleMin) {
-				this.cameraGroup.rotation.x = this.angleMin;
+			const angleMin = this.firstView ? this.firstViewAngleMin : this.thirdViewAngleMin;
+			const angleMax = this.firstView ? this.firstViewAngleMax : this.thirdViewAngleMax;
+			if (this.cameraGroup.rotation.x < angleMin) {
+				this.cameraGroup.rotation.x = angleMin;
 			}
-			// 如果 .rotation.x 大于angleMax，就设置为angleMax
-			if (this.cameraGroup.rotation.x > this.angleMax) {
-				this.cameraGroup.rotation.x = this.angleMax;
+			if (this.cameraGroup.rotation.x > angleMax) {
+				this.cameraGroup.rotation.x = angleMax;
 			}
 		});
+		// 鼠标点击场景中的物体
+		document.addEventListener("click", this.mouseClickedOnObject, false);
 	}
 
 	update(deltaTime) {
@@ -248,5 +289,12 @@ export default class PlayerController {
 		this.player.object.position.add(deltaPos);//更新玩家角色的位置
 		// 更新 socket 信息
 		this.player.socketUpdate();
+	}
+
+	toggleCrosshair(show) {
+		const crosshair = document.getElementById('crosshair');
+		if (crosshair) {
+			crosshair.style.display = show ? 'block' : 'none';
+		}
 	}
 }

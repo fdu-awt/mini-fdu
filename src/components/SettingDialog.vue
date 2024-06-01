@@ -69,7 +69,7 @@ export default {
     <el-dialog v-model="isVisible" title="后台管理" width="1000" height="800">
       <el-row class="tac">
         <el-col :span="4">
-          <el-menu default-active="2" class="el-menu-vertical-demo" @close="handleClose">
+          <el-menu default-active="1" class="el-menu-vertical-demo" @close="handleClose">
             <el-menu-item index="1" @click="navigate('PersonalInfo')">
               <el-icon>
                 <icon-menu/>

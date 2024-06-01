@@ -6,6 +6,7 @@ import {
 } from 'element-plus';
 import {getAllClubData} from "@/api/study.js";
 import ButtonHover1 from './common/ButtonHover1.vue';
+import gameEventEmitter from "@/event/GameEventEmitter";
 
 export default {
 	name: "ClubDialog",
@@ -24,12 +25,8 @@ export default {
 		};
 	},
 	mounted(){
-		window.addEventListener('ClickClub', this.handleStorageChange);
-
-		getAllClubData().then((res)=>{
-			if(res.code==200){
-				this.club_data = res.object;
-			}
+		this.getAllClubData().then(()=>{
+			window.addEventListener('ClickClub', this.handleStorageChange);
 		}).catch(e => {
 			console.error(e);
 		});
@@ -39,11 +36,25 @@ export default {
 	},
 	methods: {
 		handleStorageChange(event) {
+			gameEventEmitter.requestAllControl();
 			this.clubDialogVisible = true;
 			this.clubId = event.key;
 			this.current_club_data = this.club_data[this.clubId];
 		},
-		
+		getAllClubData() {
+			return new Promise((resolve, reject) => {
+				getAllClubData().then((res) => {
+					if (res.code === 200) {
+						this.club_data = res.object;
+						resolve(res.object);
+					} else {
+						reject(new Error(`Unexpected response code: ${res.code}`));
+					}
+				}).catch((e) => {
+					reject(e);
+				});
+			});
+		},
 		handleAskForAI(){
 			this.$emit("askAI");
 			this.clubDialogVisible = false;

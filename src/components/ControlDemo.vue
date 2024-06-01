@@ -10,10 +10,13 @@ import ClubDialog from "@/components/ClubDialog.vue";
 import eventBus from '@/eventbus/eventBus.js';
 import AIChatDialog from '@/components/AIChatDialog.vue';
 import QuizDialog from '@/components/QuizDialog.vue';
+import VideoChatDialog from "@/components/VideoChatDialog.vue";
+import videoChatEventEmitter, { VIDEO_CHAT_EVENTS } from "@/event/VideoChatEventEmitter";
 
 export default {
 	name: "ControlDemo",
 	components: {
+		VideoChatDialog,
 		PostDialog,
 		ClubDialog,
 		AIChatDialog,
@@ -41,9 +44,8 @@ export default {
 		this.canvasContainer = document.getElementById('canvas-container');
 		this.game = new Game(this.canvasContainer, new GuangHuaLou() , new Lab1FbxSelfImageLoader());
 		this.listenKeyDown();
-		// 假设Game有一个方法可以添加点击事件监听
-		window.addEventListener('objectClicked', (event) => {
-			this.handleObjectClick(event.detail.localId, event.detail.remoteId, event.detail.socket);
+		window.addEventListener('ClickPlayer', (event) => {
+			this.openChatBox(event.detail.localId, event.detail.remoteId, event.detail.socket);
 		});
 	},
 	methods: {
@@ -51,20 +53,26 @@ export default {
 			// 按下 Z 键时显示后台设置页面
 			gameEventEmitter.on(GAME_EVENTS.KEY_DOWN_Z, () => {
 				this.showSettingDialog = !this.showSettingDialog;
-				// 申请解除鼠标锁定
-				gameEventEmitter.emit(GAME_EVENTS.REQUEST_MOUSE_CONTROL);
-				// 申请接触键盘锁定
-				gameEventEmitter.emit(GAME_EVENTS.REQUEST_KEYBOARD_CONTROL);
+				// 申请解除鼠标和键盘锁定
+				gameEventEmitter.requestAllControl();
+			});
+			// 按下 KEY_DOWN_T 时显示视频聊天demo
+			gameEventEmitter.on(GAME_EVENTS.KEY_DOWN_T, () => {
+				// TODO 真实的 toId
+				const toId = 1;
+				videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.START, toId);
 			});
 		},
 		onSettingDialogClose(){
 			console.log('onSettingDialogClose');
 			this.showSettingDialog = false;
 		},
-		handleObjectClick(localId, remoteId, socket) {
+		openChatBox(localId, remoteId, socket) {
 			this.localId = localId;
 			this.remoteId = remoteId;
 			this.socket = socket;
+			// 申请解除鼠标和键盘锁定
+			gameEventEmitter.requestAllControl();
 			this.isChatBoxVisible = true; // 点击对象时显示ChatBox
 		},
 		closeChatBox() {
@@ -81,7 +89,6 @@ export default {
 		handleAIChatClose() {
 			this.AIChatDialogVisible = false;
 		},
-
 		handleNewMessage({ localId, remoteId, socket }) {
 			console.log("我在处理查看消息的点击");
 			console.log(socket);
@@ -113,6 +120,7 @@ export default {
   <QuizDialog/>
 	<SettingDialog :show="showSettingDialog" @close="onSettingDialogClose"/>
 	<ChatBox v-if="isChatBoxVisible" :socket="socket" :remote-id="remoteId" :local-id="localId" @close="closeChatBox" />
+	<VideoChatDialog/>
   <div v-if="newMessageNotification" class="new-message-notification">
     您有一条新消息，请点击查看。
     <button @click="viewNewMessage">查看消息</button>
