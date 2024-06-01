@@ -77,7 +77,7 @@ class GuangHuaLou extends GameEnvironment{
 							side: THREE.DoubleSide
 						});
 						
-						material.color.set(0x888888);
+						material.color.set(0xdddddd);
 
 						child.material = material;
 					}
@@ -110,7 +110,7 @@ class GuangHuaLou extends GameEnvironment{
 							side: THREE.DoubleSide
 						});
 
-						material.color.set(0x888888);
+						material.color.set(0xdddddd);
 			
 						child.material = material;
 					}
