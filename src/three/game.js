@@ -164,6 +164,16 @@ export class Game {
 			this.renderer.setPixelRatio(window.devicePixelRatio);
 			this.renderer.setSize(window.innerWidth, window.innerHeight);
 			this.renderer.shadowMap.enabled = true;
+
+			// 监听窗口大小变化
+			window.addEventListener('resize', () => {
+				// 更新渲染器长宽比
+				this.renderer.setSize(window.innerWidth, window.innerHeight);
+				// 更新相机长宽比
+				this.playerController.camera.aspect = window.innerWidth / window.innerHeight;
+				// 更新相机投影矩阵
+				this.playerController.camera.updateProjectionMatrix();
+			});
 		}).then(() => {
 			// 事件监听
 			// 处理：用户选择个人形象
