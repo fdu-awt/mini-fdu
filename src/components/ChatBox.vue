@@ -150,6 +150,7 @@ export default {
   flex-direction: column;
   height: 100%;
   max-height: 500px; /* Adjust the height as needed */
+  height: 400px;
 }
 
 .messages {
