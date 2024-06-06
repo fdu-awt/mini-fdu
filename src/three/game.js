@@ -591,6 +591,8 @@ class Player {
 	set action(name) {
 		if (this.actionName === name) return;
 		const previousAction = this.actions[this.actionName];
+		console.log(this.actions);
+		console.log(name);
 		const newAction = this.actions[name];
 		this.actionName = name;
 
@@ -642,7 +644,7 @@ class Player {
 					this.object.position.set( data.x, data.y, data.z );
 					const euler = new THREE.Euler(data.pb, data.h, data.pb);
 					this.object.quaternion.setFromEuler( euler );
-					this.action = data.action;
+					this.action = data.action || "Idle";
 				}
 				found = true;
 			}
@@ -708,7 +710,7 @@ class PlayerLocal extends Player {
 				z: this.object.position.z,
 				h: this.object.rotation.y,
 				pb: this.object.rotation.x,
-				action: this.action
+				action: this.action || "Idle",
 			};
 			this.gameWebSocketService.gameEmit(GAME_WS_EMIT_EVENTS.LOCAL_UPDATE, data);
 		}
