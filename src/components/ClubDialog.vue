@@ -66,9 +66,9 @@ export default {
 <template>
     <el-dialog v-model="clubDialogVisible" width="900" v-modal="true" v-close-on-click-modal="false" center="true">
         <div id="dialog-container">
-			<el-image style="width: 300px; height: 200px" :src="'./club/images/' + current_club_data.profile" :fit="contain" />
+			<el-image style="width: 300px; height: 200px" :src="'./club/images/' + current_club_data.activity" :fit="contain" />
 			<h3>{{ current_club_data.name }}</h3>
-      <h4>{{ current_club_data.slogan }}</h4>
+			<h4>{{ current_club_data.slogan }}</h4>
 			<el-text size="default" class="intro">{{ current_club_data.intro }}</el-text>
 			<br/>
 			<ButtonHover1 msg="点击询问AI" @click="handleAskForAI"/>
