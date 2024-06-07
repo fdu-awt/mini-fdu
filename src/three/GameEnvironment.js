@@ -131,7 +131,7 @@ class GuangHuaLou extends GameEnvironment{
 					}
 
 					if (child.name.startsWith("post")){
-						console.log("post", child.name);
+						// console.log("post", child.name);
 						// 处理光华路海报
 						game.post.push(child);
 						loadImage(child);
@@ -141,6 +141,10 @@ class GuangHuaLou extends GameEnvironment{
 						// 处理社团活动海报
 						game.clubs.push(child);
 						loadImage(child);
+					}
+
+					if (!child.name.startsWith("圆环")) {
+						game.colliders.push(child);
 					}
 				}
 			});
