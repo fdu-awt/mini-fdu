@@ -245,7 +245,44 @@ export default class PlayerController {
 	}
 
 	update(deltaTime) {
-		if (this.v.length() < this.vMax) { // 限制最高速度
+		const pos = this.player.object.position.clone();
+		pos.y += 60;
+		let dir = new THREE.Vector3();
+		this.player.object.getWorldDirection(dir);
+		if(this.v<0 || this.keyStates.S)
+			dir.negate();
+
+		// 处理左右旋转
+		if (this.keyStates.A || this.keyStates.D) {
+			const angle = (this.keyStates.A ? 1 : -1) * Math.PI / 2;  // 旋转90度
+			const quaternion = new THREE.Quaternion();
+			quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), angle);  // 绕y轴旋转
+			dir.applyQuaternion(quaternion);  // 旋转方向
+		}
+
+		// console.log("dir", dir);
+		let raycaster = new THREE.Raycaster(pos, dir);
+		// raycaster.near = 0;  // 添加near参数
+		// raycaster.far = 5000;  // 添加far参数
+		let blocked = false;
+		const colliders = [];
+		for (let collider of this.player.game.colliders)
+			colliders.push(collider);
+		for (let collider of this.player.game.remoteColliders)
+			colliders.push(collider);
+
+		if (colliders.length > 0) {
+			const intersect = raycaster.intersectObjects(colliders);
+			if (intersect.length > 0) {
+				if (intersect[0].distance < 50) {
+					blocked = true;
+					this.v.set(0,0,0);
+				}
+			}
+		}
+
+		// 没有碰撞物体时正常前进
+		if (!blocked && this.v.length() < this.vMax) { // 限制最高速度
 			const front = new THREE.Vector3();
 			this.player.object.getWorldDirection(front); // 获取玩家角色的前方向
 			const up = new THREE.Vector3(0, 1, 0);//y方向

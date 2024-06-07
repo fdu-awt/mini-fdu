@@ -542,7 +542,10 @@ class Player {
 					game.animations.Idle = object.animations[0];
 				} else {
 					const geometry = new THREE.BoxGeometry(100, 300, 100);
-					const material = new THREE.MeshBasicMaterial({ visible: false });
+					const material = new THREE.MeshBasicMaterial({ 
+						visible: false,
+						// color: 0x00ff00, 
+					});
 					const box = new THREE.Mesh(geometry, material);
 					box.name = "player-" + player.userId; // 使用用户ID作为名称的一部分
 					box.position.set(0, 150, 0);
