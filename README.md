@@ -21,25 +21,29 @@ npm install element-plus --save
 npm install axios --save
 ```
 
-## Project setup
-```
+## 项目启动
+
+```shell
 npm install
 ```
 
-### Compiles and hot-reloads for development
-```
+```shell
+#Compiles and hot-reloads for development
 npm run serve
 ```
 
-### Compiles and minifies for production
-```
+## docker部署
+
+修改 `.env.production` 中的后端ip地址
+
+```shell
+# Compiles and minifies for production
 npm run build
+# 构建镜像
+docker build -t mini-fdu-front:1.0.0 .
 ```
 
-### Lints and fixes files
+本地启动镜像
+```shell
+docker run -d --name mini-fdu-front -p 80:80 mini-fdu-front:1.0.0
 ```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
