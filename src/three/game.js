@@ -250,7 +250,7 @@ export class Game {
 	
 	listenKeyUp() {
 		document.addEventListener('keyup', (e) => {
-			console.log(e.key);
+			// console.log(e.key);
 			switch (e.key) {
 			case "w":
 				gameEventEmitter.emit(GAME_EVENTS.KEY_UP_W);
