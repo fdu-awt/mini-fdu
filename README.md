@@ -39,12 +39,12 @@ npm run serve
 1.修改 `.env.production` 中的后端ip地址
 
 2.为生产环境进行编译
- ```shell
- npm run build
- # 构建镜像
- # 本地构建
- docker build -t mini-fdu-front:1.0.0 .
- ```
+```shell
+npm run build
+# 构建镜像
+# 本地构建
+docker build -t mini-fdu-front:1.0.0 .
+```
 
 3.构建镜像
 ```shell
