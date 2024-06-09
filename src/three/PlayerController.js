@@ -98,6 +98,11 @@ export default class PlayerController {
 		);
 	}
 
+	inFirstView() {
+		// 指针锁定 并且 是第一人称视角
+		return this.firstView && document.pointerLockElement === this.controllerElement;
+	}
+
 	createCrosshair() {
 		const crosshair = document.createElement('div');
 		crosshair.id = 'crosshair';
