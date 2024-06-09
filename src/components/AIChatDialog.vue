@@ -1,4 +1,5 @@
 <script>
+import Markdown from 'vue3-markdown-it';
 import userAvatar from '@/assets/avatar/1.jpg';
 import aiAvatar from '@/assets/avatar/AI.jpg';
 import { chatWithAI } from '@/api/ai.js';
@@ -6,6 +7,9 @@ import STORAGE from "@/store";
 
 export default {
 	name: "AIChatDialog",
+	components: {
+		Markdown
+	},
 	data() {
 		return {
 			messages: [],
@@ -96,7 +100,10 @@ export default {
         <div v-for="(message, index) in messages" :key="index"
              :class="['message-item', { 'my-message': message.ifSelf, 'ai-message': !message.ifSelf }]">
           <el-avatar :src="message.ifSelf ? userAvatar : aiAvatar" class="message-avatar"></el-avatar>
-          <div class="message-content">{{ message.message }}</div>
+          <div class="message-content">
+<!--            {{ message.message }}-->
+            <Markdown :source="message.message" />
+          </div>
         </div>
       </el-scrollbar>
       <div class="message-input">
