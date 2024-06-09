@@ -53,6 +53,9 @@ class WebSocketService {
 			}
 		};
 	}
+	close(){
+		this.socket.close();
+	}
 
 	sendMessage(message) {
 		if (this.socket && this.socket.readyState === WebSocket.OPEN) {

@@ -701,6 +701,12 @@ class PlayerLocal extends Player {
 
 	}
 
+	closeWebSocket(){
+		this.chatWebSocketService.close();
+		this.gameWebSocketService.close();
+		// this.gameWebSocketService.socket.onclose();
+	}
+
 	socketUpdate(){
 		if (this.gameWebSocketService !== undefined){
 			const data = {
