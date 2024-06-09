@@ -2,7 +2,8 @@ class ChatWebSocketService {
 	constructor(userId) {
 		this.userId = userId;
 		this.url = process.env.VUE_APP_CHAT_WEBSOCKET_BASE_URL;
-		this.socket= null;
+		this.socket = null;
+
 	}
 	connect() {
 		const socket_url = `${this.url}/${this.userId}`;
@@ -11,13 +12,16 @@ class ChatWebSocketService {
 			console.log("WebSocket connection established");
 		};
 		this.socket.onclose = () => {
-			console.log("WebSocket connection closed");
+			console.log("WebSocket connection closed:");
 		};
 
 		this.socket.onerror = (error) => {
 			console.error("WebSocket error:", error);
 		};
 
+	}
+	close(){
+		this.socket.close ();
 	}
 
 }

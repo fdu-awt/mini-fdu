@@ -41,12 +41,16 @@ export default {
 	},
 	mounted() {
 		eventBus.on('newMessage', this.handleNewMessage.bind(this));
+		eventBus.on('logout', this.handleLogout.bind(this));
 		this.canvasContainer = document.getElementById('canvas-container');
 		this.game = new Game(this.canvasContainer, new GuangHuaLou() , new Lab1FbxSelfImageLoader());
 		this.listenKeyDown();
 		window.addEventListener('ClickPlayer', (event) => {
 			this.openChatBox(event.detail.localId, event.detail.remoteId, event.detail.socket);
 		});
+	},
+	beforeUnmount() {
+		eventBus.off('logout', this.handleLogout); // Clean up the event listener
 	},
 	methods: {
 		listenKeyDown(){
@@ -68,6 +72,15 @@ export default {
 		onSettingDialogClose(){
 			console.log('onSettingDialogClose');
 			this.showSettingDialog = false;
+		},
+		handleLogout() {
+			console.log(this.game);
+			if (this.game) {
+				this.game.player.closeWebSocket();
+				// this.game.gameWebSocketService.socket = null;
+				console.log('WebSocket connection closed due to logout.');
+			}
+			// Perform any other necessary cleanup
 		},
 		openChatBox(localId, remoteId, socket) {
 			this.localId = localId;

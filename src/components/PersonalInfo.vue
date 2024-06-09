@@ -16,6 +16,7 @@ import {getUserInfo, modifyPassword, modifyUserInfo} from "@/api/user";
 import SELF_IMAGE from "@/three/self-image/self-image";
 import STORAGE from "@/store";
 import gameEventEmitter, {GAME_EVENTS}  from "@/event/GameEventEmitter";
+import eventBus from "@/eventbus/eventBus";
 
 export default {
 	name: "PersonalInfo",
@@ -181,7 +182,10 @@ export default {
 			});
 		},
 		logOut() {
+			console.log("登出");
 			STORAGE.logOut();
+			console.log("登出");
+			eventBus.emit('logout');
 			this.$router.push('/login');
 		},
 	},
