@@ -46,6 +46,8 @@ export default {
 			ifSelf: false,
 			message: "你好，我是复旦校园智能助手。请问你想了解哪些关于复旦的问题？",
 		});
+		// 清除历史聊天记录
+		STORAGE.clearAIHistory();
 	},
 	methods: {
 		getAIResponse(question) {
