@@ -250,7 +250,7 @@ export class Game {
 	
 	listenKeyUp() {
 		document.addEventListener('keyup', (e) => {
-			console.log(e.key);
+			// console.log(e.key);
 			switch (e.key) {
 			case "w":
 				gameEventEmitter.emit(GAME_EVENTS.KEY_UP_W);
@@ -270,68 +270,71 @@ export class Game {
 
 	onMouseClick(event) {
 		const game = this;
+		if(game.playerController === undefined || game.playerController === null){
+			return;
+		}
 		const raycaster = new THREE.Raycaster();
 		const mouse = new THREE.Vector2();
-		mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-		mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+		const clientX = game.playerController.inFirstView() ? window.innerWidth / 2 : event.clientX;
+		const clientY = game.playerController.inFirstView() ? window.innerHeight / 2 : event.clientY;
+		mouse.x = (clientX / window.innerWidth) * 2 - 1;
+		mouse.y = -(clientY / window.innerHeight) * 2 + 1;
 
-		if(game.playerController!==undefined){
-			raycaster.setFromCamera(mouse, game.playerController.camera);
-			const intersects = raycaster.intersectObjects(game.scene.children, true);
+		raycaster.setFromCamera(mouse, game.playerController.camera);
+		const intersects = raycaster.intersectObjects(game.scene.children, true);
 
-			console.log("intersects", intersects);
-			let clickNPC = false;
-			if(intersects.length > 0){
-				const object = intersects[0].object;
-				console.log(object.name);
+		console.log("intersects", intersects);
+		let clickNPC = false;
+		if(intersects.length > 0){
+			const object = intersects[0].object;
+			console.log(object.name);
 
-				// 点击历史展板
-				if(object.name.startsWith("post")){
-					console.log((object.name));
-					// const post = intersects[0].object;
-					// post.material = new THREE.MeshBasicMaterial({
-					// 	color: 0xff0000,
-					// 	side: THREE.DoubleSide,
-					// });
+			// 点击历史展板
+			if(object.name.startsWith("post")){
+				console.log((object.name));
+				// const post = intersects[0].object;
+				// post.material = new THREE.MeshBasicMaterial({
+				// 	color: 0xff0000,
+				// 	side: THREE.DoubleSide,
+				// });
 
-					const post_id = Number(intersects[0].object.name.substring(4));
-					let clickEvent = new Event("ClickPost");
-					clickEvent.key = post_id;
-					window.dispatchEvent(clickEvent);
+				const post_id = Number(intersects[0].object.name.substring(4));
+				let clickEvent = new Event("ClickPost");
+				clickEvent.key = post_id;
+				window.dispatchEvent(clickEvent);
+			}
+
+			// 点击社团展板
+			if(object.name.startsWith("clubpost")){
+				const club_id = Number(intersects[0].object.name.substring(8));
+				let clickEvent = new Event("ClickClub");
+				clickEvent.key = club_id;
+				window.dispatchEvent(clickEvent);
+			}
+
+			// 点击 NPC
+			game.npcs.forEach((npc) => {
+				if (npc.collider === object) {
+					clickNPC = true;
+					npc.interact();
+				}
+			});
+
+			// 检查是否为点击的玩家
+			if (game.remotePlayers.some(player => player.collider === object) && !clickNPC) {
+				// 获取被点击玩家的用户ID
+				const clickedPlayer = game.remotePlayers.find(player => player.collider === object);
+				const clickedPlayerId = clickedPlayer.userId;
+				console.log(clickedPlayerId);
+
+				// 检查是否是自己
+				if (clickedPlayerId === game.player.userId) {
+					return;
 				}
 
-				// 点击社团展板
-				if(object.name.startsWith("clubpost")){
-					const club_id = Number(intersects[0].object.name.substring(8));
-					let clickEvent = new Event("ClickClub");
-					clickEvent.key = club_id;
-					window.dispatchEvent(clickEvent);
-				}
-
-				// 点击 NPC
-				game.npcs.forEach((npc) => {
-					if (npc.collider === object) {
-						clickNPC = true;
-						npc.interact();
-					}
-				});
-
-				// 检查是否为点击的玩家
-				if (game.remotePlayers.some(player => player.collider === object) && !clickNPC) {
-					// 获取被点击玩家的用户ID
-					const clickedPlayer = game.remotePlayers.find(player => player.collider === object);
-					const clickedPlayerId = clickedPlayer.userId;
-					console.log(clickedPlayerId);
-
-					// 检查是否是自己
-					if (clickedPlayerId === game.player.userId) {
-						return;
-					}
-
-					console.log(game.player.userId);
-					// 打开聊天界面
-					game.handlePlayerClicked(game.player.userId, clickedPlayerId, game.player.chatWebSocketService.socket);
-				}
+				console.log(game.player.userId);
+				// 打开聊天界面
+				game.handlePlayerClicked(game.player.userId, clickedPlayerId, game.player.chatWebSocketService.socket);
 			}
 		}
 	}
