@@ -21,7 +21,7 @@
             @keyup.enter="sendMessage"
         ></el-input>
         <el-button type="primary" @click="sendMessage">Send</el-button>
-        <el-button icon="el-icon-phone" @click="startVideoCall"></el-button>
+        <el-button type="primary" @click="startVideoCall">Call</el-button>
       </div>
     </div>
   </el-dialog>
