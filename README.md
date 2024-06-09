@@ -41,9 +41,6 @@ npm run serve
 2.为生产环境进行编译
 ```shell
 npm run build
-# 构建镜像
-# 本地构建
-docker build -t mini-fdu-front:1.0.0 .
 ```
 
 3.构建镜像
