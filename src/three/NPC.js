@@ -26,8 +26,8 @@ class NPC {
 			this.mixer = object.mixer;
 			this.object = object;
 			// this.object.name = "NPC_" + this.name;
-			this.object.position.copy(this.position);
-			this.object.rotation.copy(this.rotation);
+			this.object.position.set(this.position.x, this.position.y, this.position.z);
+			this.object.rotation.set(this.rotation.x, this.rotation.y, this.rotation.z);
 			// 在头顶显示 npc 名字
 			const nameText = createNPCNameText(this.name);
 			nameText.position.copy(this.nameTextPosition);
