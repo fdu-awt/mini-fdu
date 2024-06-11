@@ -1,6 +1,5 @@
 import * as THREE from "three";
 import gameEventEmitter, {GAME_EVENTS}  from "@/event/GameEventEmitter";
-import _ from 'lodash';
 
 export default class PlayerController {
 	constructor(player, controllerElement) {
@@ -60,21 +59,21 @@ export default class PlayerController {
 		this.key_down_s = () => {this.keyStates.S = true;};
 		this.key_down_d = () => {this.keyStates.D = true;};
 
-		this.key_down_v = _.debounce(() => {
+		this.key_down_v = () => {
 			this.firstView = !this.firstView;
 			this.activeCamera = this.firstView ? this.firstViewCamera : this.thirdViewCamera;
 			this.toggleCrosshair(this.firstView); // 切换视角时，显示或隐藏准星
-		}, 300); // 300ms 的防抖时间
+		};
 
-		this.key_down_e = _.debounce(() => {
+		this.key_down_e = () => {
 			this.player.action = 'Pointing';
 			this.player.socketUpdate();
-		}, 300);
+		};
 
-		this.key_down_q = _.debounce(() => {
+		this.key_down_q = () => {
 			this.player.action = 'Pointing Gesture';
 			this.player.socketUpdate();
-		}, 300);
+		};
 
 		this.key_up_w = () => {this.keyStates.W = false;};
 		this.key_up_a = () => {this.keyStates.A = false;};
@@ -97,6 +96,11 @@ export default class PlayerController {
 			GAME_EVENTS.REQUEST_KEYBOARD_CONTROL,
 			this.handleKeyboardControlRequest.bind(this)
 		);
+	}
+
+	inFirstView() {
+		// 指针锁定 并且 是第一人称视角
+		return this.firstView && document.pointerLockElement === this.controllerElement;
 	}
 
 	createCrosshair() {
@@ -161,9 +165,9 @@ export default class PlayerController {
 			.on(GAME_EVENTS.KEY_DOWN_S, this.key_down_s)
 			.on(GAME_EVENTS.KEY_DOWN_D, this.key_down_d);
 		gameEventEmitter
-			.on(GAME_EVENTS.KEY_DOWN_V, this.key_down_v)
-			.on(GAME_EVENTS.KEY_DOWN_E, this.key_down_e)
-			.on(GAME_EVENTS.KEY_DOWN_Q, this.key_down_q);
+			.onWithDebounce(GAME_EVENTS.KEY_DOWN_V, this.key_down_v.bind(this), 300)
+			.onWithDebounce(GAME_EVENTS.KEY_DOWN_E, this.key_down_e.bind(this), 300)
+			.onWithDebounce(GAME_EVENTS.KEY_DOWN_Q, this.key_down_q.bind(this), 300);
 		gameEventEmitter
 			.on(GAME_EVENTS.KEY_UP_W, this.key_up_w)
 			.on(GAME_EVENTS.KEY_UP_A, this.key_up_a)

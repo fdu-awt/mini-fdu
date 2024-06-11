@@ -94,9 +94,11 @@ export default {
       </el-col>
     </el-row>
 
-    <div>
-      <button @click="getNextQuestion()" class="next-button">下一题</button>
-    </div>
+    <el-row :gutter="20" class="button-row">
+      <el-col :span="24" class="button-col">
+        <button @click="getNextQuestion()" class="next-button">下一题</button>
+      </el-col>
+    </el-row>
   </el-dialog>
 </template>
 
@@ -106,6 +108,7 @@ export default {
   max-width: 600px;
   margin: 20px auto;
   position: relative;
+  display: flex;
   justify-content: center;
   align-items: center;
   padding-top: 40px;
@@ -122,10 +125,6 @@ export default {
   font-size: 1em;
   color: #2e2e2e;
   font-weight: 700;
-}
-
-.option-row {
-  margin-bottom: 20px;
 }
 
 .option-col {
@@ -183,12 +182,6 @@ export default {
   margin-left: 10px;
 }
 
-.next-button-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
 .next-button {
   width: 20%;
   border: 2px solid var(--primary-color);
@@ -199,11 +192,17 @@ export default {
   font-weight: 500;
   letter-spacing: 1px;
   border-radius: 30px;
-  margin: 10px;
   cursor: pointer;
   overflow: hidden;
-  margin-left: 220px;
   align-content: center;
+}
+
+.button-row {
+  display: flex;
+  justify-content: center;
+}
+.button-col {
+  text-align: center;
 }
 
 .next-button::after {
@@ -220,8 +219,8 @@ export default {
   transition-duration: .5s;
 }
 
-/* .next-button:hover::after {
+.next-button:hover::after {
     transform: translateX(600px);
     transition-duration: .5s;
-} */
+}
 </style>

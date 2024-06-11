@@ -21,7 +21,7 @@
             @keyup.enter="sendMessage"
         ></el-input>
         <el-button type="primary" @click="sendMessage">Send</el-button>
-        <el-button icon="el-icon-phone" @click="startVideoCall"></el-button>
+        <el-button type="primary" @click="startVideoCall">Call</el-button>
       </div>
     </div>
   </el-dialog>
@@ -109,6 +109,9 @@ export default {
 		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.REJECTED, () => {
 			this.fetchMessages();
 		});
+		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.SELF_END, () => {
+			this.fetchMessages();
+		});
 	},
 	methods: {
 		async fetchMessages() {
@@ -135,10 +138,7 @@ export default {
 			}
 		},
 		startVideoCall() {
-			videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.START, {
-				localId: this.localId,
-				remoteId: this.remoteId
-			});
+			videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.START, this.remoteId);
 		},
 	}
 };

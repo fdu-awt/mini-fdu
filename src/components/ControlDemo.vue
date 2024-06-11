@@ -11,7 +11,7 @@ import eventBus from '@/eventbus/eventBus.js';
 import AIChatDialog from '@/components/AIChatDialog.vue';
 import QuizDialog from '@/components/QuizDialog.vue';
 import VideoChatDialog from "@/components/VideoChatDialog.vue";
-import videoChatEventEmitter, { VIDEO_CHAT_EVENTS } from "@/event/VideoChatEventEmitter";
+import VideoChatService from "@/api/socket/VideoChatService";
 
 export default {
 	name: "ControlDemo",
@@ -41,6 +41,7 @@ export default {
 	},
 	mounted() {
 		eventBus.on('newMessage', this.handleNewMessage.bind(this));
+		eventBus.on('logout', this.handleLogout.bind(this));
 		this.canvasContainer = document.getElementById('canvas-container');
 		this.game = new Game(this.canvasContainer, new GuangHuaLou() , new Lab1FbxSelfImageLoader());
 		this.listenKeyDown();
@@ -48,24 +49,39 @@ export default {
 			this.openChatBox(event.detail.localId, event.detail.remoteId, event.detail.socket);
 		});
 	},
+	beforeUnmount() {
+		eventBus.off('logout', this.handleLogout); // Clean up the event listener
+	},
 	methods: {
 		listenKeyDown(){
 			// 按下 Z 键时显示后台设置页面
-			gameEventEmitter.on(GAME_EVENTS.KEY_DOWN_Z, () => {
-				this.showSettingDialog = !this.showSettingDialog;
-				// 申请解除鼠标和键盘锁定
-				gameEventEmitter.requestAllControl();
-			});
+			gameEventEmitter.onWithDebounce(GAME_EVENTS.KEY_DOWN_Z, this.handleKeyZDown.bind(this), 300);
 			// 按下 KEY_DOWN_T 时显示视频聊天demo
-			gameEventEmitter.on(GAME_EVENTS.KEY_DOWN_T, () => {
-				// TODO 真实的 toId
-				const toId = 1;
-				videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.START, toId);
-			});
+			gameEventEmitter.onWithDebounce(GAME_EVENTS.KEY_DOWN_T, this.handleKeyTDown.bind(this), 300);
+		},
+		handleKeyZDown(){
+			this.showSettingDialog = !this.showSettingDialog;
+			// 申请解除鼠标和键盘锁定
+			gameEventEmitter.requestAllControl();
+		},
+		handleKeyTDown(){
+			// TODO 真实的 toId
+			// const toId = 1;
+			// videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.START, toId);
 		},
 		onSettingDialogClose(){
 			console.log('onSettingDialogClose');
 			this.showSettingDialog = false;
+		},
+		handleLogout() {
+			console.log(this.game);
+			if (this.game) {
+				this.game.player.closeWebSocket();
+				VideoChatService.close();
+				// this.game.gameWebSocketService.socket = null;
+				console.log('WebSocket connection closed due to logout.');
+			}
+			// Perform any other necessary cleanup
 		},
 		openChatBox(localId, remoteId, socket) {
 			this.localId = localId;

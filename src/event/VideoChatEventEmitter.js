@@ -10,6 +10,7 @@ const VIDEO_CHAT_EVENTS = Object.freeze({
 	SELF_END: Symbol("self_end_video_chat"),
 	END: Symbol("end_video_chat"),
 	INVITE: Symbol("invite_video_chat"),
+	ACCEPTED: Symbol("video_accepted") // 邀请被接受
 });
 
 class VideoChatEventEmitter extends EventEmitter {
