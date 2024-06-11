@@ -24,11 +24,11 @@ export default class PlayerController {
 		// 用三维向量表示玩家角色(人)运动漫游速度，初始速度设置为0
 		this.v = new THREE.Vector3(0, 0, 0);
 		//加速度：调节按键加速快慢
-		this.a = 400;
+		this.a = 800;
 		//速度上限
 		this.vMax = 1000;
 		//阻尼 当没有WASD加速的时候，角色慢慢减速停下来
-		this.damping = -0.04;
+		this.damping = -0.2;
 
 		// 运动速度阈值
 		this.speedThresholds = {
@@ -244,6 +244,15 @@ export default class PlayerController {
 		document.addEventListener("click", this.mouseClickedOnObject, false);
 	}
 
+	// 检查同一时刻是否只有一个键被按下
+	checkSingleKeyPressed() {
+		const pressedKeys = Object.values(this.keyStates).filter(value => value);
+		if(pressedKeys.length == 1)
+			return true;
+		else
+			return false;
+	}
+
 	update(deltaTime) {
 		const pos = this.player.object.position.clone();
 		pos.y += 60;
@@ -258,6 +267,17 @@ export default class PlayerController {
 			const quaternion = new THREE.Quaternion();
 			quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), angle);  // 绕y轴旋转
 			dir.applyQuaternion(quaternion);  // 旋转方向
+		}
+
+		if(this.keyStates.W && this.checkSingleKeyPressed()){
+			const front = new THREE.Vector3();
+			this.player.object.getWorldDirection(front); // 获取玩家角色的前方向
+			// 计算当前速度的大小（模）
+			const speed = this.v.length();
+
+			// 设置新的速度向量为前方向乘以速度的大小
+			this.v.copy(front).multiplyScalar(speed);
+			// console.log(this.keyStates);
 		}
 
 		// console.log("dir", dir);
@@ -282,7 +302,7 @@ export default class PlayerController {
 		}
 
 		// 没有碰撞物体时正常前进
-		if (!blocked && this.v.length() < this.vMax) { // 限制最高速度
+		if (!blocked) { 
 			const front = new THREE.Vector3();
 			this.player.object.getWorldDirection(front); // 获取玩家角色的前方向
 			const up = new THREE.Vector3(0, 1, 0);//y方向
@@ -301,6 +321,14 @@ export default class PlayerController {
 			if (this.keyStates.D) {
 				this.v.add(left.multiplyScalar(- this.a * deltaTime));
 			}
+		}
+		// 限制最高速度
+		if(this.v.length()>this.vMax){
+			// 计算当前速度的单位向量（方向）
+			this.v.normalize();
+	
+			// 将速度调整为最大速度
+			this.v.multiplyScalar(this.vMax);
 		}
 		if (!this.keyStates.W && !this.keyStates.S && !this.keyStates.A && !this.keyStates.D) {
 			// 没有按下WASD键时候，速度逐渐减小
