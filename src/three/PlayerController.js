@@ -9,6 +9,7 @@ export default class PlayerController {
 			A: false,
 			S: false,
 			D: false,
+			V: false,
 		};
 
 		// 控制的玩家角色
@@ -60,9 +61,15 @@ export default class PlayerController {
 		this.key_down_d = () => {this.keyStates.D = true;};
 
 		this.key_down_v = () => {
+			console.log("key_down_v");
 			this.firstView = !this.firstView;
 			this.activeCamera = this.firstView ? this.firstViewCamera : this.thirdViewCamera;
 			this.toggleCrosshair(this.firstView); // 切换视角时，显示或隐藏准星
+			this.keyStates.V = true;
+		};
+
+		this.key_up_v = () => {
+			this.keyStates.V = false;
 		};
 
 		this.key_down_e = () => {
@@ -165,9 +172,11 @@ export default class PlayerController {
 			.on(GAME_EVENTS.KEY_DOWN_S, this.key_down_s)
 			.on(GAME_EVENTS.KEY_DOWN_D, this.key_down_d);
 		gameEventEmitter
-			.onWithDebounce(GAME_EVENTS.KEY_DOWN_V, this.key_down_v.bind(this), 300)
 			.onWithDebounce(GAME_EVENTS.KEY_DOWN_E, this.key_down_e.bind(this), 300)
 			.onWithDebounce(GAME_EVENTS.KEY_DOWN_Q, this.key_down_q.bind(this), 300);
+		gameEventEmitter
+			.on(GAME_EVENTS.KEY_DOWN_V, this.key_down_v)
+			.on(GAME_EVENTS.KEY_UP_V, this.key_up_v);
 		gameEventEmitter
 			.on(GAME_EVENTS.KEY_UP_W, this.key_up_w)
 			.on(GAME_EVENTS.KEY_UP_A, this.key_up_a)

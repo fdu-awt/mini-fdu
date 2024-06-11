@@ -15,6 +15,7 @@ const GAME_EVENTS = Object.freeze({
 	KEY_UP_A: Symbol("key_up_a"),
 	KEY_UP_S: Symbol("key_up_s"),
 	KEY_UP_D: Symbol("key_up_d"),
+	KEY_UP_V: Symbol("key_up_v"),
 	// 申请鼠标控制（鼠标解锁）
 	REQUEST_MOUSE_CONTROL: Symbol("request_mouse_control"),
 	// 申请键盘控制
