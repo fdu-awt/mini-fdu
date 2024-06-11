@@ -61,11 +61,13 @@ export default class PlayerController {
 		this.key_down_d = () => {this.keyStates.D = true;};
 
 		this.key_down_v = () => {
-			console.log("key_down_v");
-			this.firstView = !this.firstView;
-			this.activeCamera = this.firstView ? this.firstViewCamera : this.thirdViewCamera;
-			this.toggleCrosshair(this.firstView); // 切换视角时，显示或隐藏准星
-			this.keyStates.V = true;
+			if(!this.keyStates.V){
+				console.log("key_down_v");
+				this.firstView = !this.firstView;
+				this.activeCamera = this.firstView ? this.firstViewCamera : this.thirdViewCamera;
+				this.toggleCrosshair(this.firstView); // 切换视角时，显示或隐藏准星
+				this.keyStates.V = true;
+			}
 		};
 
 		this.key_up_v = () => {
