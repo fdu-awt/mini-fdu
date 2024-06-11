@@ -14,6 +14,12 @@ export default {
 		};
 	},
 	mounted() {
+
+		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.ACCEPTED, () => {
+			// 处理对方接受邀请的逻辑，例如隐藏加载覆盖层等
+			console.log('对方已接受视频聊天邀请');
+			this.isRemoteLoading = false; // 隐藏加载覆盖层
+		});
 		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.START, this.onChatStart.bind(this));
 		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.INVITE, this.onChatInvite.bind(this));
 		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.END, () => {
@@ -26,9 +32,9 @@ export default {
 				this.visible = false;
 			});
 		});
-		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.SELF_END, () => {
-			this.visible = false;
-		});
+		// videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.SELF_END, () => {
+		// 	this.visible = false;
+		// });
 		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.REJECTED, (msg) => {
 			ElMessageBox.alert(msg, '视频聊天被拒绝', {
 				confirmButtonText: '确定',
@@ -48,8 +54,10 @@ export default {
 			this.$nextTick(() => {
 				const localVideo = document.getElementById('localVideo');
 				const remoteVideo = document.getElementById('remoteVideo');
+				console.log("remoteVideo",remoteVideo);
 				videoChatService.invite(toId, localVideo, remoteVideo)
 					.then(() => {
+						console.log(toId);
 						console.log("已发出邀请");
 					})
 					.catch((err) => {
@@ -67,6 +75,7 @@ export default {
 					const remoteVideo = document.getElementById('remoteVideo');
 					videoChatService.accept(fromId, localVideo, remoteVideo)
 						.then(() => {
+
 							this.isRemoteLoading = false; // 接受邀请后隐藏加载覆盖层
 						})
 						.catch((err) => {

@@ -9,6 +9,7 @@ class VideoChatService {
 
 		this.signalingServerUrl = process.env.VUE_APP_VIDEO_CHAT_WEBSOCKET_BASE_URL;
 		this.userId = store.getUserId();
+		console.log("userId",this.userId);
 		this.rtcPeerConnection = null;
 		this.ws = null;
 		this.localStream = null;
@@ -47,6 +48,9 @@ class VideoChatService {
 		this.ws.addEventListener('error', (err) => {
 			console.error(err.name + ': ' + err.message);
 		});
+	}
+	close(){
+		this.ws.close();
 	}
 	/**
 	 * @description 邀请对方进行视频聊天
@@ -116,43 +120,6 @@ class VideoChatService {
 		});
 	}
 
-	// /**
-	//  * @description 邀请对方进行视频聊天
-	//  * */
-	// invite(toId, localVideo, remoteVideo){
-	// 	if (this.peerId) {
-	// 		console.error('Already in a video chat');
-	// 		return;
-	// 	}
-	// 	if (!toId) {
-	// 		console.error('toId is not provided');
-	// 		return;
-	// 	}
-	// 	if (!localVideo) {
-	// 		console.error('localVideo is not provided');
-	// 		return;
-	// 	}
-	// 	if (!remoteVideo) {
-	// 		console.error('remoteVideo is not provided');
-	// 		return;
-	// 	}
-	// 	this.localVideo = localVideo;
-	// 	this.remoteVideo = remoteVideo;
-	// 	this.startLocalVideo()
-	// 		.then(() => {
-	// 			return this.startRtc(toId);
-	// 		}).then(() => {
-	// 			this.ws.send(JSON.stringify({
-	// 				type: 'video-invite',
-	// 				toId: toId,
-	// 			}));
-	// 			this.peerId = toId;
-	// 		})
-	// 		.catch((err) => {
-	// 			console.error(err.name + ': ' + err.message);
-	// 			// todo 通知用户
-	// 		});
-	// }
 
 	/**
 	 * 处理 自己 结束视频聊天
@@ -163,6 +130,7 @@ class VideoChatService {
 			toId: this.peerId,
 		}));
 		return this.endChat().then(() => {
+			this.peerId=null;
 			videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.SELF_END);
 		});
 	}
@@ -264,39 +232,6 @@ class VideoChatService {
 			});
 	}
 
-	// /**
-	//  * @description 接受对方的视频聊天邀请
-	//  * */
-	// accept(toId, localVideo, remoteVideo){
-	// 	if (!toId) {
-	// 		console.error('Already in a video chat');
-	// 		return;
-	// 	}
-	// 	if (!localVideo) {
-	// 		console.error('localVideo is not provided');
-	// 		return;
-	// 	}
-	// 	if (!remoteVideo) {
-	// 		console.error('remoteVideo is not provided');
-	// 		return;
-	// 	}
-	// 	// 发送 accept 给信令服务器
-	// 	this.ws.send(JSON.stringify({
-	// 		type: 'video-accept',
-	// 		toId: toId,
-	// 	}));
-	// 	this.peerId = toId;
-	// 	this.localVideo = localVideo;
-	// 	this.remoteVideo = remoteVideo;
-	// 	this.startLocalVideo()
-	// 		.then(() => {
-	// 			// 开启 WebRTC 连接
-	// 			return this.startRtc(toId);
-	// 		})
-	// 		.catch((err) => {
-	// 			console.error(err.name + ': ' + err.message);
-	// 		});
-	// }
 
 	/**
 	 * @description 拒绝对方的视频聊天邀请
@@ -338,6 +273,8 @@ class VideoChatService {
 		if (!fromId) {
 			console.error('fromId is not provided');
 		}
+		// 触发邀请被接受的事件
+		videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.ACCEPTED);
 	}
 
 	/**
@@ -416,6 +353,7 @@ class VideoChatService {
 	handleEnd(data) {
 		console.log('对方结束了视频聊天' + data.fromId);
 		this.endChat().then(() => {
+			this.peerId=null;
 			videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.END);
 		}).catch((error) => {
 			console.error(error);

@@ -109,6 +109,9 @@ export default {
 		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.REJECTED, () => {
 			this.fetchMessages();
 		});
+		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.SELF_END, () => {
+			this.fetchMessages();
+		});
 	},
 	methods: {
 		async fetchMessages() {
@@ -135,10 +138,7 @@ export default {
 			}
 		},
 		startVideoCall() {
-			videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.START, {
-				localId: this.localId,
-				remoteId: this.remoteId
-			});
+			videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.START, this.remoteId);
 		},
 	}
 };

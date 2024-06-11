@@ -184,7 +184,6 @@ export default {
 		logOut() {
 			console.log("登出");
 			STORAGE.logOut();
-			console.log("登出");
 			eventBus.emit('logout');
 			this.$router.push('/login');
 		},

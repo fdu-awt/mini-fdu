@@ -26,6 +26,7 @@ const STORAGE = {
 	},
 	setUserId(userId){
 		const user = STORAGE.getUser();
+		console.log("user",user);
 		user.id = userId;
 		window.localStorage.setItem(USER_KEY, JSON.stringify(user));
 	},

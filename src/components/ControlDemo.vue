@@ -11,7 +11,7 @@ import eventBus from '@/eventbus/eventBus.js';
 import AIChatDialog from '@/components/AIChatDialog.vue';
 import QuizDialog from '@/components/QuizDialog.vue';
 import VideoChatDialog from "@/components/VideoChatDialog.vue";
-import videoChatEventEmitter, { VIDEO_CHAT_EVENTS } from "@/event/VideoChatEventEmitter";
+import VideoChatService from "@/api/socket/VideoChatService";
 
 export default {
 	name: "ControlDemo",
@@ -66,8 +66,8 @@ export default {
 		},
 		handleKeyTDown(){
 			// TODO 真实的 toId
-			const toId = 1;
-			videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.START, toId);
+			// const toId = 1;
+			// videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.START, toId);
 		},
 		onSettingDialogClose(){
 			console.log('onSettingDialogClose');
@@ -77,6 +77,7 @@ export default {
 			console.log(this.game);
 			if (this.game) {
 				this.game.player.closeWebSocket();
+				VideoChatService.close();
 				// this.game.gameWebSocketService.socket = null;
 				console.log('WebSocket connection closed due to logout.');
 			}
