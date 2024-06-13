@@ -19,7 +19,10 @@ class EventEmitter {
 	 * */
 	onWithDebounce(event, listener, delay) {
 		const debouncedListener = _.debounce(listener, delay);
-		return this.on(event, debouncedListener);
+		// 存储原始监听器和防抖后的监听器
+		this.events[event] = this.events[event] || [];
+		this.events[event].push({listener: debouncedListener, original: listener});
+		return this;
 	}
 
 	/**
@@ -27,7 +30,10 @@ class EventEmitter {
 	 */
 	onWithThrottle(event, listener, delay) {
 		const throttledListener = _.throttle(listener, delay);
-		return this.on(event, throttledListener);
+		// 存储原始监听器和节流后的监听器
+		this.events[event] = this.events[event] || [];
+		this.events[event].push({listener: throttledListener, original: listener});
+		return this;
 	}
 
 	off(event, listener) {
@@ -35,9 +41,23 @@ class EventEmitter {
 			return this;
 		}
 		this.events[event] = this.events[event].filter(
-			({listener: eventListener}) => eventListener !== listener
+			({listener: eventListener, original}) => eventListener !== listener && original !== listener
 		);
 		return this;
+	}
+
+	/**
+	 * @description 移除指定事件的防抖监听器
+	 */
+	offWithDebounce(event, listener) {
+		return this.off(event, listener);
+	}
+
+	/**
+	 * @description 移除指定事件的节流监听器
+	 */
+	offWithThrottle(event, listener) {
+		return this.off(event, listener);
 	}
 
 	emit(event, ...args) {
