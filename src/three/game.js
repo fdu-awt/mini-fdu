@@ -170,9 +170,11 @@ export class Game {
 				// 更新渲染器长宽比
 				this.renderer.setSize(window.innerWidth, window.innerHeight);
 				// 更新相机长宽比
-				this.playerController.camera.aspect = window.innerWidth / window.innerHeight;
+				this.playerController.cameras.firstViewCamera.aspect = window.innerWidth / window.innerHeight;
+				this.playerController.cameras.thirdViewCamera.aspect = window.innerWidth / window.innerHeight;
 				// 更新相机投影矩阵
-				this.playerController.camera.updateProjectionMatrix();
+				this.playerController.cameras.firstViewCamera.updateProjectionMatrix();
+				this.playerController.cameras.thirdViewCamera.updateProjectionMatrix();
 			});
 		}).then(() => {
 			// 事件监听
@@ -264,6 +266,8 @@ export class Game {
 			case "d":
 				gameEventEmitter.emit(GAME_EVENTS.KEY_UP_D);
 				break;
+			case "v":
+				gameEventEmitter.emit(GAME_EVENTS.KEY_UP_V);
 			}
 		});
 	}
