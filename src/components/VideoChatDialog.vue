@@ -16,6 +16,8 @@ export default {
 			boundChatInvite: null,
 			boundChatEnd: null,
 			boundChatRejected: null,
+			inviteDialogVisible: false,
+			inviteFromId: null,
 		};
 	},
 	mounted() {
@@ -62,33 +64,33 @@ export default {
 					});
 			});
 		},
+		acceptInvite() {
+			this.visible = true;
+			this.isRemoteLoading = true;
+			this.inviteDialogVisible = false;
+			this.$nextTick(() => {
+				const localVideo = document.getElementById('localVideo');
+				const remoteVideo = document.getElementById('remoteVideo');
+				videoChatService.accept(this.inviteFromId, localVideo, remoteVideo)
+					.then(() => {
+						this.isRemoteLoading = false; // 接受邀请后隐藏加载覆盖层
+					})
+					.catch((err) => {
+						console.error(err.name + ': ' + err.message);
+						this.isRemoteLoading = false; // 出错时隐藏加载覆盖层
+					});
+			});
+		},
+		rejectInvite() {
+			videoChatService.reject(this.inviteFromId);
+			this.inviteDialogVisible = false;
+		},
 		onChatInvite(fromId) {
-			const onAccept = () => {
-				this.visible = true;
-				this.isRemoteLoading = true;
-				this.$nextTick(() => {
-					const localVideo = document.getElementById('localVideo');
-					const remoteVideo = document.getElementById('remoteVideo');
-					videoChatService.accept(fromId, localVideo, remoteVideo)
-						.then(() => {
-							this.isRemoteLoading = false; // 接受邀请后隐藏加载覆盖层
-						})
-						.catch((err) => {
-							console.error(err.name + ': ' + err.message);
-							this.isRemoteLoading = false; // 出错时隐藏加载覆盖层
-						});
-				});
-			};
-			const onReject = () => {
-				videoChatService.reject(fromId);
-			};
-			ElMessageBox.confirm('收到视频聊天邀请，是否接受？', '视频聊天邀请', {
-				confirmButtonText: '接受',
-				cancelButtonText: '拒绝',
-				type: 'warning',
-			}).then(onAccept).catch(onReject);
+			this.inviteFromId = fromId;
+			this.inviteDialogVisible = true;
 		},
 		onChatEnd() {
+			this.closeInviteDialog();
 			ElMessageBox.alert('对方已挂断', '视频聊天结束', {
 				confirmButtonText: '确定',
 				type: 'warning',
@@ -104,6 +106,7 @@ export default {
 			});
 		},
 		onChatRejected(msg) {
+			this.closeInviteDialog();
 			ElMessageBox.alert(msg, '视频聊天被拒绝', {
 				confirmButtonText: '确定',
 				type: 'warning',
@@ -112,7 +115,10 @@ export default {
 			}).catch(() => {
 				this.visible = false;
 			});
-		}
+		},
+		closeInviteDialog() {
+			this.inviteDialogVisible = false;
+		},
 	},
 };
 </script>
@@ -132,6 +138,19 @@ export default {
       <el-button id="hangupButton" type="danger" @click="onHangUp">挂断</el-button>
     </div>
   </el-dialog>
+	<el-dialog
+			v-model="inviteDialogVisible"
+			title="视频聊天邀请"
+			width="30%"
+			:show-close="false"
+			:close-on-click-modal="false"
+			:close-on-press-escape="false">
+		<span>收到视频聊天邀请，是否接受？</span>
+		<div class="invite-footer">
+			<el-button @click="rejectInvite">拒绝</el-button>
+			<el-button type="primary" @click="acceptInvite">接受</el-button>
+		</div>
+	</el-dialog>
 </template>
 
 <style scoped>
@@ -143,6 +162,13 @@ export default {
   justify-content: center;
   align-items: center;
   background-color: white;
+}
+
+.invite-footer {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-top: 20px;
 }
 
 #remoteVideo {
