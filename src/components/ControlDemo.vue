@@ -38,12 +38,17 @@ export default {
 
 			AIChatDialogVisible: false,
 			newMessageNotification: false, // 新消息通知的标记
+
+			boundNewMessage: null,
+			boundLogout: null,
 		};
 	},
 	mounted() {
-		eventBus.on('newMessage', this.handleNewMessage.bind(this));
-		eventBus.on('logout', this.handleLogout.bind(this));
-		apiErrorEventEmitter.on(API_ERROR_EVENTS.UN_AUTH, this.handleLogout.bind(this));
+		this.boundNewMessage = this.handleNewMessage.bind(this);
+		this.boundLogout = this.handleLogout.bind(this);
+		eventBus.on('newMessage', this.boundNewMessage);
+		eventBus.on('logout', this.boundLogout);
+		apiErrorEventEmitter.on(API_ERROR_EVENTS.UN_AUTH, this.boundLogout);
 		this.canvasContainer = document.getElementById('canvas-container');
 		this.game = new Game(this.canvasContainer, new GuangHuaLou() , new Lab1FbxSelfImageLoader());
 		this.listenKeyDown();
@@ -53,9 +58,9 @@ export default {
 	},
 	beforeUnmount() {
 		// Clean up the event listener
-		eventBus.off('logout', this.handleLogout);
-		eventBus.off('newMessage', this.handleNewMessage);
-		apiErrorEventEmitter.off(API_ERROR_EVENTS.UN_AUTH, this.handleLogout);
+		eventBus.off('logout', this.boundLogout);
+		eventBus.off('newMessage', this.boundNewMessage);
+		apiErrorEventEmitter.off(API_ERROR_EVENTS.UN_AUTH, this.boundLogout);
 	},
 	methods: {
 		listenKeyDown(){
