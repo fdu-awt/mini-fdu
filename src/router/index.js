@@ -1,11 +1,8 @@
 import {createRouter, createWebHistory} from "vue-router";
 import HomePage from "@/pages/HomePage.vue";
-import AboutPage from "@/pages/AboutPage.vue";
 import LogInPage from "@/pages/LogInPage.vue";
 import SignUpPage from "@/pages/SignUpPage.vue";
-import UserProfile from "@/components/UserProfilePage.vue";
 import NotFoundPage from "@/pages/NotFoundPage.vue";
-import VideoChatDemo from "@/components/VideoChatDemo.vue";
 import STORAGE from "../store";
 import {ElMessageBox, ElNotification} from 'element-plus';
 import apiErrorEmitter, {API_ERROR_EVENTS} from "@/event/ApiErrorEventEmitter";
@@ -15,11 +12,8 @@ import gameErrorEventEmitter, {GAME_ERROR_EVENTS} from "@/event/GameErrorEventEm
 const routes = [
 	{path: '/', component: HomePage, meta: {requireAuth: true}},
 	{path: '/home', component: HomePage, meta: {requireAuth: true}},
-	{path: '/about', component: AboutPage, meta: {requireAuth: false}},
 	{path: '/login', component: LogInPage, meta: {requireAuth: false}},
 	{path: '/signup', component: SignUpPage, meta: {requireAuth: false}},
-	{path: '/profile', component: UserProfile, meta: {requireAuth: true}},
-	{path: '/video', component: VideoChatDemo, meta: {requireAuth: false}},
 	// 捕获所有未处理的路径
 	{path: '/:pathMatch(.*)*', component: NotFoundPage, meta: {requireAuth: false}},
 ];
