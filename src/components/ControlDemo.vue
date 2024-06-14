@@ -12,6 +12,7 @@ import AIChatDialog from '@/components/AIChatDialog.vue';
 import QuizDialog from '@/components/QuizDialog.vue';
 import VideoChatDialog from "@/components/VideoChatDialog.vue";
 import VideoChatService from "@/api/socket/VideoChatService";
+import apiErrorEventEmitter, {API_ERROR_EVENTS} from "@/event/ApiErrorEventEmitter";
 
 export default {
 	name: "ControlDemo",
@@ -42,6 +43,7 @@ export default {
 	mounted() {
 		eventBus.on('newMessage', this.handleNewMessage.bind(this));
 		eventBus.on('logout', this.handleLogout.bind(this));
+		apiErrorEventEmitter.on(API_ERROR_EVENTS.UN_AUTH, this.handleLogout.bind(this));
 		this.canvasContainer = document.getElementById('canvas-container');
 		this.game = new Game(this.canvasContainer, new GuangHuaLou() , new Lab1FbxSelfImageLoader());
 		this.listenKeyDown();
@@ -50,7 +52,10 @@ export default {
 		});
 	},
 	beforeUnmount() {
-		eventBus.off('logout', this.handleLogout); // Clean up the event listener
+		// Clean up the event listener
+		eventBus.off('logout', this.handleLogout);
+		eventBus.off('newMessage', this.handleNewMessage);
+		apiErrorEventEmitter.off(API_ERROR_EVENTS.UN_AUTH, this.handleLogout);
 	},
 	methods: {
 		listenKeyDown(){
