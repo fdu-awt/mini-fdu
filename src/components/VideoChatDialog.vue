@@ -10,43 +10,39 @@ export default {
 		return {
 			userId: null,
 			visible: false,
-			isRemoteLoading: false // 添加此属性以表示加载状态
+			isRemoteLoading: false, // 添加此属性以表示加载状态
+			boundChatAccepted: null,
+			boundChatStart: null,
+			boundChatInvite: null,
+			boundChatEnd: null,
+			boundChatRejected: null,
 		};
 	},
 	mounted() {
-
-		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.ACCEPTED, () => {
+		this.boundChatAccepted = this.onChatAccepted.bind(this);
+		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.ACCEPTED, this.boundChatAccepted);
+		this.boundChatStart = this.onChatStart.bind(this);
+		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.START, this.boundChatStart);
+		this.boundChatInvite = this.onChatInvite.bind(this);
+		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.INVITE, this.boundChatInvite);
+		this.boundChatEnd = this.onChatEnd.bind(this);
+		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.END, this.boundChatEnd);
+		this.boundChatRejected = this.onChatRejected.bind(this);
+		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.REJECTED, this.boundChatRejected);
+	},
+	beforeUnmount() {
+		videoChatEventEmitter.off(VIDEO_CHAT_EVENTS.ACCEPTED, this.boundChatAccepted);
+		videoChatEventEmitter.off(VIDEO_CHAT_EVENTS.START, this.boundChatStart);
+		videoChatEventEmitter.off(VIDEO_CHAT_EVENTS.INVITE, this.boundChatInvite);
+		videoChatEventEmitter.off(VIDEO_CHAT_EVENTS.END, this.boundChatEnd);
+		videoChatEventEmitter.off(VIDEO_CHAT_EVENTS.REJECTED, this.boundChatRejected);
+	},
+	methods: {
+		onChatAccepted() {
 			// 处理对方接受邀请的逻辑，例如隐藏加载覆盖层等
 			console.log('对方已接受视频聊天邀请');
 			this.isRemoteLoading = false; // 隐藏加载覆盖层
-		});
-		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.START, this.onChatStart.bind(this));
-		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.INVITE, this.onChatInvite.bind(this));
-		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.END, () => {
-			ElMessageBox.alert('对方已挂断', '视频聊天结束', {
-				confirmButtonText: '确定',
-				type: 'warning',
-			}).then(() => {
-				this.visible = false;
-			}).catch(() => {
-				this.visible = false;
-			});
-		});
-		// videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.SELF_END, () => {
-		// 	this.visible = false;
-		// });
-		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.REJECTED, (msg) => {
-			ElMessageBox.alert(msg, '视频聊天被拒绝', {
-				confirmButtonText: '确定',
-				type: 'warning',
-			}).then(() => {
-				this.visible = false;
-			}).catch(() => {
-				this.visible = false;
-			});
-		});
-	},
-	methods: {
+		},
 		onChatStart(toId) {
 			gameEventEmitter.requestAllControl();
 			this.visible = true;
@@ -75,7 +71,6 @@ export default {
 					const remoteVideo = document.getElementById('remoteVideo');
 					videoChatService.accept(fromId, localVideo, remoteVideo)
 						.then(() => {
-
 							this.isRemoteLoading = false; // 接受邀请后隐藏加载覆盖层
 						})
 						.catch((err) => {
@@ -93,11 +88,31 @@ export default {
 				type: 'warning',
 			}).then(onAccept).catch(onReject);
 		},
+		onChatEnd() {
+			ElMessageBox.alert('对方已挂断', '视频聊天结束', {
+				confirmButtonText: '确定',
+				type: 'warning',
+			}).then(() => {
+				this.visible = false;
+			}).catch(() => {
+				this.visible = false;
+			});
+		},
 		onHangUp() {
 			videoChatService.hangup().then(() => {
 				this.visible = false;
 			});
 		},
+		onChatRejected(msg) {
+			ElMessageBox.alert(msg, '视频聊天被拒绝', {
+				confirmButtonText: '确定',
+				type: 'warning',
+			}).then(() => {
+				this.visible = false;
+			}).catch(() => {
+				this.visible = false;
+			});
+		}
 	},
 };
 </script>
