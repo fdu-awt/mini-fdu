@@ -6,31 +6,26 @@ class VideoChatService {
 	constructor() {
 		this.localVideo = null;
 		this.remoteVideo = null;
-
 		this.signalingServerUrl = process.env.VUE_APP_VIDEO_CHAT_WEBSOCKET_BASE_URL;
 		this.userId = store.getUserId();
-		console.log("userId",this.userId);
 		this.rtcPeerConnection = null;
 		this.ws = null;
 		this.localStream = null;
-
 		this.peerId = null;
-
+		this.invitationCancelled = false; // 添加这个状态
 		this.messageHandlers = {
 			'video-invite': this.handleInvite.bind(this),
 			'video-accept': this.handleAccept.bind(this),
 			'video-reject': this.handleReject.bind(this),
 			'video-processing': this.handleProcessing.bind(this),
 			'video-end': this.handleEnd.bind(this),
-		};
 
+		};
 		this.onMessage = this.onMessage.bind(this);
 		this.handleIceCandidate = this.handleIceCandidate.bind(this);
 		this.handleRemoteStream = this.handleRemoteStream.bind(this);
-
 		this.webSocketInit();
 	}
-
 	webSocketInit(){
 		const url = `${this.signalingServerUrl}/${this.userId}`;
 		// const url = 'ws://localhost:3000';
@@ -123,17 +118,20 @@ class VideoChatService {
 
 	/**
 	 * 处理 自己 结束视频聊天
-	 * */
-	hangup() {
+	 */
+	hangup(isAccepted) {
 		this.ws.send(JSON.stringify({
 			type: 'video-end',
 			toId: this.peerId,
+			isAccepted: isAccepted,
 		}));
 		return this.endChat().then(() => {
-			this.peerId=null;
+			this.peerId = null;
 			videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.SELF_END);
+			// videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.END);
 		});
 	}
+
 
 	/**
 	 * @description 开启本地视频
@@ -244,6 +242,29 @@ class VideoChatService {
 		videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.REJECT);
 	}
 
+
+	handleAccept(data) {
+		if (this.invitationCancelled) {
+			return; // 如果邀请已取消，忽略接受邀请的处理
+		}
+		const fromId = data.fromId;
+		if (!fromId) {
+			console.error('fromId is not provided');
+		}
+		videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.ACCEPTED);
+	}
+
+	handleInvite(data) {
+		if (this.invitationCancelled) {
+			return; // 如果邀请已取消，忽略新的邀请
+		}
+		const fromId = data.fromId;
+		if (fromId) {
+			videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.INVITE, fromId);
+		} else {
+			console.error('fromId is not provided');
+		}
+	}
 	processing(toId, forwardData){
 		const msg = JSON.stringify({
 			type: 'video-processing',
@@ -253,29 +274,29 @@ class VideoChatService {
 		this.ws.send(msg);
 	}
 
-	/**
-	 * 处理来自他人的视频聊天邀请
-	 * */
-	handleInvite(data){
-		const fromId = data.fromId;
-		if (fromId) {
-			videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.INVITE, fromId);
-		} else {
-			console.error('fromId is not provided');
-		}
-	}
+	// /**
+	//  * 处理来自他人的视频聊天邀请
+	//  * */
+	// handleInvite(data){
+	// 	const fromId = data.fromId;
+	// 	if (fromId) {
+	// 		videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.INVITE, fromId);
+	// 	} else {
+	// 		console.error('fromId is not provided');
+	// 	}
+	// }
 
-	/**
-	 * @description 对方接受了视频聊天，我方进行处理
-	 * */
-	handleAccept(data) {
-		const fromId = data.fromId;
-		if (!fromId) {
-			console.error('fromId is not provided');
-		}
-		// 触发邀请被接受的事件
-		videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.ACCEPTED);
-	}
+	// /**
+	//  * @description 对方接受了视频聊天，我方进行处理
+	//  * */
+	// handleAccept(data) {
+	// 	const fromId = data.fromId;
+	// 	if (!fromId) {
+	// 		console.error('fromId is not provided');
+	// 	}
+	// 	// 触发邀请被接受的事件
+	// 	videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.ACCEPTED);
+	// }
 
 	/**
 	 * @description 对方拒绝了视频聊天邀请
@@ -290,6 +311,7 @@ class VideoChatService {
 			msg = '对方不在线';
 		}
 		this.endChat().then(() => {
+			this.peerId=null;
 			videoChatEventEmitter.emit(VIDEO_CHAT_EVENTS.REJECTED, msg);
 		}).catch((error) => {
 			console.error(error);

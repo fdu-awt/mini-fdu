@@ -110,6 +110,7 @@ export default {
 			this.fetchMessages();
 		});
 		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.SELF_END, () => {
+			console.log("我是自己挂断的");
 			this.fetchMessages();
 		});
 	},

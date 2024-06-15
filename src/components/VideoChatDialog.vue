@@ -10,7 +10,7 @@ export default {
 		return {
 			userId: null,
 			visible: false,
-			isRemoteLoading: false, // 添加此属性以表示加载状态
+			isRemoteLoading: false,
 			boundChatAccepted: null,
 			boundChatStart: null,
 			boundChatInvite: null,
@@ -18,6 +18,8 @@ export default {
 			boundChatRejected: null,
 			inviteDialogVisible: false,
 			inviteFromId: null,
+			// invitationCancelled: false, // 添加这个状态
+			isSelfEnded: false, // 新增状态，用来标记是否是自己挂断的聊天
 		};
 	},
 	mounted() {
@@ -31,6 +33,8 @@ export default {
 		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.END, this.boundChatEnd);
 		this.boundChatRejected = this.onChatRejected.bind(this);
 		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.REJECTED, this.boundChatRejected);
+		this.boundChatSelfEnd = this.onChatSelfEnd.bind(this);
+		videoChatEventEmitter.on(VIDEO_CHAT_EVENTS.SELF_END, this.boundChatSelfEnd);
 	},
 	beforeUnmount() {
 		videoChatEventEmitter.off(VIDEO_CHAT_EVENTS.ACCEPTED, this.boundChatAccepted);
@@ -38,12 +42,18 @@ export default {
 		videoChatEventEmitter.off(VIDEO_CHAT_EVENTS.INVITE, this.boundChatInvite);
 		videoChatEventEmitter.off(VIDEO_CHAT_EVENTS.END, this.boundChatEnd);
 		videoChatEventEmitter.off(VIDEO_CHAT_EVENTS.REJECTED, this.boundChatRejected);
+		videoChatEventEmitter.off(VIDEO_CHAT_EVENTS.SELF_END, this.boundChatSelfEnd);
 	},
 	methods: {
 		onChatAccepted() {
-			// 处理对方接受邀请的逻辑，例如隐藏加载覆盖层等
 			console.log('对方已接受视频聊天邀请');
-			this.isRemoteLoading = false; // 隐藏加载覆盖层
+			this.isRemoteLoading = false;
+		},
+		onHangUp() {
+			this.isSelfEnded = true; // 设置标志，表示挂断是由用户自己发起的
+			videoChatService.hangup(!this.isRemoteLoading).then(() => {
+				this.visible = false;
+			});
 		},
 		onChatStart(toId) {
 			gameEventEmitter.requestAllControl();
@@ -64,6 +74,22 @@ export default {
 					});
 			});
 		},
+		// 前端接收到对方已经挂断的消息时调用此方法
+		onChatSelfEnd() {
+			this.closeInviteDialog();
+			// 如果是对方挂断的，显示提示对话框
+			if(!this.isSelfEnded) {
+				ElMessageBox.alert('对方已挂断', '视频聊天结束', {
+					confirmButtonText: '确定',
+					type: 'warning',
+				}).then(() => {
+					this.closeVideoChat();
+				}).catch(() => {
+					this.closeVideoChat();
+				});
+			}
+		},
+
 		acceptInvite() {
 			this.visible = true;
 			this.isRemoteLoading = true;
@@ -90,6 +116,7 @@ export default {
 			this.inviteDialogVisible = true;
 		},
 		onChatEnd() {
+			this.isSelfEnded = false; // 标记不是自己挂断的
 			this.closeInviteDialog();
 			ElMessageBox.alert('对方已挂断', '视频聊天结束', {
 				confirmButtonText: '确定',
@@ -100,11 +127,7 @@ export default {
 				this.visible = false;
 			});
 		},
-		onHangUp() {
-			videoChatService.hangup().then(() => {
-				this.visible = false;
-			});
-		},
+
 		onChatRejected(msg) {
 			this.closeInviteDialog();
 			ElMessageBox.alert(msg, '视频聊天被拒绝', {
@@ -119,6 +142,14 @@ export default {
 		closeInviteDialog() {
 			this.inviteDialogVisible = false;
 		},
+		// 关闭视频聊天界面的通用方法
+		closeVideoChat() {
+			this.visible = false; // 关闭视频聊天界面
+			this.isRemoteLoading = false; // 重置加载状态
+			this.inviteDialogVisible = false; // 关闭邀请对话框
+			// 这里可以添加其他需要重置的状态或资源清理工作
+		},
+
 	},
 };
 </script>
