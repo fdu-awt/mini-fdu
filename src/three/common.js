@@ -98,8 +98,29 @@ export function createPlayerNameText(name) {
 	const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
 	const sprite = new THREE.Sprite(spriteMaterial);
 	sprite.scale.set(100, 50, 1); // 根据需要调整比例
+	sprite.name = 'nameText';
 
 	return sprite;
+}
+
+export function removePlayerNameText(player) {
+	// 找到名字文本对象
+	const nameText = player.object.getObjectByName('nameText');
+	if (nameText) {
+		// 从父对象中移除
+		player.object.remove(nameText);
+		
+		// 销毁纹理
+		if (nameText.material.map) {
+			nameText.material.map.dispose();
+		}
+		
+		// 销毁材质
+		nameText.material.dispose();
+		
+		// 销毁几何体（在Sprite中不需要，但如果使用其他类型则可能需要）
+		// nameText.geometry.dispose();
+	}
 }
 
 export function createNPCNameText(name){
