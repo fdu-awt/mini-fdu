@@ -46,9 +46,6 @@ class NPC {
 
 			// 保存对 collider 的引用
 			this.collider = box;
-
-			// TODO 加入game的碰撞检测
-
 			// idle动画
 			this.action = "Idle";
 		});
