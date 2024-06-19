@@ -148,8 +148,15 @@ export default {
 			this.isRemoteLoading = false; // 重置加载状态
 			this.inviteDialogVisible = false; // 关闭邀请对话框
 			// 这里可以添加其他需要重置的状态或资源清理工作
+			const localVideo = document.getElementById('localVideo');
+			const remoteVideo = document.getElementById('remoteVideo');
+			if (localVideo) {
+				localVideo.srcObject = null;
+			}
+			if (remoteVideo) {
+				remoteVideo.srcObject = null;
+			}
 		},
-
 	},
 };
 </script>
