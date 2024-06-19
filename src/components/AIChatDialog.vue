@@ -19,12 +19,17 @@ export default {
 			aiAvatar: aiAvatar,
 
 			visible: this.dialogVisible,
+			// boardIntro: this.intro
 		};
 	},
 	props: {
 		dialogVisible: {
 			type: Boolean,
 			required: true
+		},
+		intro: {
+			type: String,
+			default: ''
 		}
 	},
 	watch: {
@@ -52,7 +57,7 @@ export default {
 	methods: {
 		getAIResponse(question) {
 			// 支持多轮对话（同时发送历史聊天记录）
-			chatWithAI(question, STORAGE.getAIHistory()).then((data) => {
+			chatWithAI(question, this.intro, STORAGE.getAIHistory()).then((data) => {
 				if (data.status === 200) {
 					this.messages.push({
 						ifSelf: false,
@@ -103,7 +108,7 @@ export default {
              :class="['message-item', { 'my-message': message.ifSelf, 'ai-message': !message.ifSelf }]">
           <el-avatar :src="message.ifSelf ? userAvatar : aiAvatar" class="message-avatar"></el-avatar>
           <div class="message-content">
-<!--            {{ message.message }}-->
+            <!--            {{ message.message }}-->
             <Markdown :source="message.message" />
           </div>
         </div>
@@ -118,95 +123,95 @@ export default {
 
 <style scoped>
 .chat-box {
-	display: flex;
-	flex-direction: column;
-	/* height: 100%; */
-	height: 400px;
-	/* Adjust the height as needed */
+  display: flex;
+  flex-direction: column;
+  /* height: 100%; */
+  height: 400px;
+  /* Adjust the height as needed */
 }
 
 .messages {
-	flex-grow: 1;
-	max-height: 80%;
-	overflow-y: auto;
-	padding: 10px;
-	display: flex;
-	flex-direction: column;
+  flex-grow: 1;
+  max-height: 80%;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
 }
 
 .message-group {
-	margin-bottom: 20px;
+  margin-bottom: 20px;
 }
 
 .date-divider {
-	text-align: center;
-	margin: 10px 0;
-	color: #999;
+  text-align: center;
+  margin: 10px 0;
+  color: #999;
 }
 
 .message-item {
-	display: flex;
-	align-items: flex-start;
-	margin-bottom: 10px;
-	max-width: 70%;
-	word-wrap: break-word;
-	overflow-wrap: break-word;
-	/* Ensures words break properly */
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  max-width: 70%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  /* Ensures words break properly */
 }
 
 .my-message {
-	margin-left: auto;
-	flex-direction: row-reverse;
+  margin-left: auto;
+  flex-direction: row-reverse;
 }
 
 .other-message {
-	margin-right: auto;
+  margin-right: auto;
 }
 
 .message-content {
-	padding: 10px 20px;
-	border-radius: 20px;
-	color: #333;
-	font-size: 14px;
-	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-	/* background-color: #dcf8c6; */
-	/* Default background color */
-	max-width: calc(100% - 90px);
-	/* Ensures the message content stays within the container */
-	word-wrap: break-word;
-	overflow-wrap: break-word;
+  padding: 10px 20px;
+  border-radius: 20px;
+  color: #333;
+  font-size: 14px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  /* background-color: #dcf8c6; */
+  /* Default background color */
+  max-width: calc(100% - 90px);
+  /* Ensures the message content stays within the container */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .my-message .message-content {
-	background-color: #dcf8c6;
-	/* User's message background color */
+  background-color: #dcf8c6;
+  /* User's message background color */
 }
 
 .other-message .message-content {
-	background-color: #f0f0f0;
-	/* Other user's message background color */
+  background-color: #f0f0f0;
+  /* Other user's message background color */
 }
 
 .message-avatar {
-	margin-right: 10px;
+  margin-right: 10px;
 }
 
 .my-message .message-avatar {
-	margin-right: 0;
-	margin-left: 10px;
+  margin-right: 0;
+  margin-left: 10px;
 }
 
 .message-input {
-	display: flex;
-	padding: 10px;
-	background: #f1f1f1;
+  display: flex;
+  padding: 10px;
+  background: #f1f1f1;
 }
 
 .message-input .el-input {
-	flex-grow: 1;
+  flex-grow: 1;
 }
 
 .message-input .el-button {
-	margin-left: 10px;
+  margin-left: 10px;
 }
 </style>

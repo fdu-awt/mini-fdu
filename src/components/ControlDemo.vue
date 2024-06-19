@@ -37,6 +37,8 @@ export default {
 			showSettingDialog: false,
 
 			AIChatDialogVisible: false,
+			intro: null,
+
 			newMessageNotification: false, // 新消息通知的标记
 
 			boundNewMessage: null,
@@ -109,8 +111,9 @@ export default {
 			this.remoteId = null; // 可选：如果需要在通知中使用remoteId
 			this.socket = null; // 可选：如果需要在通知中使用socket
 		},
-		handleAskAI() {
+		handleAskAI(intro) {
 			this.AIChatDialogVisible = true;
+			this.intro = intro;
 		},
 		handleAIChatClose() {
 			this.AIChatDialogVisible = false;
@@ -137,16 +140,16 @@ export default {
 </script>
 
 <template>
-	<div id="canvas-container"></div>
+  <div id="canvas-container"></div>
 
-	<PostDialog @askAI="handleAskAI"/>
-	<ClubDialog @askAI="handleAskAI"/>
-	<AIChatDialog :dialogVisible="this.AIChatDialogVisible" @close="handleAIChatClose"/>
-	
+  <PostDialog @askAI="handleAskAI"/>
+  <ClubDialog @askAI="handleAskAI"/>
+  <AIChatDialog :dialogVisible="this.AIChatDialogVisible" :intro="this.intro" @close="handleAIChatClose"/>
+
   <QuizDialog/>
-	<SettingDialog :show="showSettingDialog" @close="onSettingDialogClose"/>
-	<ChatBox v-if="isChatBoxVisible" :socket="socket" :remote-id="remoteId" :local-id="localId" @close="closeChatBox" />
-	<VideoChatDialog/>
+  <SettingDialog :show="showSettingDialog" @close="onSettingDialogClose"/>
+  <ChatBox v-if="isChatBoxVisible" :socket="socket" :remote-id="remoteId" :local-id="localId" @close="closeChatBox" />
+  <VideoChatDialog/>
   <div v-if="newMessageNotification" class="new-message-notification">
     您有一条新消息，请点击查看。
     <button @click="viewNewMessage">查看消息</button>

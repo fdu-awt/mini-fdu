@@ -1,9 +1,10 @@
 import {AIService as request} from "@/api/index";
 
 // AI问答
-export function chatWithAI(question, history) {
+export function chatWithAI(question, intro, history) {
 	const data = {
 		question: question,
+		intro: intro,
 		history: history,
 	};
 	return request({

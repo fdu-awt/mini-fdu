@@ -56,7 +56,8 @@ export default {
 			});
 		},
 		handleAskForAI(){
-			this.$emit("askAI");
+			// this.$emit("askAI");
+			this.$emit("askAI", this.current_club_data.intro);
 			this.clubDialogVisible = false;
 		}
 	}
@@ -64,33 +65,33 @@ export default {
 </script>
 
 <template>
-    <el-dialog v-model="clubDialogVisible" width="900" v-modal="true" v-close-on-click-modal="false" center="true">
-        <div id="dialog-container">
-			<el-image style="width: 300px; height: 200px" :src="'./club/images/' + current_club_data.activity" :fit="contain" />
-			<h3>{{ current_club_data.name }}</h3>
-			<h4>{{ current_club_data.slogan }}</h4>
-			<el-text size="default" class="intro">{{ current_club_data.intro }}</el-text>
-			<br/>
-			<ButtonHover1 msg="点击询问AI" @click="handleAskForAI"/>
-		</div>
-    </el-dialog>
+  <el-dialog v-model="clubDialogVisible" width="900" v-modal="true" v-close-on-click-modal="false" center="true">
+    <div id="dialog-container">
+      <el-image style="width: 300px; height: 200px" :src="'./club/images/' + current_club_data.activity" :fit="contain" />
+      <h3>{{ current_club_data.name }}</h3>
+      <h4>{{ current_club_data.slogan }}</h4>
+      <el-text size="default" class="intro">{{ current_club_data.intro }}</el-text>
+      <br/>
+      <ButtonHover1 msg="点击询问AI" @click="handleAskForAI"/>
+    </div>
+  </el-dialog>
 </template>
 
 <style scoped>
 #dialog-container{
-	height: 500px;
-	width: 800px;
+  height: 500px;
+  width: 800px;
 
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	flex-direction: column;
-	margin:auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin:auto;
 }
 
 h3{
-	display:block;
-	padding: 25px
+  display:block;
+  padding: 25px
 }
 
 h4{
@@ -99,6 +100,6 @@ h4{
 }
 
 .el-dialog, .el-dialog--center,.el-overlay-dialog {
-	border-radius: 50px;
+  border-radius: 50px;
 }
 </style>
