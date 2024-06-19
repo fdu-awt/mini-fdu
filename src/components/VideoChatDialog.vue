@@ -1,11 +1,15 @@
 <script>
 import videoChatService from "@/api/socket/VideoChatService";
-import videoChatEventEmitter, { VIDEO_CHAT_EVENTS } from "@/event/VideoChatEventEmitter";
+import videoChatEventEmitter, {VIDEO_CHAT_EVENTS} from "@/event/VideoChatEventEmitter";
 import gameEventEmitter from "@/event/GameEventEmitter";
-import { ElMessageBox } from "element-plus";
+import {ElMessageBox} from "element-plus";
+import LoadingVideo from "@/components/common/LoadingVideo.vue"; // Import the new component
 
 export default {
 	name: "VideoChatDialog",
+	components: {
+		LoadingVideo
+	},
 	data() {
 		return {
 			userId: null,
@@ -18,8 +22,7 @@ export default {
 			boundChatRejected: null,
 			inviteDialogVisible: false,
 			inviteFromId: null,
-			// invitationCancelled: false, // 添加这个状态
-			isSelfEnded: false, // 新增状态，用来标记是否是自己挂断的聊天
+			isSelfEnded: false,
 		};
 	},
 	mounted() {
@@ -50,7 +53,7 @@ export default {
 			this.isRemoteLoading = false;
 		},
 		onHangUp() {
-			this.isSelfEnded = true; // 设置标志，表示挂断是由用户自己发起的
+			this.isSelfEnded = true;
 			videoChatService.hangup(!this.isRemoteLoading).then(() => {
 				this.visible = false;
 			});
@@ -62,7 +65,7 @@ export default {
 			this.$nextTick(() => {
 				const localVideo = document.getElementById('localVideo');
 				const remoteVideo = document.getElementById('remoteVideo');
-				console.log("remoteVideo",remoteVideo);
+				console.log("remoteVideo", remoteVideo);
 				videoChatService.invite(toId, localVideo, remoteVideo)
 					.then(() => {
 						console.log(toId);
@@ -70,15 +73,13 @@ export default {
 					})
 					.catch((err) => {
 						console.error(err.name + ': ' + err.message);
-						this.isRemoteLoading = false; // 出错时隐藏加载覆盖层
+						this.isRemoteLoading = false;
 					});
 			});
 		},
-		// 前端接收到对方已经挂断的消息时调用此方法
 		onChatSelfEnd() {
 			this.closeInviteDialog();
-			// 如果是对方挂断的，显示提示对话框
-			if(!this.isSelfEnded) {
+			if (!this.isSelfEnded) {
 				ElMessageBox.alert('对方已挂断', '视频聊天结束', {
 					confirmButtonText: '确定',
 					type: 'warning',
@@ -89,7 +90,6 @@ export default {
 				});
 			}
 		},
-
 		acceptInvite() {
 			this.visible = true;
 			this.isRemoteLoading = true;
@@ -99,11 +99,11 @@ export default {
 				const remoteVideo = document.getElementById('remoteVideo');
 				videoChatService.accept(this.inviteFromId, localVideo, remoteVideo)
 					.then(() => {
-						this.isRemoteLoading = false; // 接受邀请后隐藏加载覆盖层
+						this.isRemoteLoading = false;
 					})
 					.catch((err) => {
 						console.error(err.name + ': ' + err.message);
-						this.isRemoteLoading = false; // 出错时隐藏加载覆盖层
+						this.isRemoteLoading = false;
 					});
 			});
 		},
@@ -116,7 +116,7 @@ export default {
 			this.inviteDialogVisible = true;
 		},
 		onChatEnd() {
-			this.isSelfEnded = false; // 标记不是自己挂断的
+			this.isSelfEnded = false;
 			this.closeInviteDialog();
 			ElMessageBox.alert('对方已挂断', '视频聊天结束', {
 				confirmButtonText: '确定',
@@ -127,7 +127,6 @@ export default {
 				this.visible = false;
 			});
 		},
-
 		onChatRejected(msg) {
 			this.closeInviteDialog();
 			ElMessageBox.alert(msg, '视频聊天被拒绝', {
@@ -142,16 +141,14 @@ export default {
 		closeInviteDialog() {
 			this.inviteDialogVisible = false;
 		},
-		// 关闭视频聊天界面的通用方法
 		closeVideoChat() {
-			this.visible = false; // 关闭视频聊天界面
-			this.isRemoteLoading = false; // 重置加载状态
-			this.inviteDialogVisible = false; // 关闭邀请对话框
-			// 这里可以添加其他需要重置的状态或资源清理工作
+			this.visible = false;
+			this.isRemoteLoading = false;
+			this.inviteDialogVisible = false;
 		},
-
 	},
 };
+
 </script>
 
 <template>
@@ -163,26 +160,29 @@ export default {
       :close-on-click-modal="false"
       :close-on-press-escape="false">
     <div class="video-container">
-      <div v-if="isRemoteLoading" class="loading-overlay">正在呼叫...</div>
-      <video id="remoteVideo" autoplay playsinline/>
-      <video id="localVideo" autoplay playsinline/>
+      <div class="video-overlay" v-if="isRemoteLoading">
+        <loading-video /> <!-- Use the new component -->
+      </div>
+      <video id="remoteVideo" autoplay playsinline />
+      <video id="localVideo" autoplay playsinline />
       <el-button id="hangupButton" type="danger" @click="onHangUp">挂断</el-button>
     </div>
   </el-dialog>
-	<el-dialog
-			v-model="inviteDialogVisible"
-			title="视频聊天邀请"
-			width="30%"
-			:show-close="false"
-			:close-on-click-modal="false"
-			:close-on-press-escape="false">
-		<span>收到视频聊天邀请，是否接受？</span>
-		<div class="invite-footer">
-			<el-button @click="rejectInvite">拒绝</el-button>
-			<el-button type="primary" @click="acceptInvite">接受</el-button>
-		</div>
-	</el-dialog>
+  <el-dialog
+      v-model="inviteDialogVisible"
+      title="视频聊天邀请"
+      width="30%"
+      :show-close="false"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false">
+    <span>收到视频聊天邀请，是否接受？</span>
+    <div class="invite-footer">
+      <el-button @click="rejectInvite">拒绝</el-button>
+      <el-button type="primary" @click="acceptInvite">接受</el-button>
+    </div>
+  </el-dialog>
 </template>
+
 
 <style scoped>
 .video-container {
@@ -195,16 +195,30 @@ export default {
   background-color: white;
 }
 
+.video-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.8);
+  z-index: 10; /* Ensure it appears above the videos */
+}
+
 .invite-footer {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
 }
 
 #remoteVideo {
   width: 100%;
   height: 100%;
+  z-index: 1; /* Ensure the video is below the overlay */
 }
 
 #localVideo {
@@ -216,6 +230,7 @@ export default {
   border: 2px solid #ccc;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   background-color: white;
+  z-index: 15; /* Ensure the local video is above the overlay */
 }
 
 #hangupButton {
@@ -223,18 +238,9 @@ export default {
   bottom: 10px;
   left: 50%;
   transform: translateX(-50%);
-}
-
-.loading-overlay {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(255, 255, 255, 0.8);
-  padding: 20px;
-  border-radius: 5px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-  font-size: 18px;
-  color: #333;
+  z-index: 15; /* Ensure the button is above the overlay */
 }
 </style>
+
+
+
