@@ -171,7 +171,7 @@ export default {
     <div class="video-container">
       <div v-if="isRemoteLoading" class="loading-overlay">正在呼叫...</div>
       <video id="remoteVideo" autoplay playsinline/>
-      <video id="localVideo" autoplay playsinline/>
+      <video id="localVideo" autoplay playsinline muted/>
       <el-button id="hangupButton" type="danger" @click="onHangUp">挂断</el-button>
     </div>
   </el-dialog>
