@@ -98,7 +98,8 @@ const FBX_IMAGE = {
 	ANIMATION_PATH_PREFIX: "/fbx_models/fbx/anims/",
 	MODEL_PATH_PREFIX: "/fbx_models/fbx/people",
 	TEXTURE_PATH_PREFIX: "/fbx_models/images/SimplePeople_",
-	PEOPLE: ['BeachBabe', 'BusinessMan', 'Doctor', 'FireFighter', 'Housewife', 'Policeman', 'Prostitute', 'Punk', 'RiotCop', 'Roadworker', 'Robber', 'Sheriff', 'Streetman', 'Waitress'],
+	// PEOPLE: ['BeachBabe', 'BusinessMan', 'Doctor', 'FireFighter', 'Housewife', 'Policeman', 'Prostitute', 'Punk', 'RiotCop', 'Roadworker', 'Robber', 'Sheriff', 'Streetman', 'Waitress'],
+	PEOPLE: ['BeachBabe', 'BusinessMan', 'Doctor', 'FireFighter', 'Policeman', 'Prostitute', 'Punk', 'RiotCop', 'Robber', 'Sheriff', 'Waitress'],
 	COLOURS: ['Black', 'Brown', 'White'],
 	randomColour() {
 		return this.COLOURS[Math.floor(Math.random() * this.COLOURS.length)];
