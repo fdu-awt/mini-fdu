@@ -52,7 +52,7 @@ export default {
 		onHangUp() {
 			this.isSelfEnded = true; // 设置标志，表示挂断是由用户自己发起的
 			videoChatService.hangup(!this.isRemoteLoading).then(() => {
-				this.visible = false;
+				this.closeVideoChat();
 			});
 		},
 		onChatStart(toId) {
@@ -89,7 +89,6 @@ export default {
 				});
 			}
 		},
-
 		acceptInvite() {
 			this.visible = true;
 			this.isRemoteLoading = true;
@@ -122,9 +121,9 @@ export default {
 				confirmButtonText: '确定',
 				type: 'warning',
 			}).then(() => {
-				this.visible = false;
+				this.closeVideoChat();
 			}).catch(() => {
-				this.visible = false;
+				this.closeVideoChat();
 			});
 		},
 
@@ -134,9 +133,9 @@ export default {
 				confirmButtonText: '确定',
 				type: 'warning',
 			}).then(() => {
-				this.visible = false;
+				this.closeVideoChat();
 			}).catch(() => {
-				this.visible = false;
+				this.closeVideoChat();
 			});
 		},
 		closeInviteDialog() {
