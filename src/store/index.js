@@ -24,6 +24,11 @@ const STORAGE = {
 	getUsername() {
 		return STORAGE.getUser().username;
 	},
+	setUsername(username) {
+		const user = STORAGE.getUser();
+		user.username = username;
+		window.localStorage.setItem(USER_KEY, JSON.stringify(user));
+	},
 	setUserId(userId){
 		const user = STORAGE.getUser();
 		console.log("user",user);

@@ -9,7 +9,7 @@ import ChatWebSocketService from "@/api/socket/ChatWebSocketService";
 import gameEventEmitter, {GAME_EVENTS} from "@/event/GameEventEmitter";
 import STORAGE from "@/store";
 import gameErrorEventEmitter, {GAME_ERROR_EVENTS} from "@/event/GameErrorEventEmitter";
-import {createPlayerNameText} from "@/three/common";
+import {createPlayerNameText, removePlayerNameText} from "@/three/common";
 import NPC from "@/three/NPC";
 import eventBus from '@/eventbus/eventBus.js';
 
@@ -539,7 +539,7 @@ class Player {
 				game.scene.add(player.object);
 
 				// 在头顶显示用户名
-				const nameText = createPlayerNameText(player.username);
+				let nameText = createPlayerNameText(player.username);
 				nameText.position.set(position.nameTextPos.x, position.nameTextPos.y, position.nameTextPos.z); // 设置名字的位置
 				player.object.add(nameText);
 
@@ -547,6 +547,19 @@ class Player {
 					game.playerController = new PlayerController(player, game.container);
 					game.sun.target = game.player.object;
 					game.animations.Idle = object.animations[0];
+
+					window.addEventListener("UpdateUsername", function(event){
+						STORAGE.setUsername(event.new_username);
+						player.username = event.new_username;
+						// 销毁旧的用户名
+						removePlayerNameText(player);
+
+						// 加入新的用户名
+						nameText = createPlayerNameText(player.username);
+						nameText.position.set(position.nameTextPos.x, position.nameTextPos.y, position.nameTextPos.z); // 设置名字的位置
+						player.object.add(nameText);
+						console.log("event", "here");
+					});
 				} else {
 					const geometry = new THREE.BoxGeometry(100, 300, 100);
 					const material = new THREE.MeshBasicMaterial({ 

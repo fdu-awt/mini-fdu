@@ -108,6 +108,12 @@ export default {
 			}
 			modifyUserInfo(this.form.username, this.form.email, this.form.selfImage).then((data) => {
 				if (data.code === 200) {
+					// 更新本地缓存
+					let updateEvent = new Event("UpdateUsername");
+					updateEvent.new_username = this.form.username;
+					updateEvent.userId = STORAGE.getUserId();
+					window.dispatchEvent(updateEvent);
+
 					this.formOld = deepCopy(this.form);
 					STORAGE.setSelfImage(this.form.selfImage);
 					ElMessage({

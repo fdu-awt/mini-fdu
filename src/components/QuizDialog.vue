@@ -2,6 +2,7 @@
 import { ElCard, ElRow, ElCol, ElMessage, ElDialog } from 'element-plus';
 import { Select, CloseBold } from '@element-plus/icons-vue';
 import { getRandomQuizQuestion, submitAnswer } from '@/api/quiz';
+import gameEventEmitter from "@/event/GameEventEmitter";
 
 export default {
 	name: 'QuizDialog',
@@ -30,6 +31,7 @@ export default {
 	methods: {
 		// 处理 NPC 被点击的逻辑
 		handleNPCClicked() {
+			gameEventEmitter.requestAllControl();
 			this.quizDialogVisible = true;
 		},
 		getRandomQuizQuestion() {

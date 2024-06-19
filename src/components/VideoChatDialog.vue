@@ -53,9 +53,9 @@ export default {
 			this.isRemoteLoading = false;
 		},
 		onHangUp() {
-			this.isSelfEnded = true;
+			this.isSelfEnded = true; // 设置标志，表示挂断是由用户自己发起的
 			videoChatService.hangup(!this.isRemoteLoading).then(() => {
-				this.visible = false;
+				this.closeVideoChat();
 			});
 		},
 		onChatStart(toId) {
@@ -65,7 +65,7 @@ export default {
 			this.$nextTick(() => {
 				const localVideo = document.getElementById('localVideo');
 				const remoteVideo = document.getElementById('remoteVideo');
-				console.log("remoteVideo", remoteVideo);
+				console.log("remoteVideo",remoteVideo);
 				videoChatService.invite(toId, localVideo, remoteVideo)
 					.then(() => {
 						console.log(toId);
@@ -73,13 +73,15 @@ export default {
 					})
 					.catch((err) => {
 						console.error(err.name + ': ' + err.message);
-						this.isRemoteLoading = false;
+						this.isRemoteLoading = false; // 出错时隐藏加载覆盖层
 					});
 			});
 		},
+		// 前端接收到对方已经挂断的消息时调用此方法
 		onChatSelfEnd() {
 			this.closeInviteDialog();
-			if (!this.isSelfEnded) {
+			// 如果是对方挂断的，显示提示对话框
+			if(!this.isSelfEnded) {
 				ElMessageBox.alert('对方已挂断', '视频聊天结束', {
 					confirmButtonText: '确定',
 					type: 'warning',
@@ -90,6 +92,7 @@ export default {
 				});
 			}
 		},
+
 		acceptInvite() {
 			this.visible = true;
 			this.isRemoteLoading = true;
@@ -99,11 +102,11 @@ export default {
 				const remoteVideo = document.getElementById('remoteVideo');
 				videoChatService.accept(this.inviteFromId, localVideo, remoteVideo)
 					.then(() => {
-						this.isRemoteLoading = false;
+						this.isRemoteLoading = false; // 接受邀请后隐藏加载覆盖层
 					})
 					.catch((err) => {
 						console.error(err.name + ': ' + err.message);
-						this.isRemoteLoading = false;
+						this.isRemoteLoading = false; // 出错时隐藏加载覆盖层
 					});
 			});
 		},
@@ -116,39 +119,50 @@ export default {
 			this.inviteDialogVisible = true;
 		},
 		onChatEnd() {
-			this.isSelfEnded = false;
+			this.isSelfEnded = false; // 标记不是自己挂断的
 			this.closeInviteDialog();
 			ElMessageBox.alert('对方已挂断', '视频聊天结束', {
 				confirmButtonText: '确定',
 				type: 'warning',
 			}).then(() => {
-				this.visible = false;
+				this.closeVideoChat();
 			}).catch(() => {
-				this.visible = false;
+				this.closeVideoChat();
 			});
 		},
+
 		onChatRejected(msg) {
 			this.closeInviteDialog();
 			ElMessageBox.alert(msg, '视频聊天被拒绝', {
 				confirmButtonText: '确定',
 				type: 'warning',
 			}).then(() => {
-				this.visible = false;
+				this.closeVideoChat();
 			}).catch(() => {
-				this.visible = false;
+				this.closeVideoChat();
 			});
 		},
 		closeInviteDialog() {
 			this.inviteDialogVisible = false;
 		},
+		// 关闭视频聊天界面的通用方法
 		closeVideoChat() {
-			this.visible = false;
-			this.isRemoteLoading = false;
-			this.inviteDialogVisible = false;
+			this.visible = false; // 关闭视频聊天界面
+			this.isRemoteLoading = false; // 重置加载状态
+			this.inviteDialogVisible = false; // 关闭邀请对话框
+			// 这里可以添加其他需要重置的状态或资源清理工作
+			const localVideo = document.getElementById('localVideo');
+			const remoteVideo = document.getElementById('remoteVideo');
+			if (localVideo) {
+				localVideo.srcObject = null;
+			}
+			if (remoteVideo) {
+				remoteVideo.srcObject = null;
+			}
 		},
+
 	},
 };
-
 </script>
 
 <template>
@@ -182,7 +196,6 @@ export default {
     </div>
   </el-dialog>
 </template>
-
 
 <style scoped>
 .video-container {
@@ -218,7 +231,6 @@ export default {
 #remoteVideo {
   width: 100%;
   height: 100%;
-  z-index: 1; /* Ensure the video is below the overlay */
 }
 
 #localVideo {
@@ -230,7 +242,6 @@ export default {
   border: 2px solid #ccc;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   background-color: white;
-  z-index: 15; /* Ensure the local video is above the overlay */
 }
 
 #hangupButton {
@@ -241,6 +252,3 @@ export default {
   z-index: 15; /* Ensure the button is above the overlay */
 }
 </style>
-
-
-
